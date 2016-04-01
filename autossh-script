@@ -1,0 +1,4 @@
+#! /bin/bash
+
+export AUTOSSH_GATETIME=0
+RANDOM=$HOSTNAME; PORT=$((RANDOM + 2000)); echo "Forwarding on server port $PORT"; autossh greg@104.154.52.255 -R $PORT:localhost:22
