@@ -1,6 +1,6 @@
 #! /bin/bash
 
 export AUTOSSH_GATETIME=0
-PORT=`./hostname-to-port.sh $HOSTNAME`
+PORT=$(( (0x`tr "[:upper:]" "[:lower:]" <<< $HOSTNAME | md5sum | cut -c -8` % 61991) + 2000 )) # 2000 min port, 61991 random prime
 echo "Forwarding on server port $PORT"
 autossh greg@104.154.52.255 -R $PORT:localhost:22
