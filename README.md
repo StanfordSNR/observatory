@@ -1,3 +1,2 @@
-autossh-script called by /etc/rc.local  
-For a local username greg we include in rc.local:  
-sudo -u greg /home/greg/diagnostic_box_scripts/autossh-script.sh
+On a deployed box with local username greg, include in /etc/rc.local the line:  
+`sudo -u greg /home/greg/diagnostic_box_scripts/autossh-script.sh`
