@@ -6,5 +6,4 @@ export AUTOSSH_GATETIME=0
 PORT=$(( (0x`tr "[:upper:]" "[:lower:]" <<< $HOSTNAME | md5sum | cut -c -16` % 63499) + 2000 ))
 
 screen -dmS autossh-glcoud autossh lpng@104.196.19.245 -R $PORT:localhost:22
-screen -dmS autossh-stanford autossh lpng@pion.stanford.edu -R $PORT:localhost:22
 screen -dmS autossh-aws autossh lpng@52.9.177.212 -R $PORT:localhost:22
