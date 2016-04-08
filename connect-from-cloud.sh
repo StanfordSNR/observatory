@@ -7,4 +7,4 @@ fi
 PORT=$(( (0x`tr "[:upper:]" "[:lower:]" <<< $2 | md5sum | cut -c -16` % 63499) + 2000 ))
 
 echo "Trying to connect to hostname $2 which we expect to be accessable on local port $PORT"
-ssh $1@localhost:$PORT
+ssh -p $PORT $1@localhost
