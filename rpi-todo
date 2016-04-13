@@ -1,0 +1,2 @@
+sudo apt-get install wicd-curses
+raspi-config -- expand disk size
