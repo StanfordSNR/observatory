@@ -5,3 +5,5 @@ Required programs on box:
 git  
 screen  
 autossh
+wicd-curses
+raspi-config -- expand disk size
