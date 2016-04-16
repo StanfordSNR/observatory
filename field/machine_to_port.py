@@ -2,10 +2,13 @@
 
 import sys
 
-host_to_port = dict()
 base_port = 11738
-host_to_port["lilbox0"] = base_port
-host_to_port["pi"]      = base_port + 2
+host_to_port = {
+
+'lilbox0': base_port ,
+'pi'     : base_port + 2
+
+ }
 
 if len( sys.argv ) is not 2:
     raise ValueError("Usage: " + sys.argv[0] + " hostname")
