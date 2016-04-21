@@ -1,0 +1,1 @@
+echo -e AT^NDISDUP=1,1,fast.tmobile.com > /dev/ttyUSB0
