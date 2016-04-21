@@ -1,0 +1,20 @@
+1) open a terminal session with either the modem or pcui serial interface
+
+2) enter pin code as usual: AT+CPIN=xxxx
+
+3) connect using: AT^NDISDUP=1,1,"yourapn"
+(I believe the first number is the CGDCONT - this may require an
+ existing entry, or overwrite anything already there)
+
+4) Retrieve IP addresses using: AT^DHCP?
+Note that this has side effects: Packets will not flow until this
+command is sent
+
+5) configure the interface manuall with the output of the previous command:
+^DHCP:4d92124d,fcffffff,4e92124d,4e92124d,470d5c1,c60f4382,100000000,50000000
+
+$ perl -e 'print join(",",map { join(".", unpack("C4", pack("L", hex))) } split /,/, shift),"\n"' 4d92124d,fcffffff,4e92124d,4e92124d,470d5c1,c60f4382
+77.18.146.77,255.255.255.252,77.18.146.78,77.18.146.78,193.213.112.4,130.67.15.198
+
+# ifconfig wwan0 77.18.146.77 netmask 255.255.255.252
+# ip route add default via 77.18.146.78
