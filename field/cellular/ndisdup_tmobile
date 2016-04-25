@@ -1,1 +1,2 @@
 echo -e AT^NDISDUP=1,1,fast.tmobile.com > /dev/ttyUSB0
+cat /dev/ttyUSB0 | tee temp_at_ndisdup
