@@ -1,0 +1,14 @@
+put the following into a file "/etc/usb_modeswitch.d/12d1:1f01":
+
+# Huawei E3531s-2 - switch to modem mode instead of HiLink CDC-Ether mode
+TargetVendor=0x12d1
+TargetProduct=0x1f01
+
+# switch to 12d1:1001 (modem mode, 3 virtual serial ports)
+MessageContent="55534243123456780000000000000011062000000100000000000000000000"
+
+# switch to 12d1:14dc (default HiLink CDC-Ether mode)
+# MessageContent="55534243123456780000000000000a11062000000000000100000000000000"
+
+# switch to 12d1:1442 (debug mode with 2 virtual serial ports)
+# MessageContent="55534243000000000000000000000011060000000000000000000000000000"
