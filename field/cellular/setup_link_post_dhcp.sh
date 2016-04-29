@@ -6,4 +6,4 @@ VIA=`echo $UNPACKED_RESPONSE | cut -d, -f 3`
 echo "got $UNPACKED_RESPONSE"
 sudo ifconfig wwan0 $IP netmask $MASK
 sudo ip route add default via $VIA
-echo nameserver 8.8.8.8 | sudo resolvconf -a wwan0
+echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4\n" | sudo resolvconf -a wwan0
