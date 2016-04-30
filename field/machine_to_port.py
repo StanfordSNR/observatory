@@ -5,8 +5,8 @@ import sys
 base_port = 11738
 host_to_port = {
 
-'lilbox0': base_port ,
-'pi'     : base_port + 2
+'lilbox0'    : base_port ,
+'raspberrypi': base_port + 2
 
  }
 
