@@ -14,4 +14,7 @@ while : ; do
     sudo wvdial E397
     echo sudo wvdial E531
     sudo wvdial E3531
+    #temp hack for dhcp
+    echo sudo dhclient eth1
+    sudo dhclient eth1
 done
