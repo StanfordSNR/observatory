@@ -1,0 +1,1 @@
+cat ~/screen.* | grep forwarding
