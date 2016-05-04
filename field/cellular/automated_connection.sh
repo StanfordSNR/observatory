@@ -17,7 +17,4 @@ while : ; do
     #temp hack for dhcp
     echo sudo dhclient eth1
     sudo dhclient eth1
-    #also temp hack
-    echo remote_port_forwarding_hack.sh
-    /home/pi/diagnostic_box_scripts/field/remote_port_forwarding_hack.sh
 done
