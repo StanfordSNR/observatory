@@ -6,8 +6,8 @@ while : ; do
     done
     echo sleep 5s
     sleep 5s
-    echo generic_huawei_modeswitch
-    /home/pi/diagnostic_box_scripts/field/cellular/generic_huawei_modeswitch
+    echo generic_huawei_modeswitch.sh
+    /home/pi/diagnostic_box_scripts/field/cellular/generic_huawei_modeswitch.sh
     echo sleep 5s
     sleep 5s
     echo sudo wvdial E397
