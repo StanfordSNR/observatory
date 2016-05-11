@@ -1,0 +1,4 @@
+add: RAMTMP=yes
+to /etc/default/rcS
+
+add ro to /etc/fstab
