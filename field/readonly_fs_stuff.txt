@@ -1,4 +1,3 @@
-add: RAMTMP=yes
-to /etc/default/rcS
+sudo systemctl enable tmp.mount
 
 add ro to /etc/fstab
