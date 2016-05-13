@@ -1,1 +1,1 @@
-mkdir /tmp/logs /tmp/logs/aws /tmp/logs/gcloud /tmp/logs/aws/autossh /tmp/logs/gcloud/autossh /tmp/logs/aws/screen /tmp/logs/gcloud/screen /tmp/logs/autoconnect
+mkdir /tmp/aws_logs /tmp/gcloud_logs /tmp/gcloud_logs/autossh /tmp/aws_logs/autossh /tmp/gcloud_logs/screen /tmp/aws_logs/screen /tmp/autoconnect_logs

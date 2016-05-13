@@ -1,7 +1,7 @@
 #! /bin/bash
 
 export AUTOSSH_GATETIME=0;
-cd /tmp/logs/gcloud/screen
+cd /tmp/gcloud_logs/screen
 screen -dmSL autossh-gcloud autossh lpng@104.196.19.245 -R 0:localhost:22
 
 OLD_PORT=0
@@ -13,5 +13,5 @@ while : ; do
         scp gcloud.port lpng@104.196.19.245:diagnostic_box_scripts/cloud/dynamic_ports/$(hostname)
     fi
     OLD_PORT=$PORT
-    sleep 2
+    sleep 1
 done

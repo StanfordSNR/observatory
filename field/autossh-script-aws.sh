@@ -1,7 +1,7 @@
 #! /bin/bash
 
 export AUTOSSH_GATETIME=0;
-cd /tmp/logs/aws/screen
+cd /tmp/aws_logs/screen
 screen -dmSL autossh-aws autossh lpng@52.9.177.212 -R 0:localhost:22
 
 OLD_PORT=0
@@ -13,5 +13,5 @@ while : ; do
         scp aws.port lpng@52.9.177.212:diagnostic_box_scripts/cloud/dynamic_ports/$(hostname)
     fi
     OLD_PORT=$PORT
-    sleep 2
+    sleep 1
 done
