@@ -1,4 +1,4 @@
-@reboot /home/pi/diagnostic_box_scripts/field/cellular/automated_connection.sh > /tmp/logs/autoconnect/`date --iso-8601=minutes`autoconnect_log 2>&1
+@reboot /home/pi/diagnostic_box_scripts/field/make_tmp_dirs.sh; /home/pi/diagnostic_box_scripts/field/cellular/automated_connection.sh > /tmp/logs/autoconnect/`date --iso-8601=minutes`autoconnect_log 2>&1
 @reboot /home/pi/diagnostic_box_scripts/field/make_tmp_dirs.sh; /home/pi/diagnostic_box_scripts/field/autossh-script-aws.sh > /tmp/logs/aws/autossh/`date --iso-8601=minutes`autossh_log 2>&1
 @reboot /home/pi/diagnostic_box_scripts/field/make_tmp_dirs.sh; /home/pi/diagnostic_box_scripts/field/autossh-script-gcloud.sh > /tmp/logs/gcloud/autossh/`date --iso-8601=minutes`autossh_log 2>&1
 @daily sudo reboot
