@@ -10,7 +10,7 @@ while : ; do
     if [ "$OLD_PORT" != "$PORT" ]
     then
         echo $PORT > aws.port
-        scp aws.port lpng@52.9.177.212:diagnostic_box_scripts/cloud/aws.port
+        scp aws.port lpng@52.9.177.212:diagnostic_box_scripts/cloud/dynamic_ports/$(hostname)
     fi
     OLD_PORT=$PORT
     sleep 2

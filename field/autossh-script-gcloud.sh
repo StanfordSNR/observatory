@@ -10,7 +10,7 @@ while : ; do
     if [ "$OLD_PORT" != "$PORT" ]
     then
         echo $PORT > gcloud.port
-        scp gcloud.port lpng@104.196.19.245:diagnostic_box_scripts/cloud/gcloud.port
+        scp gcloud.port lpng@104.196.19.245:diagnostic_box_scripts/cloud/dynamic_ports/$(hostname)
     fi
     OLD_PORT=$PORT
     sleep 2
