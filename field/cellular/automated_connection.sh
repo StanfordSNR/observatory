@@ -21,4 +21,4 @@ while : ; do
     # if we fall to here make sure to restart autossh connections
     echo pkill autossh --signal USR1
     pkill autossh --signal USR1
-one
+done
