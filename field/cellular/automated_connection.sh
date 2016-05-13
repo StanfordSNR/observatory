@@ -17,4 +17,8 @@ while : ; do
     #temp hack for dhcp
     echo sudo dhclient eth1
     sudo dhclient eth1
-done
+
+    # if we fall to here make sure to restart autossh connections
+    echo pkill autossh --signal USR1
+    pkill autossh --signal USR1
+one
