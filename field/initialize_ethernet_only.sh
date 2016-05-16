@@ -13,9 +13,9 @@ cd ~
 git clone https://github.com/greghill/DotFiles.git && cd DotFiles && sudo ./initialize.sh
 
 # Set up my diagnostic box scripts
-echo "setting up cron jobs"
+echo "setting up cron jobs, making filesytem readonly on reboot"
 cd ~
-git clone https://github.com/StanfordLPNG/diagnostic_box_scripts && cd diagnostic_box_scripts/field && crontab cron_jobs_ethernet_only
+git clone https://github.com/StanfordLPNG/diagnostic_box_scripts && cd diagnostic_box_scripts/field && crontab cron_jobs_ethernet_only && sudo ./make_readonly_filesystem.sh
 
 # Change password from raspberry, requires user input
 passwd pi
