@@ -1,3 +1,0 @@
-sudo systemctl enable tmp.mount
-
-add ro to /etc/fstab
