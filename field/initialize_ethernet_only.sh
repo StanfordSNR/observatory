@@ -6,24 +6,20 @@ fi
 
 #raspi-config -- expand disk space
 
-#change password
-
 #ssh-known hosts and authorized_keys
 
-#change hostname
-
+echo "installing git screen autossh"
 sudo apt-get install -y vim git screen autossh
-cd ~
 
 # Set up my dotfiles, also changes keyboard layout to US
-git clone https://github.com/greghill/DotFiles.git && cd DotFiles; sudo ./initialize.sh
+echo "setting up greg dotfiles"
 cd ~
+git clone https://github.com/greghill/DotFiles.git && cd DotFiles && sudo ./initialize.sh
 
 # Set up my diagnostic box scripts
-git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
-cd diagnostic_box_scripts/field
-
-crontab cron_jobs_ethernet_only
+echo "setting up cron jobs"
+cd ~
+git clone https://github.com/StanfordLPNG/diagnostic_box_scripts && cd diagnostic_box_scripts/field && crontab cron_jobs_ethernet_only
 
 # Change password from raspberry, requires user input
 passwd pi
