@@ -25,6 +25,8 @@ cd diagnostic_box_scripts/field
 
 crontab cron_jobs_ethernet_only
 
+# Change password from raspberry, requires user input
+passwd pi
 # Change hostname from raspberrypi, requires user input
 sudo ./change_hostname.sh
 echo "will reboot on enter to establish changed hostname"
