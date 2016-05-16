@@ -16,8 +16,8 @@ sudo apt-get install -y vim git screen autossh
 cd ~
 
 # Set up my dotfiles, also changes keyboard layout to US
-mv .bashrc .bashrc.old
-git clone https://github.com/greghill/DotFiles.git && ln DotFiles/.* .
+git clone https://github.com/greghill/DotFiles.git && cd DotFiles; sudo ./initialize.sh
+cd ~
 
 # Set up my diagnostic box scripts
 git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
