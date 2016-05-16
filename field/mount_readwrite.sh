@@ -4,4 +4,4 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
-sudo mount -o remount,rw /
+mount -o remount,rw /
