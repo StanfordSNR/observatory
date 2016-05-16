@@ -1,3 +1,9 @@
+#! /bin/bash
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root"
+    exit
+fi
+
 for PROD_ID in `lsusb | grep -i huawei | cut -d: -f 3- | cut -b 1-4`;
 do
     echo "Trying to modeswitch from prod_id $PROD_ID"

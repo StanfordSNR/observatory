@@ -1,3 +1,9 @@
+#! /bin/bash
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root"
+    exit
+fi
+
 while : ; do
     while ! lsusb | grep -i huawei;
     do
