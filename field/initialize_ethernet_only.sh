@@ -22,4 +22,11 @@ git clone https://github.com/greghill/DotFiles.git && ln DotFiles/.* .
 # Set up my diagnostic box scripts
 git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 cd diagnostic_box_scripts/field
+
 crontab cron_jobs_ethernet_only
+
+# Change hostname from raspberrypi, requires user input
+sudo ./change_hostname.sh
+echo "will reboot on enter to establish changed hostname"
+read
+sudo reboot
