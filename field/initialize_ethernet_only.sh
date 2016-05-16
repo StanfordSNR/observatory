@@ -15,7 +15,7 @@ fi
 sudo apt-get install -y vim git screen autossh
 cd ~
 
-# Set up my dotfiles
+# Set up my dotfiles, also changes keyboard layout to US
 mv .bashrc .bashrc.old
 git clone https://github.com/greghill/DotFiles.git && ln DotFiles/.* .
 
