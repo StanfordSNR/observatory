@@ -1,11 +1,7 @@
 #! /bin/bash
 
-#raspi-config -- expand disk space
+# raspi-config -- expand disk space
 
-# apt update/upgrade?
-# hotplug eth0?
-
-#ssh-known hosts and authorized_keys
 sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh"
@@ -34,6 +30,13 @@ crontab cron_jobs_ethernet_only
 passwd pi
 # Change hostname from raspberrypi, requires user input
 sudo ./change_hostname.sh
+
+# make default ssh key and add to repo
+cat /dev/zero | ssh-keygen -q -N ""
+cat ~/.ssh/id_rsa.pub >> authorized_keys
+git add authorized_keys
+git commit -m "adding keys for $(cat /etc/hostname)"
+git push
 
 sudo ./make_readonly_filesystem.sh
 echo "will reboot on enter into readonly filesystem"
