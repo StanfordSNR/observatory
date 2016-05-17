@@ -28,6 +28,9 @@ sudo ./change_timezone.sh
 echo "Adding cron jobs"
 crontab cron_jobs_ethernet_only
 
+echo "Changing filesystem to be read-only on future boots"
+sudo ./make_readonly_filesystem.sh
+
 # Change password from raspberry, requires user input
 passwd pi
 # Change hostname from raspberrypi, requires user input
@@ -43,7 +46,6 @@ cd ../cloud
 cp authorized_keys ~/.ssh/authorized_keys
 cp known_hosts ~/.ssh/known_hosts
 
-sudo ./make_readonly_filesystem.sh
 echo "will reboot on enter into readonly filesystem"
 read
 sudo reboot
