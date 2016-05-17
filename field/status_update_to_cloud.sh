@@ -2,7 +2,8 @@
 CONTENTS=$(
 date --iso-8601=minutes;
 echo -ne "\ndiagnostic_box_scripts HEAD="
-cd /home/pi/diagnostic_box_scripts && git rev-parse HEAD
+cd /home/pi/diagnostic_box_scripts && git rev-parse HEAD;
+/opt/vc/bin/vcgencmd measure_temp
 )
 echo $CONTENTS
 COMMAND="echo $CONTENTS >> diagnostic_box_scripts/cloud/status_logs/$(hostname)"
