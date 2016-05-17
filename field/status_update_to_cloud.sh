@@ -2,7 +2,7 @@
 CONTENTS=$(
 date --iso-8601=minutes;
 echo -ne "\ndiagnostic_box_scripts HEAD="
-cd ~/diagnostic_box_scripts && git rev-parse HEAD
+cd /home/pi/diagnostic_box_scripts && git rev-parse HEAD
 )
 echo $CONTENTS
 COMMAND="echo $CONTENTS >> diagnostic_box_scripts/cloud/status_logs/$(hostname)"

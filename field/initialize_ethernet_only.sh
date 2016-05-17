@@ -1,4 +1,8 @@
 #! /bin/bash
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root"
+    exit
+fi
 
 #raspi-config -- expand disk space
 
@@ -9,12 +13,12 @@ sudo apt-get install -y vim git screen autossh
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
-cd ~
+cd /home/pi
 git clone https://github.com/greghill/DotFiles.git && cd DotFiles && sudo ./initialize.sh
 
 # Set up my diagnostic box scripts
 echo "setting up cron jobs, making filesytem readonly on reboot"
-cd ~
+cd /home/pi
 git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd diagnostic_box_scripts/field
