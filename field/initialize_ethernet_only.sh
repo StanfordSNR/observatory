@@ -15,7 +15,15 @@ git clone https://github.com/greghill/DotFiles.git && cd DotFiles && sudo ./init
 # Set up my diagnostic box scripts
 echo "setting up cron jobs, making filesytem readonly on reboot"
 cd ~
-git clone https://github.com/StanfordLPNG/diagnostic_box_scripts && cd diagnostic_box_scripts/field && crontab cron_jobs_ethernet_only && sudo ./make_readonly_filesystem.sh
+git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
+
+cd diagnostic_box_scripts/field
+crontab cron_jobs_ethernet_only
+
+sudo ./make_readonly_filesystem.sh
+
+echo "changing timezone to Los Angeles"
+sudo timezone/change_timezone.sh
 
 # Change password from raspberry, requires user input
 passwd pi
