@@ -6,6 +6,9 @@ fi
 
 #raspi-config -- expand disk space
 
+# apt update/upgrade?
+# hotplug eth0?
+
 #ssh-known hosts and authorized_keys
 
 echo "installing git screen autossh"
