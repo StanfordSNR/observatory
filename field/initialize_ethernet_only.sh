@@ -20,22 +20,27 @@ cd /home/pi
 git clone https://github.com/greghill/DotFiles.git && cd DotFiles && sudo ./initialize.sh
 
 # Set up my diagnostic box scripts
-echo "setting up cron jobs, making filesytem readonly on reboot"
+echo "getting diagnostic box scripts"
 cd /home/pi
 git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd diagnostic_box_scripts/field
-crontab cron_jobs_ethernet_only
-
-sudo ./make_readonly_filesystem.sh
 
 echo "changing timezone to Los Angeles"
 sudo timezone/change_timezone.sh
+echo "Please change locale to US. Hit enter to go to GUI"
+read
+sudo dpkg-reconfigure locale
+
+echo "Adding cron jobs"
+crontab cron_jobs_ethernet_only
 
 # Change password from raspberry, requires user input
 passwd pi
 # Change hostname from raspberrypi, requires user input
 sudo ./change_hostname.sh
-echo "will reboot on enter to establish changed hostname"
+
+sudo ./make_readonly_filesystem.sh
+echo "will reboot on enter into readonly filesystem"
 read
 sudo reboot
