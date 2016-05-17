@@ -6,6 +6,7 @@
 # hotplug eth0?
 
 #ssh-known hosts and authorized_keys
+sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh"
 sudo apt-get update
