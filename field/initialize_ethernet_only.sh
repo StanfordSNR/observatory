@@ -12,6 +12,7 @@ fi
 #ssh-known hosts and authorized_keys
 
 echo "installing git screen autossh"
+apt-get update
 apt-get install -y vim git screen autossh
 
 # Set up my dotfiles, also changes keyboard layout to US
