@@ -8,7 +8,7 @@ while : ; do
     while ! lsusb | grep -i huawei;
     do
         echo "no huawei devices found"
-        sleep 1s
+        sleep 5s
     done
     echo sleep 2s
     sleep 2s
