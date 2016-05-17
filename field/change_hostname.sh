@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 echo "enter new hostname"
-read NEW_HOSTNAME
+read -t 90000 NEW_HOSTNAME
 if [ $(echo -n $NEW_HOSTNAME | wc -w) -eq 1 ] && [ $(echo -n $NEW_HOSTNAME | wc -m) -gt 0 ] # check new hostname exactly one word with positive length
 then
     sed -i "s/raspberrypi/$NEW_HOSTNAME/g" /etc/hosts /etc/hostname
