@@ -37,6 +37,9 @@ cat ~/.ssh/id_rsa.pub >> authorized_keys
 git add authorized_keys
 git commit -m "adding keys for $(cat /etc/hostname)"
 git push
+cd ../cloud
+cp authorized_keys ~/.ssh/authorized_keys
+cp known_hosts ~/.ssh/known_hosts
 
 sudo ./make_readonly_filesystem.sh
 echo "will reboot on enter into readonly filesystem"
