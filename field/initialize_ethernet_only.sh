@@ -26,9 +26,8 @@ git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd diagnostic_box_scripts/field
 
-echo "changing timezone to Los Angeles, locale to US"
+echo "changing timezone to Los Angeles"
 ./change_timezone.sh
-./change_locales.sh
 
 echo "Adding cron jobs"
 crontab cron_jobs_ethernet_only
