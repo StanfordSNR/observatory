@@ -11,7 +11,7 @@ then
     sed -i "s/raspberrypi/$NEW_HOSTNAME/g" /etc/hosts /etc/hostname
     if [ $(cat /etc/hostname) == $NEW_HOSTNAME ]
     then
-        echo hostname change success
+        echo hostname changed successfully to $NEW_HOSTNAME
     else
         echo hostname change failure
     fi
