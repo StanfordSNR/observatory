@@ -6,7 +6,7 @@ sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh"
 sudo apt-get update
-sudo apt-get install -y vim git screen autossh
+sudo apt-get install -y vim git screen autossh usb-modeswitch wvdial
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
@@ -26,7 +26,7 @@ echo "changing timezone to Los Angeles"
 sudo ./change_timezone.sh
 
 echo "Adding cron jobs"
-crontab cron_jobs_ethernet_only
+crontab cron_jobs
 
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
