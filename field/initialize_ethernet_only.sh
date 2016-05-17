@@ -26,11 +26,9 @@ git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd diagnostic_box_scripts/field
 
-echo "changing timezone to Los Angeles"
-sudo timezone/change_timezone.sh
-echo "Please change locale to US. Hit enter to go to GUI"
-read
-sudo dpkg-reconfigure locale
+echo "changing timezone to Los Angeles, locale to US"
+sudo change_timezone.sh
+sudo change_locales.sh
 
 echo "Adding cron jobs"
 crontab cron_jobs_ethernet_only

@@ -4,5 +4,5 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
-cp /home/pi/diagnostic_box_scripts/field/timezone/etc_timezone /etc/timezone
+echo "America/Los_Angeles" > /etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
