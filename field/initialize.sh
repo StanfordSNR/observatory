@@ -6,7 +6,7 @@ sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh"
 sudo apt-get update
-sudo apt-get install -y vim git screen autossh
+sudo apt-get install -y vim git screen autossh dialog
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
@@ -28,26 +28,14 @@ sudo ./change_timezone.sh
 echo "Adding cron jobs"
 crontab cron_jobs
 
-echo "Download cellular connectivity software? y/n (no if using wired etherenet only)"
-#from http://tecadmin.net/bash-script-prompt-to-confirm-yes-no/#
-while : ; do
-        read -r -t 90000 -p "Are You Sure? [Y/n] " input
-
-        case $input in
-            [yY][eE][sS]|[yY])
-                echo "Yes"
-                sudo ./initialize_cellular_extras.sh
-                ;;
-        
-            [nN][oO]|[nN])
-                echo "No"
-                ;;
-        
-            *)
-                echo "Invalid input..."
-                ;;
-    esac
-done
+dialog --yesno 'Download cellular connectivity software? (no if using wired etherenet only)' 5 80
+# from https://bash.cyberciti.biz/guide/A_yes/no_dialog_box
+response=$?
+case $response in
+    0) ./intialize_cellular_extras.sh;;
+    1) echo "Not installed.";;
+    255) echo "[ESC] key pressed. Extras not installed";;
+esac
 
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
