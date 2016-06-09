@@ -4,7 +4,7 @@
 
 sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
-echo "installing git screen autossh"
+echo "installing git screen autossh dialog"
 sudo apt-get update
 sudo apt-get install -y vim git screen autossh dialog
 
@@ -32,7 +32,7 @@ dialog --yesno 'Download cellular connectivity software? (no if using wired ethe
 # from https://bash.cyberciti.biz/guide/A_yes/no_dialog_box
 response=$?
 case $response in
-    0) ./intialize_cellular_extras.sh;;
+    0) ./initialize_cellular_extras.sh;;
     1) echo "Not installed.";;
     255) echo "[ESC] key pressed. Extras not installed";;
 esac
