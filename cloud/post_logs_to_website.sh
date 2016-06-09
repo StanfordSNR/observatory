@@ -10,8 +10,7 @@ while : ; do
             while read line; do
                 HOSTNAME=$l
                 POST_REQ='hostname='$l'&datetime='$(echo $line | sed 's/\ diagnostic_box_scripts\ HEAD=/\&head=/g; s/\ temp=/\&temp=/g; s/C$//g')
-                #curl -i -X POST -d "$POST_REQ" https://network-observatory.herokuapp.com/post-measurement-box-checkin
-                echo $POST_REQ " from " $HOSTNAME
+                curl -i -X POST -d "$POST_REQ" https://network-observatory.herokuapp.com/post-measurement-box-checkin
             done < /tmp/toUpload
 
             echo /tmp/toUpload >> ../uploaded_status_logs/$l
