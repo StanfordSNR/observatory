@@ -1,2 +1,2 @@
-`wget tinyurl.com/lpng-init` should fetch contents of field/intialize\_ethernet\_only.sh
+`wget tinyurl.com/init-lpng` should fetch contents of field/intialize.sh
 Run this to initialize a raspberry pi 3
