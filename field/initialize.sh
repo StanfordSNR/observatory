@@ -28,6 +28,28 @@ sudo ./change_timezone.sh
 echo "Adding cron jobs"
 crontab cron_jobs
 
+echo "Download cellular connectivity software? y/n (no if using wired etherenet only)"
+#from http://tecadmin.net/bash-script-prompt-to-confirm-yes-no/#
+while true:
+do
+        read -r -p -t 90000 "Are You Sure? [Y/n] " input
+
+        case $input in
+            [yY][eE][sS]|[yY])
+                echo "Yes"
+                sudo ./initialize_cellular_extras.sh
+                ;;
+        
+            [nN][oO]|[nN])
+                echo "No"
+                ;;
+        
+            *)
+                echo "Invalid input..."
+                ;;
+    esac
+done
+
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
 
