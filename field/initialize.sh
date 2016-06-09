@@ -31,7 +31,7 @@ crontab cron_jobs
 echo "Download cellular connectivity software? y/n (no if using wired etherenet only)"
 #from http://tecadmin.net/bash-script-prompt-to-confirm-yes-no/#
 while : ; do
-        read -r -p -t 90000 "Are You Sure? [Y/n] " input
+        read -r -t 90000 -p "Are You Sure? [Y/n] " input
 
         case $input in
             [yY][eE][sS]|[yY])
