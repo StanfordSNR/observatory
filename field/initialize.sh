@@ -56,5 +56,5 @@ cp authorized_keys ~/.ssh/authorized_keys
 cp known_hosts ~/.ssh/known_hosts
 
 echo "will reboot on enter into readonly filesystem"
-read
+read -t 90001
 sudo reboot
