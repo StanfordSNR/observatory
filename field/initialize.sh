@@ -41,6 +41,8 @@ esac
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
 
+echo "Adding eth0:0 so can always ssh with local cable to 192.168.10.10"
+sudo ./make_default_wired_interface.sh
 # Change password from raspberry, requires user input
 passwd pi
 # Change hostname, requires user input
