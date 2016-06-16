@@ -23,12 +23,6 @@ git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd diagnostic_box_scripts/field
 
-echo "changing timezone to Los Angeles"
-sudo ./change_timezone.sh
-
-echo "Adding cron jobs"
-crontab cron_jobs
-
 dialog --yesno 'Download cellular connectivity software? (no if using wired etherenet only)' 5 80
 # from https://bash.cyberciti.biz/guide/A_yes/no_dialog_box
 response=$?
@@ -37,6 +31,12 @@ case $response in
     1) echo "Not installed.";;
     255) echo "[ESC] key pressed. Extras not installed";;
 esac
+
+echo "changing timezone to Los Angeles"
+sudo ./change_timezone.sh
+
+echo "Adding cron jobs"
+crontab cron_jobs
 
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
