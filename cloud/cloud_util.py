@@ -55,6 +55,6 @@ if args.command == "web_checkin":
     #print(r.text)
 
 if args.command == "sleep":
-    time_sleep = 20 #TODO longer
+    time_sleep = 4000 # 66 mins
     print("Sleeping " + str(time_sleep) + " seconds")
     time.sleep(time_sleep)
