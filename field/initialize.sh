@@ -47,9 +47,10 @@ sudo ./change_hostname.sh
 
 # make default ssh key and add to repo
 cat /dev/zero | ssh-keygen -q -N ""
-cat ~/.ssh/id_rsa.pub >> authorized_keys
+RESTRICTED_KEY="command=\"~/diagnostic_box_scripts/cloud/cloud_util.py $(cat /etc/hostname) $SSH_ORIGINAL_COMMAND\", $(cat ~/.ssh/id_rsa.pub)"
+echo $RESTRICTED_KEY >> authorized_keys
 git add authorized_keys
-git commit -m "adding keys for $(cat /etc/hostname)"
+git commit -m "adding command restricted key for $(cat /etc/hostname) for cloud servers to add to authorized_keys"
 git push
 cd ../cloud
 cp authorized_keys ~/.ssh/authorized_keys
