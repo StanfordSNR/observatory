@@ -2,6 +2,7 @@
 
 # raspi-config -- expand disk space
 
+echo "disabling wifi"
 sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh dialog"
@@ -42,10 +43,10 @@ sudo ./make_readonly_filesystem.sh
 
 # Change password from raspberry, requires user input
 passwd pi
-# Change hostname from raspberrypi, requires user input
+# Change hostname, requires user input
 sudo ./change_hostname.sh
 
-# make default ssh key and add to repo
+# make default ssh key that is command restricted and add to repo
 cat /dev/zero | ssh-keygen -q -N ""
 RESTRICTED_KEY="command=\"~/diagnostic_box_scripts/cloud/cloud_util.py $(cat /etc/hostname) \$SSH_ORIGINAL_COMMAND\", $(cat ~/.ssh/id_rsa.pub)"
 echo $RESTRICTED_KEY >> authorized_keys
