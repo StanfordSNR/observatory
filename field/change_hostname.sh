@@ -11,6 +11,7 @@ then
     sed "s/\(127\.0\.1\.1[[:space:]]*\)[[:alnum:]]*/\1$NEW_HOSTNAME/g" /etc/hosts > /tmp/hosts
     mv /tmp/hosts /etc/hosts
     echo "$NEW_HOSTNAME" > /etc/hostname
+    hostname $NEW_HOSTNAME # think this is temp until restart which is fine because above will change for after restart
 else
     echo invalid hostname: $NEW_HOSTNAME
 fi
