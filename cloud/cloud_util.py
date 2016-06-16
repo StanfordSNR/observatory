@@ -42,7 +42,6 @@ if args.command == "set_port":
 if args.command == "web_checkin":
     cur_time = datetime.utcnow()
     cur_time = cur_time.replace(microsecond=0)
-    print(cur_time.isoformat())
     payload = {'hostname': args.hostname, 'datetime': cur_time.isoformat()}
 
     if args.git_head is not None:
@@ -53,9 +52,9 @@ if args.command == "web_checkin":
     r = requests.post("https://network-observatory.herokuapp.com/post-measurement-box-checkin", data=payload)
 
     print("post returned: " + str(r.status_code))
-    print(r.text)
+    #print(r.text)
 
 if args.command == "sleep":
-    time_sleep = 2 #TODO longer
+    time_sleep = 20 #TODO longer
     print("Sleeping " + str(time_sleep) + " seconds")
     time.sleep(time_sleep)
