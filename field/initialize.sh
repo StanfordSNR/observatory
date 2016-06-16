@@ -7,7 +7,7 @@ sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "installing git screen autossh dialog"
 sudo apt-get update
-sudo apt-get install -y vim git screen autossh dialog
+sudo apt-get install -y vim git screen autossh dialog w3m
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
