@@ -35,9 +35,6 @@ esac
 echo "changing timezone to Los Angeles"
 sudo ./change_timezone.sh
 
-echo "Adding cron jobs"
-crontab cron_jobs
-
 echo "Changing filesystem to be read-only on future boots"
 sudo ./make_readonly_filesystem.sh
 
@@ -58,6 +55,10 @@ git push
 cd ../cloud
 cp authorized_keys ~/.ssh/authorized_keys
 cp known_hosts ~/.ssh/known_hosts
+
+echo "Adding cron jobs"
+cd ~/diagnostic_box_scripts/field
+crontab cron_jobs
 
 echo "will reboot on enter into readonly filesystem"
 read -t 90001
