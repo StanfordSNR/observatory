@@ -7,20 +7,15 @@ import requests
 
 parser = argparse.ArgumentParser(description='Handle status updates and reporting ssh remote forwarding dynamic ports for field boxes.')
 
-parser.add_argument('hostname', type=str, 
-                    help='hostname of field box')
+parser.add_argument('hostname', type=str, help='hostname of field box')
 
-parser.add_argument('command', type=str, choices=["set_port", "web_checkin", "sleep"],
-                    help='action to be taken')
+parser.add_argument('command', type=str, choices=["set_port", "web_checkin", "sleep"], help='action to be taken')
 
-parser.add_argument('--port',
-                    help='Port number on cloud machine ssh remote forwarded to a field box with the given hostname.')
+parser.add_argument('--port', help='Port number on cloud machine ssh remote forwarded to a field box with the given hostname.')
 
-parser.add_argument('--git_head',
-                    help='SHA-1 hash of git head for diagnostic_box_scripts repository on field box')
+parser.add_argument('--git_head', help='SHA-1 hash of git head for diagnostic_box_scripts repository on field box')
 
-parser.add_argument('--temp', 
-                    help='Temperature of field box in degress Celsius.')
+parser.add_argument('--temp', help='Temperature of field box in degress Celsius.')
 
 args = parser.parse_args()
 
