@@ -1,9 +1,8 @@
 #! /bin/bash
 
-export AUTOSSH_GATETIME=0;
 cd /tmp/gcloud_logs/screen
 CLOUD_ADDRESS=lpng@23.251.141.221
-screen -dmSL autossh-gcloud autossh $CLOUD_ADDRESS -R 0:localhost:22
+screen -dmSL autossh-gcloud ~/diagnostic_box_scripts/field/autossh-inner-loop.sh $CLOUD_ADDRESS
 
 OLD_PORT=0
 while : ; do

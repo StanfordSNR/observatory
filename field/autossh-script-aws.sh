@@ -1,9 +1,8 @@
 #! /bin/bash
 
-export AUTOSSH_GATETIME=0;
 cd /tmp/aws_logs/screen
 CLOUD_ADDRESS=lpng@52.192.246.2
-screen -dmSL autossh-aws autossh $CLOUD_ADDRESS -R 0:localhost:22 sleep
+screen -dmSL autossh-aws ~/diagnostic_box_scripts/field/autossh-inner-loop.sh $CLOUD_ADDRESS
 
 OLD_PORT=0
 while : ; do
