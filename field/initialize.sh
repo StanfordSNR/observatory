@@ -58,7 +58,8 @@ cp known_hosts ~/.ssh/known_hosts
 
 echo "Adding cron jobs"
 cd ~/diagnostic_box_scripts/field
-crontab cron_jobs
+crontab user_cron_jobs
+sudo crontab root_cron_jobs
 
 echo "will reboot on enter into readonly filesystem"
 read -t 90001
