@@ -5,9 +5,9 @@
 echo "disabling wifi"
 sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
-echo "installing git screen autossh dialog"
+echo "installing extra utilities"
 sudo apt-get update
-sudo apt-get install -y vim git screen autossh dialog w3m
+sudo apt-get install -y vim git screen autossh dialog w3m dnsutils traceroute ntp resolvconf
 
 # TODO test remove fake-hwclock
 # sudo apt-get autoremove fake-hwclock
