@@ -9,6 +9,11 @@ echo "installing git screen autossh dialog"
 sudo apt-get update
 sudo apt-get install -y vim git screen autossh dialog w3m
 
+# TODO test remove fake-hwclock
+# sudo apt-get autoremove fake-hwclock
+# sudo rm /etc/cron.hourly/fake-hwclock
+# sudo rm /etc/fake-hwclock.data
+
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
 cd ~
