@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 sleep 4m
-cd ~/diagnostic_box_scripts/field
+cd /home/pi/diagnostic_box_scripts/field
 ./mount_readwrite.sh
 git reset --hard HEAD@{"30 minutes ago"}
 crontab root_cron_jobs
