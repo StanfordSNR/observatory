@@ -26,7 +26,7 @@ echo "getting diagnostic box scripts"
 cd ~
 git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
-cd diagnostic_box_scripts/field
+cd ~/diagnostic_box_scripts/field/initialization
 
 dialog --yesno 'Download cellular connectivity software? (no if using wired etherenet only)' 5 80
 # from https://bash.cyberciti.biz/guide/A_yes/no_dialog_box
@@ -57,12 +57,12 @@ echo $RESTRICTED_KEY >> authorized_keys
 git add authorized_keys
 git commit -m "adding command restricted key for $(cat /etc/hostname) for cloud servers to add to authorized_keys"
 git push
-cd ../cloud
+cd ~/diagnostic_box_scripts/cloud
 cp authorized_keys ~/.ssh/authorized_keys
 cp known_hosts ~/.ssh/known_hosts
 
 echo "Adding cron jobs"
-cd ~/diagnostic_box_scripts/field
+cd ~/diagnostic_box_scripts/field/initialization
 crontab user_cron_jobs
 sudo crontab root_cron_jobs
 
