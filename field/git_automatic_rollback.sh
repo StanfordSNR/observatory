@@ -7,6 +7,6 @@ fi
 sleep 4m
 cd /home/pi/diagnostic_box_scripts/field
 ./mount_readwrite.sh
-git reset --hard HEAD@{"30 minutes ago"}
 crontab root_cron_jobs
+git reset --hard HEAD@{"30 minutes ago"}
 shutdown -r +1
