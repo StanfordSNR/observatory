@@ -1,2 +1,2 @@
-`wget tinyurl.com/init-lpng` should fetch contents of field/intialize.sh
-Run this to initialize a raspberry pi 3
+`wget http://tinyurl.com/lpng-start` should fetch contents of field/initialization/intialize.sh
+Run this to initialize a fresh raspberry pi 3 with Raspian Jessie Lite installed
