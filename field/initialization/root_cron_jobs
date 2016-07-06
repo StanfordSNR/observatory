@@ -1,1 +1,1 @@
-@hourly shutdown -r +2
+@hourly /sbin/shutdown -r +7
