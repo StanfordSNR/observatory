@@ -7,7 +7,7 @@ sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
 
 echo "updating and installing extra utilities"
 sudo apt-get update
-sudo apt-get -y upgrade
+sudo apt-get -y dist-upgrade
 sudo apt-get install -y vim git screen autossh dialog w3m dnsutils traceroute ntp resolvconf
 
 # TODO test remove fake-hwclock
