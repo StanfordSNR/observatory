@@ -5,6 +5,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 export AUTOSSH_GATETIME=0;
+export AUTOSSH_POLL=60; # poll for a connection every 60 seconds
 while : ; do
     autossh $1 -R 0:localhost:22 sleep
     sleep 5
