@@ -1,2 +1,2 @@
-@reboot /home/pi/diagnostic_box_scripts/field/make_tmp_dirs.sh; /home/pi/diagnostic_box_scripts/field/cellular/automated_cellular_connection.sh > /tmp/cellular_autoconnect_logs/`date --iso-8601=minutes`_cellular_autoconnect_log 2>&1
+@reboot /home/pi/diagnostic_box_scripts/field/make_tmp_dirs.sh; /home/pi/diagnostic_box_scripts/field/cellular/automated_cellular_connection.sh > /tmp/cellular_autoconnect_logs/cellular_autoconnect.log 2>&1
 @hourly /sbin/shutdown -r +7
