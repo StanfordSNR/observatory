@@ -2,7 +2,7 @@
 
 # ssh -R prints locally which port it is bound to on the remote machine. This script gets this port number from the log for the autossh script and gives it to the cloud server.
 
-cd /tmp/aws_logs
+cd /tmp/
 AWS_ADDRESS=lpng@52.192.246.2
 
 OLD_PORT=0
