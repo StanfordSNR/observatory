@@ -4,7 +4,7 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
-sleep 10m
+sleep 15m
 cd /home/pi/diagnostic_box_scripts/field
 ./mount_readwrite.sh
 git reset --hard HEAD@{1}
