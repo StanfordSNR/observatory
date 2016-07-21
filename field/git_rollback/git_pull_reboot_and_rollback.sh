@@ -1,5 +1,4 @@
 #!/bin/bash -xe
-exit 1
 sudo /home/pi/diagnostic_box_scripts/field/mount_readwrite.sh
 git pull --ff-only
 crontab /home/pi/diagnostic_box_scripts/field/initialization/user_cron_jobs
