@@ -9,4 +9,5 @@ cd /home/pi/diagnostic_box_scripts/field
 ./mount_readwrite.sh
 git reset --hard HEAD@{1}
 crontab initialization/root_cron_jobs
+crontab -u pi initialization/user_cron_jobs
 /sbin/shutdown -r +2
