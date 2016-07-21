@@ -7,6 +7,6 @@ fi
 sleep 10m
 cd /home/pi/diagnostic_box_scripts/field
 ./mount_readwrite.sh
-crontab initialization/root_cron_jobs
 git reset --hard HEAD@{1}
-shutdown -r +1
+crontab initialization/root_cron_jobs
+/sbin/shutdown -r +2
