@@ -10,7 +10,9 @@ else
     TEMP=0
 fi
 
-COMMAND="web_checkin --git_head=$(git rev-parse HEAD) --temp=$TEMP"
+# probably want to keeup uptime last as multiple words are parsed
+UPTIME=$(uptime)
+COMMAND="web_checkin --git_head=$(git rev-parse HEAD) --temp=$TEMP --uptime $UPTIME"
 
 ssh lpng@52.192.246.2 $COMMAND &
 ssh lpng@23.251.141.221 $COMMAND
