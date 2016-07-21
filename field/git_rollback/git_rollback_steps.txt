@@ -1,0 +1,5 @@
+./mount_readwrite.sh
+git pull --ff-only
+crontab /home/pi/diagnostic_box_scripts/field/initialization/user_cron_jobs
+sudo crontab /home/pi/diagnostic_box_scripts/field/git_rollback/root_cron_jobs
+sudo reboot
