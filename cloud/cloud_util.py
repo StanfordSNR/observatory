@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import os
 import requests
+import sys
 
 parser = argparse.ArgumentParser(description='Handle status updates and reporting ssh remote forwarding dynamic ports for field boxes.')
 
@@ -17,7 +18,7 @@ parser.add_argument('--git_head', help='SHA-1 hash of git head for diagnostic_bo
 
 parser.add_argument('--temp', help='Temperature of field box in degress Celsius.')
 
-parser.add_argument('--uptime', help='report the results of running the command: uptime')
+parser.add_argument('--uptime', nargs='+', help='report the results of running the command: uptime')
 
 args = parser.parse_args()
 
@@ -46,7 +47,7 @@ if args.command == "web_checkin":
     if args.temp is not None:
         payload['temp'] = args.temp
     if args.uptime is not None:
-        payload['uptime'] = args.uptime
+        payload['uptime'] = ' '.join(args.uptime)
 
     r = requests.post("https://network-observatory.herokuapp.com/post-measurement-box-checkin", data=payload)
 
