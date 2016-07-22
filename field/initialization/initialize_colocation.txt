@@ -1,0 +1,2 @@
+sudo adduser pi
+sudo gpasswd -a pi sudo
