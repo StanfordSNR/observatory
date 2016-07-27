@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 cd ~/diagnostic_box_scripts #so we can get git head
 
 # If temp script doesn't exist/work default to 0

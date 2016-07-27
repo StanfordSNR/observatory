@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 GCLOUD_ADDRESS=lpng@23.251.141.221
 
 export AUTOSSH_GATETIME=0;

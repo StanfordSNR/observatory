@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 # raspi-config -- expand disk space
 

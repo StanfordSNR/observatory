@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 # ssh -R prints locally which port it is bound to on the remote machine. This script gets this port number from the log for the autossh script and gives it to the cloud server.
 

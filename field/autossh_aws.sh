@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 AWS_ADDRESS=lpng@52.192.246.2
 
 export AUTOSSH_GATETIME=0;
