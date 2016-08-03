@@ -2,9 +2,6 @@
 
 # raspi-config -- expand disk space
 
-echo "disabling wifi"
-sudo su -c 'echo blacklist brcmfmac > /etc/modprobe.d/wlan-blacklist.conf'
-
 echo "updating and installing extra utilities"
 sudo apt-get update
 sudo apt-get -y dist-upgrade
@@ -66,6 +63,9 @@ echo "Adding cron jobs"
 cd ~/diagnostic_box_scripts/field/initialization
 crontab user_cron_jobs
 sudo crontab root_cron_jobs
+
+echo "disabling wifi/bluetooth/sound"
+sudo cp raspi-blacklist.conf /etc/modprobe.d/
 
 echo "will reboot on enter into readonly filesystem"
 read -t 90001
