@@ -35,18 +35,16 @@ case $response in
     255) echo "[ESC] key pressed. Extras not installed";;
 esac
 
-echo "changing timezone to Los Angeles"
-sudo ./change_timezone.sh
-
-echo "Changing filesystem to be read-only on future boots"
-sudo ./make_readonly_filesystem.sh
-
+dialog --yesno 'Is this a raspberry pi?' 5 80
+response=$?
+case $response in
+    0) ./initialize_rpi_specific.sh;;
+    1) echo "Extras not installed.";;
+    255) echo "[ESC] key pressed. Extras not installed";;
+esac
 echo "Adding eth0:0 so can always ssh with local cable to 192.168.10.10"
+
 sudo ./make_default_wired_interface.sh
-# Change password from raspberry, requires user input
-passwd pi
-# Change hostname, requires user input
-sudo ./change_hostname.sh
 
 # make default ssh key that is command restricted and add to repo
 cat /dev/zero | ssh-keygen -q -N ""
@@ -64,9 +62,6 @@ echo "Adding cron jobs"
 cd ~/diagnostic_box_scripts/field/initialization
 crontab user_cron_jobs
 sudo crontab root_cron_jobs
-
-echo "disabling wifi/bluetooth/sound"
-sudo cp raspi-blacklist.conf /etc/modprobe.d/
 
 echo "will reboot on enter into readonly filesystem"
 read -t 90001
