@@ -63,6 +63,6 @@ cd ~/diagnostic_box_scripts/field/initialization
 crontab user_cron_jobs
 sudo crontab root_cron_jobs
 
-echo "will reboot on enter into readonly filesystem"
+echo "will reboot on enter"
 read -t 90001
 sudo reboot
