@@ -13,8 +13,6 @@ while : ; do
     sleep 5s
     /home/pi/diagnostic_box_scripts/field/cellular/generic_huawei_modeswitch.sh
     sleep 10s
-    wvdial E3531 safaricom pin
-    sleep 5s
     wvdial E3531 safaricom
 
     # if we fall to here make sure to restart autossh connections
