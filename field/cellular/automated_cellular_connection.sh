@@ -15,6 +15,8 @@ while : ; do
     sleep 10s
     wvdial E3531 airtel
     wvdial E3531 safaricom
+    wvdial second_modem E3531 airtel
+    wvdial second_modem E3531 safaricom
 
     # if we fall to here make sure to restart autossh connections
     pkill autossh --signal USR1
