@@ -1,16 +1,9 @@
 #! /bin/bash -x
 
-# raspi-config -- expand disk space
-
 echo "updating and installing extra utilities"
 sudo apt-get update
 sudo apt-get -y dist-upgrade
 sudo apt-get install -y vim git autossh dialog w3m dnsutils traceroute ntp resolvconf
-
-# TODO test remove fake-hwclock
-# sudo apt-get autoremove fake-hwclock
-# sudo rm /etc/cron.hourly/fake-hwclock
-# sudo rm /etc/fake-hwclock.data
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
@@ -42,9 +35,6 @@ case $response in
     1) echo "Extras not installed.";;
     255) echo "[ESC] key pressed. Extras not installed";;
 esac
-echo "Adding eth0:0 so can always ssh with local cable to 192.168.10.10"
-
-sudo ./make_default_wired_interface.sh
 
 # make default ssh key that is command restricted and add to repo
 cat /dev/zero | ssh-keygen -q -N ""
