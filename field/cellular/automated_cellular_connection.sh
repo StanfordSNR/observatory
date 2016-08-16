@@ -4,6 +4,12 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 [wvdial_script]"
+    exit 1
+fi
+
+
 while : ; do
     while ! lsusb | grep -i huawei;
     do
@@ -13,10 +19,7 @@ while : ; do
     sleep 5s
     /home/pi/diagnostic_box_scripts/field/cellular/generic_huawei_modeswitch.sh
     sleep 10s
-    wvdial E3531 airtel
-    wvdial E3531 safaricom
-    wvdial second_modem E3531 airtel
-    wvdial second_modem E3531 safaricom
+    ./$1
 
     # if we fall to here make sure to restart autossh connections
     pkill autossh --signal USR1
