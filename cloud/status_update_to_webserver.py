@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(description='Perform status update POST on beha
 
 parser.add_argument('hostname', type=str, help='hostname of field box')
 
-parser.add_argument('--git_head', help='SHA-1 hash of git head for diagnostic_box_scripts repository on field box')
+parser.add_argument('--git-head', help='SHA-1 hash of git head for diagnostic_box_scripts repository on field box')
 
 parser.add_argument('--temp', help='Temperature of field box in degress Celsius.')
 
