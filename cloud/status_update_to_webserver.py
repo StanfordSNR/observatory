@@ -13,6 +13,8 @@ parser.add_argument('--temp', help='Temperature of field box in degress Celsius.
 
 parser.add_argument('--uptime', nargs='+', help='report the results of running the command: uptime')
 
+parser.add_argument('--public-ip', help='Public IP of field box')
+
 args = parser.parse_args()
 
 cur_time = datetime.utcnow()
@@ -25,6 +27,8 @@ if args.temp is not None:
     payload['temp'] = args.temp
 if args.uptime is not None:
     payload['uptime'] = ' '.join(args.uptime)
+if args.public_ip is not None:
+    payload['public_ip'] = ' '.join(args.public_ip)
 
 r = requests.post("https://network-observatory.herokuapp.com/post-measurement-box-checkin", data=payload)
 

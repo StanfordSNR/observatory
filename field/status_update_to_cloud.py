@@ -23,4 +23,7 @@ status_update_command += ["--git-head", git_head_results]
 uptime_results = call("uptime")
 status_update_command += ["--uptime", uptime_results]
 
+public_ip = call("dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/\"//g'")
+status_update_command += ["--public-ip", public_ip]
+
 call(status_update_command)
