@@ -13,5 +13,5 @@ then
     echo "$NEW_HOSTNAME" > /etc/hostname
     hostname $NEW_HOSTNAME # think this is temp until restart which is fine because above will change for after restart
 else
-    echo invalid hostname: $NEW_HOSTNAME
+    echo invalid hostname: $NEW_HOSTNAME, not changing
 fi
