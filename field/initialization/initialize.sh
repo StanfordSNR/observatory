@@ -38,7 +38,8 @@ case $response in
 esac
 
 # make default ssh key that is command restricted and add to repo
-if [ ! -f ~/.ssh/id_rsa ]: then
+if [ ! -f ~/.ssh/id_rsa ]
+then
     mkdir -p ~/.ssh
     ssh-keygen -q -N "" -f ~/.ssh/id_rsa < /dev/zero
     RESTRICTED_KEY="command=\"~/diagnostic_box_scripts/cloud/cloud_util.py $(cat /etc/hostname) \$SSH_ORIGINAL_COMMAND\", $(cat ~/.ssh/id_rsa.pub)"
