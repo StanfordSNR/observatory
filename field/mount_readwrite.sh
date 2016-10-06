@@ -4,4 +4,5 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
+touch /tmp/dont_reboot_automatically
 mount -o remount,rw /
