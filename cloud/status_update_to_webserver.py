@@ -23,10 +23,15 @@ payload = {'hostname': args.hostname, 'datetime': cur_time.isoformat()}
 
 if args.git_head is not None:
     payload['head'] = args.git_head
+
 if args.temp is not None:
     payload['temp'] = args.temp
+else:
+    payload['temp'] = str(0.0)
+
 if args.public_ip is not None:
     payload['public_ip'] = args.public_ip
+
 # Uptime needs to go last as it is a multiple word output
 if args.uptime is not None:
     payload['uptime'] = ' '.join(args.uptime)
