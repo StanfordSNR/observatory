@@ -16,9 +16,14 @@ status_update_command = ['ssh', args.cloud_username + '@' + str(args.cloud_ip), 
 hostname = check_output("hostname")
 status_update_command += [hostname]
 
-# Only run if temp command exists
+# command to get core temperature of Rasperry Pi
 temp_results = check_output("/opt/vc/bin/vcgencmd measure_temp | sed s/[^0-9.]*//g", shell=True)
-status_update_command += ["--temp", temp_results]
+try:
+    float(temp_results)
+    status_update_command += ["--temp", temp_results]
+except ValueError:
+    # command probably didn't exist, don't include temp in status update
+    pass
 
 git_head_results = check_output("cd ~/diagnostic_box_scripts && git rev-parse HEAD", shell=True)
 status_update_command += ["--git-head", git_head_results]
