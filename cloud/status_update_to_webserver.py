@@ -33,4 +33,4 @@ if args.uptime is not None:
 
 r = requests.post("https://network-observatory.herokuapp.com/post-measurement-box-checkin", data=payload)
 
-print("post returned: " + str(r.status_code))
+print("POST returned " + str(r.status_code) +": " + r.text)
