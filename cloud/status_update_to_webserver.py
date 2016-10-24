@@ -26,7 +26,7 @@ if args.git_head is not None:
 if args.temp is not None:
     payload['temp'] = args.temp
 if args.public_ip is not None:
-    payload['public_ip'] = ' '.join(args.public_ip)
+    payload['public_ip'] = args.public_ip
 # Uptime needs to go last as it is a multiple word output
 if args.uptime is not None:
     payload['uptime'] = ' '.join(args.uptime)
