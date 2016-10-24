@@ -28,10 +28,11 @@ except ValueError:
 git_head_results = check_output("cd ~/diagnostic_box_scripts && git rev-parse HEAD", shell=True)
 status_update_command += ["--git-head", git_head_results]
 
-uptime_results = check_output("uptime")
-status_update_command += ["--uptime", uptime_results]
-
 public_ip = check_output("dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/\"//g'", shell=True)
 status_update_command += ["--public-ip", public_ip]
+
+# Uptime needs to go last as it is a multiple word output
+uptime_results = check_output("uptime")
+status_update_command += ["--uptime", uptime_results]
 
 call(status_update_command)
