@@ -25,10 +25,11 @@ if args.git_head is not None:
     payload['head'] = args.git_head
 if args.temp is not None:
     payload['temp'] = args.temp
-if args.uptime is not None:
-    payload['uptime'] = ' '.join(args.uptime)
 if args.public_ip is not None:
     payload['public_ip'] = ' '.join(args.public_ip)
+# Uptime needs to go last as it is a multiple word output
+if args.uptime is not None:
+    payload['uptime'] = ' '.join(args.uptime)
 
 r = requests.post("https://network-observatory.herokuapp.com/post-measurement-box-checkin", data=payload)
 
