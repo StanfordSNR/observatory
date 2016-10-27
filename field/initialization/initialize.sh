@@ -3,7 +3,7 @@
 echo "updating and installing extra utilities"
 sudo apt-get update
 sudo apt-get -y dist-upgrade
-sudo apt-get install -y vim git autossh dialog w3m dnsutils traceroute ntp resolvconf curl python3 mosh
+sudo apt-get install -y vim git autossh dialog w3m dnsutils traceroute ntp resolvconf curl python3 mosh dnsutils
 
 # Set up my dotfiles, also changes keyboard layout to US
 echo "setting up greg dotfiles"
