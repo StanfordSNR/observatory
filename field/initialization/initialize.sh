@@ -20,6 +20,9 @@ git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
 
 cd ~/diagnostic_box_scripts/field/initialization
 
+# Change hostname, requires user input
+sudo ./change_hostname.sh
+
 dialog --yesno 'Download cellular connectivity software? (no if using wired etherenet only)' 5 80
 # from https://bash.cyberciti.biz/guide/A_yes/no_dialog_box
 response=$?
