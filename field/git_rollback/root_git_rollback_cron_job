@@ -1,2 +1,0 @@
-# Script to roll-back a git pull after a reboot if not cancelled by user
-@reboot /home/pi/diagnostic_box_scripts/field/git_rollback/git_do_rollback.sh > /tmp/git_do_rollback.log 2>&1

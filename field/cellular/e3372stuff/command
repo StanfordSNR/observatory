@@ -1,1 +1,0 @@
-echo "<request><mode>1</mode></request>" | curl -X POST -H " RequestVerificationToken:125002" -H "Content-type: text/xml" -d @- http://192.168.8.1/api/device/mode
