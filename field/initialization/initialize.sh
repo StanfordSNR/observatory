@@ -10,13 +10,9 @@ echo "setting up greg dotfiles"
 cd ~
 git clone https://github.com/greghill/DotFiles.git && cd DotFiles && ./initialize.sh
 
-echo "getting robust remote connect"
-cd ~
-git clone https://github.com/StanfordLPNG/robust_remote_connect
-
 echo "getting diagnostic box scripts"
 cd ~
-git clone https://github.com/StanfordLPNG/diagnostic_box_scripts
+git clone https://github.com/StanfordLPNG/diagnostic_box_scripts -b observatory_box_scripts
 
 cd ~/diagnostic_box_scripts/field/initialization
 
@@ -45,9 +41,8 @@ if [ ! -f ~/.ssh/id_rsa ]
 then
     mkdir -p ~/.ssh
     ssh-keygen -q -N "" -f ~/.ssh/id_rsa < /dev/zero
-    RESTRICTED_KEY="command=\"~/diagnostic_box_scripts/cloud/cloud_util.py $(cat /etc/hostname) \$SSH_ORIGINAL_COMMAND\", $(cat ~/.ssh/id_rsa.pub)"
     git pull --ff-only # make sure we aren't behind already
-    echo $RESTRICTED_KEY >> authorized_keys
+    cat ~/.ssh/id_rsa.pub >> authorized_keys
     git add authorized_keys
     git commit -m "adding command restricted key for $(cat /etc/hostname) for cloud servers to add to authorized_keys"
     git push
@@ -61,7 +56,3 @@ echo "Adding cron jobs"
 cd ~/diagnostic_box_scripts/field/initialization
 crontab user_cron_jobs
 sudo crontab root_cron_jobs
-
-echo "will reboot on enter"
-read -t 90001
-sudo reboot
