@@ -1,1 +1,0 @@
-@reboot ~/diagnostic_box_scripts/cloud/post_logs_to_website.sh
