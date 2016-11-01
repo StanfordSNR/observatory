@@ -1,4 +1,0 @@
-@reboot /home/pi/robust_remote_connect/field/robust_remote_connect.py lpng 23.251.141.221 > /tmp/robust_remote_connect.gcloud 2>&1
-@reboot /home/pi/robust_remote_connect/field/robust_remote_connect.py lpng 52.192.246.2 > /tmp/robust_remote_connect.aws 2>&1
-*/5 * * * * /home/pi/diagnostic_box_scripts/field/status_update_to_cloud.py lpng 23.251.141.221 > /tmp/cloud_status_update.gcloud 2>&1
-*/5 * * * * /home/pi/diagnostic_box_scripts/field/status_update_to_cloud.py lpng 52.192.246.2 > /tmp/cloud_status_update.aws 2>&1

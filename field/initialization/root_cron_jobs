@@ -1,2 +1,0 @@
-@reboot /home/pi/diagnostic_box_scripts/field/cellular/automated_cellular_connection.sh [ADD HERE] > /tmp/cellular_autoconnect.log 2>&1
-@hourly test ! -e /tmp/dont_reboot_automatically && /sbin/shutdown -r +2
