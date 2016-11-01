@@ -17,7 +17,7 @@ while : ; do
         sleep 5s
     done
     sleep 5s
-    /home/pi/diagnostic_box_scripts/cellular/generic_huawei_modeswitch.sh
+    /home/pi/observatory_box_scripts/cellular/generic_huawei_modeswitch.sh
     sleep 10s
     $1
 done
