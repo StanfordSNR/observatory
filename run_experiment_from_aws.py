@@ -41,8 +41,8 @@ def main():
 
     cmd = './run.py -t 10 -r ' + sites[args.site_name] + ':pantheon ' + \
           '--tunnel-server local --local-addr ' + local_external_ip + \
-          ' --sender-side remote --remote-interface ppp0 ' \
-          '--local-info aws_california --remote-info ' + args.site_name
+          ' --sender-side remote --remote-interface ppp0 --random-order ' \
+          '--local-info "aws california" --remote-info ' + args.site_name
 
     print(cmd)
     check_call(cmd, shell=True)
