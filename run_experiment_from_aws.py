@@ -15,7 +15,8 @@ sites = {
     'mexico': 'pi@143.255.56.146'
 }
 
-local_external_ip = '52.9.40.135'
+# location_and_external_ip = ('aws brazil', '52.67.123.5')
+location_and_external_ip = ('aws california', '52.9.40.135')
 
 
 def main():
@@ -39,10 +40,11 @@ def main():
     check_call('rm -f *.png', shell=True)
     check_call('rm -f *.xz ', shell=True)
 
-    cmd = './run.py -t 10 -r ' + sites[args.site_name] + ':pantheon ' + \
-          '--tunnel-server local --local-addr ' + local_external_ip + \
-          ' --sender-side remote --remote-interface ppp0 --random-order ' \
-          '--local-info "aws california" --remote-info ' + args.site_name
+    cmd = './run.py -t 30 -r ' + sites[args.site_name] + ':pantheon ' + \
+          '--tunnel-server local  --sender-side remote --random-order ' \
+          '--local-addr ' + location_and_external_ip[1] + ' ' + \
+          '--local-info "%s" ' % location_and_external_ip[0] + \
+          '--remote-interface ppp0 --remote-info ' + args.site_name
 
     print(cmd)
     check_call(cmd, shell=True)
