@@ -54,7 +54,8 @@ def main():
           '--tunnel-server local  --sender-side remote --random-order ' \
           '--local-addr ' + sources[args.source] + ' ' + \
           '--local-info "%s" ' % args.source + \
-          '--remote-interface ppp0 --remote-info "%s"' % args.destination
+          '--remote-interface ppp0 --remote-info "%s" ' % args.destination + \
+          '--run-times 5'
 
     print(cmd)
     check_call(cmd, shell=True)
