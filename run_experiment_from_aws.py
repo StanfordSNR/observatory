@@ -55,7 +55,7 @@ def main():
           '--local-addr ' + sources[args.source] + ' ' + \
           '--local-info "%s" ' % args.source + \
           '--remote-interface ppp0 --remote-info "%s" ' % args.destination + \
-          '--run-times 5'
+          '--run-times 10'
 
     print(cmd)
     check_call(cmd, shell=True)
