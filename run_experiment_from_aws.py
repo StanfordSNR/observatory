@@ -57,8 +57,11 @@ def main():
           '--remote-interface ppp0 --remote-info "%s" ' % args.destination + \
           '--run-times 10'
 
-    print(cmd)
-    check_call(cmd, shell=True)
+    print(cmd + ' --run-only setup')
+    check_call(cmd + ' --run-only setup', shell=True)
+
+    print(cmd + ' --run-only test')
+    check_call(cmd + ' --run-only test', shell=True)
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
