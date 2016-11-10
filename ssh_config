@@ -1,0 +1,35 @@
+# ln -s ssh_config ~/.ssh/config
+# brazil
+Host 177.234.144.122
+    HostName 177.234.144.122
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
+
+# colombia
+Host 138.121.201.58
+    HostName 138.121.201.58
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
+
+# india
+Host 109.73.164.122
+    HostName 109.73.164.122
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
+
+# mexico
+Host 143.255.56.146
+    HostName 143.255.56.146
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
+
+# stanford
+Host 171.66.3.239
+    HostName 171.66.3.239
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
