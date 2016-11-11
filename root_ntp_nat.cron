@@ -1,0 +1,4 @@
+# this is for interface em1
+@reboot iptables -t nat -A POSTROUTING -p udp --sport 123 -o em1 -j SNAT --to-source :1123
+@reboot sudo iptables -t nat -A PREROUTING -p udp --dport 1123 -i em1 -j DNAT --to-destination :123
+
