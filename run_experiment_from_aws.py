@@ -69,7 +69,7 @@ def main():
              + '/'
     src_file = date + '_logs.xz'
     dst_file = s3_url + src_file
-    check_call('tar caf ' + src_file + ' *.log', shell=True)
+    check_call('tar caf ' + src_file + ' *.log *.json', shell=True)
     check_call('aws s3 cp ' + src_file + ' ' + dst_file, shell=True)
 
     src_file = os.path.join(test_dir, 'pantheon_report.pdf')
