@@ -37,14 +37,6 @@ def main():
             ), "pantheon versions differ between local (%s) and remote (%s)" \
         % (local_head[:-1], remote_head[:-1])
 
-    local_submodules = check_output(['git', 'submodule', 'summary'])
-    remote_submodules = check_output(['ssh', destinations[args.destination],
-                                      'git', '-C', 'pantheon', 'submodule',
-                                      'summary'])
-    assert (local_submodules == remote_submodules
-            ), "pantheon submodule versions differ between local and remote " \
-               "repositories"
-
     check_call('rm -f *.log', shell=True)
     check_call('rm -f *.pdf', shell=True)
     check_call('rm -f *.png', shell=True)
