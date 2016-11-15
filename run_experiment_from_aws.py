@@ -13,11 +13,11 @@ sources = {
 }
 
 destinations = {
-    'stanford': 'greg@171.66.3.239',
-    'brazil': 'pi@177.234.144.122',
-    'colombia': 'pi@138.121.201.58',
-    'india': 'pi@109.73.164.122',
-    'mexico': 'pi@143.255.56.146'
+    'Stanford': 'greg@171.66.3.239',
+    'Brazil': 'pi@177.234.144.122',
+    'Colombia': 'pi@138.121.201.58',
+    'India': 'pi@109.73.164.122',
+    'Mexico': 'pi@143.255.56.146'
 }
 
 
