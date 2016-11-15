@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, check_call, check_output
 import argparse
 
 sources = {
-    'aws brazil': '52.67.123.5',
+    'AWS Brazil': '52.67.203.197',
     'aws california': '52.9.40.135',
 }
 
