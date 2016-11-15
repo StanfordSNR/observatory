@@ -59,7 +59,7 @@ def main():
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     s3_url = 's3://stanford-pantheon/real-world-results/' + args.destination \
              + '/'
-    src_file = date + '_logs.xz'
+    src_file = date + '_logs.tar.xz'
     dst_file = s3_url + src_file
     check_call('tar caf ' + src_file + ' *.log *.json', shell=True)
     check_call('aws s3 cp ' + src_file + ' ' + dst_file, shell=True)
