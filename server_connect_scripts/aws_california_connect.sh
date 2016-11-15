@@ -1,1 +1,1 @@
-mosh ubuntu@52.9.40.135
+mosh ubuntu@52.52.80.245

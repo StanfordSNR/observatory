@@ -9,7 +9,7 @@ import argparse
 
 sources = {
     'AWS Brazil': '52.67.203.197',
-    'aws california': '52.9.40.135',
+    'AWS California': '52.52.80.245',
 }
 
 destinations = {
