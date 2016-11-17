@@ -16,9 +16,15 @@ while : ; do
         echo "no huawei devices found"
         sleep 5s
     done
-    sleep 5s
-    /home/pi/observatory_box_scripts/cellular/generic_huawei_modeswitch.sh
-    sleep 10s
+
+
+    # run modeswitch if Huawei device not in modem mode
+    if ! lsusb | grep -i "1506 Huawei"; then
+        sleep 10s
+        /home/pi/observatory_box_scripts/cellular/generic_huawei_modeswitch.sh
+    fi
+
+    sleep 20s
     # run wvdial command supplied by user
     $1
 done
