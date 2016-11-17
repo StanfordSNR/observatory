@@ -19,5 +19,6 @@ while : ; do
     sleep 5s
     /home/pi/observatory_box_scripts/cellular/generic_huawei_modeswitch.sh
     sleep 10s
+    # run wvdial command supplied by user
     $1
 done
