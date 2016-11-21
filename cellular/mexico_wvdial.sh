@@ -1,1 +1,1 @@
-wvdial --config=wvdial.conf telcel_mexico
+wvdial --config=wvdial.conf telcel_mexico &

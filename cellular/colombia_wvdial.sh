@@ -1,1 +1,1 @@
-wvdial --config=wvdial.conf claro_colombia
+wvdial --config=wvdial.conf claro_colombia &

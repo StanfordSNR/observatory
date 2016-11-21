@@ -1,1 +1,1 @@
-wvdial --config=wvdial.conf tim_brazil
+wvdial --config=wvdial.conf tim_brazil &

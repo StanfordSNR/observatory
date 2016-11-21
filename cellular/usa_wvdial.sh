@@ -1,1 +1,1 @@
-wvdial --config=wvdial.conf tmobile_usa
+wvdial --config=wvdial.conf tmobile_usa &
