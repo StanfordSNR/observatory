@@ -1,0 +1,3 @@
+# /etc/ppp/peers/tsinghua
+file /etc/ppp/options_observatory
+connect "/usr/sbin/chat -v -f /etc/chatscripts/tsinghua.chat"

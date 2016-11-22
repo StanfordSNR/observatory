@@ -1,0 +1,5 @@
+# /etc/ppp/peers/mexico
+file /etc/ppp/options_observatory
+user "webgprs"
+password "webgprs2002"
+connect "/usr/sbin/chat -v -f /etc/chatscripts/mexico.chat"

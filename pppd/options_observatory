@@ -1,0 +1,9 @@
+# /etc/ppp/options_observatory
+ttyUSB0
+115200
+noipdefault
+usepeerdns
+defaultroute
+persist
+noauth
+lock
