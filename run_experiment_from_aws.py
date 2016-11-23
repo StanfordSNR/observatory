@@ -13,7 +13,7 @@ sources = {
 }
 
 destinations = {
-    'Stanford': 'pi@171.66.3.239',
+    'Stanford': 'pi@171.66.3.235',
     'Brazil': 'pi@177.234.144.122',
     'Colombia': 'pi@138.121.201.58',
     'India': 'pi@109.73.164.122',
