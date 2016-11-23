@@ -37,10 +37,7 @@ def main():
             ), "pantheon versions differ between local (%s) and remote (%s)" \
         % (local_head[:-1], remote_head[:-1])
 
-    check_call('rm -f *.log', shell=True)
-    check_call('rm -f *.pdf', shell=True)
-    check_call('rm -f *.png', shell=True)
-    check_call('rm -f *.xz ', shell=True)
+    check_call('rm -f *.log *.json', shell=True)
 
     cmd = './run.py -t 30 -r ' + destinations[args.destination] + ':pantheon '\
           '--tunnel-server local  --sender-side remote --random-order ' \
@@ -67,7 +64,7 @@ def main():
     check_call('tar caf ' + src_archive + ' ' + src_dir, shell=True)
 
     dst_file = s3_url + src_archive
-    check_call('aws s3 cp ' + src_archive+ ' ' + dst_file, shell=True)
+    check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
 
     print('file uploaded to: ' + dst_file)
 
