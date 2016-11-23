@@ -59,10 +59,15 @@ def main():
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     s3_url = 's3://stanford-pantheon/real-world-results/' + args.destination \
              + '/'
-    src_file = date + '_logs.tar.xz'
-    dst_file = s3_url + src_file
-    check_call('tar caf ' + src_file + ' *.log *.json', shell=True)
-    check_call('aws s3 cp ' + src_file + ' ' + dst_file, shell=True)
+    src_dir = date + '_logs'
+    check_call(['mkdir', src_dir])
+    check_call('mv *.log *.json ' + src_dir, shell=True)
+
+    src_archive = src_dir + '.tar.xz'
+    check_call('tar caf ' + src_archive + ' ' + src_dir, shell=True)
+
+    dst_file = s3_url + src_archive
+    check_call('aws s3 cp ' + src_archive+ ' ' + dst_file, shell=True)
 
     print('file uploaded to: ' + dst_file)
 
