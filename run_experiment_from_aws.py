@@ -64,9 +64,7 @@ def main():
     check_call('tar caf ' + src_file + ' *.log *.json', shell=True)
     check_call('aws s3 cp ' + src_file + ' ' + dst_file, shell=True)
 
-    src_file = os.path.join(test_dir, 'pantheon_report.pdf')
-    dst_file = s3_url + date + '_report.pdf'
-    check_call('aws s3 cp ' + src_file + ' ' + dst_file, shell=True)
+    print('file uploaded to: ' + dst_file)
 
 if __name__ == '__main__':
     main()
