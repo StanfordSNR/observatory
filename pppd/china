@@ -1,0 +1,3 @@
+# /etc/ppp/peers/china
+file /etc/ppp/options_observatory
+connect "/usr/sbin/chat -v -f /etc/chatscripts/china.chat"
