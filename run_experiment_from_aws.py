@@ -17,7 +17,7 @@ destinations = {
     'Brazil': 'pi@177.234.144.122',
     'Colombia': 'pi@138.121.201.58',
     'India': 'pi@109.73.164.122',
-    'Mexico': 'pi@143.255.56.146'
+    'Mexico': 'pi@143.255.56.146',
     'China': 'yanyu@101.6.97.145'
 }
 
