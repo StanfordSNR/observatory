@@ -50,9 +50,9 @@ def main():
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     s3_url = 's3://stanford-pantheon/real-world-results/%s/' % args.destination
-    src_dir = date + '_logs'
+    src_dir = date + '-logs'
     check_call(['mkdir', src_dir])
-    check_call('mv *.log *.json *.pdf' + src_dir, shell=True)
+    check_call('mv *.log *.json *.pdf ' + src_dir, shell=True)
 
     src_archive = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_archive + ' ' + src_dir, shell=True)
