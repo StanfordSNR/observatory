@@ -1,7 +1,7 @@
-#! /bin/bash -x
+#!/bin/sh -x
 
 sudo apt-get update
 sudo apt-get -y dist-upgrade
-sudo apt-get install -y traceroute mosh dnsutils python-dev python-pip ntp ntpdate awscli
+sudo apt-get -yq --force-yes install traceroute mosh dnsutils python-dev \
+             python-pip ntp ntpdate awscli python-matplotlib
 sudo pip install requests
-sudo pip install matplotlib

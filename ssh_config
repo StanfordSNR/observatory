@@ -1,4 +1,6 @@
-# mkdir -p ~/.ssh/controlmasters && ln -s ~/observatory_box_scripts/ssh_config ~/.ssh/config
+# mkdir -p ~/.ssh/controlmasters
+# ln -s ~/observatory_box_scripts/ssh_config ~/.ssh/config
+
 # brazil
 Host 177.234.144.122
     HostName 177.234.144.122
