@@ -1,3 +1,1 @@
-echo "not a truly static ip, might fail"
-mosh pi@171.66.3.235
-
+mosh pi@171.67.76.32
