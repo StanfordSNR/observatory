@@ -55,7 +55,7 @@ def main():
     check_call('mv *.log *.json ' + src_dir, shell=True)
 
     src_archive = src_dir + '.tar.xz'
-    check_call('tar caf ' + src_archive + ' ' + src_dir, shell=True)
+    check_call('tar cJf ' + src_archive + ' ' + src_dir, shell=True)
 
     dst_file = s3_url + src_archive
     check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
