@@ -33,20 +33,18 @@ def main():
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
-
     check_call('rm -f *.log *.json', shell=True)
 
-    cmd = './run.py -t 30 -r ' + destinations[args.destination] + ':pantheon '\
-          '--tunnel-server local  --sender-side remote --random-order ' \
-          '--local-addr ' + sources[args.source] + ' ' + \
-          '--local-info "%s" ' % args.source + \
-          '--remote-interface ppp0 --remote-info "%s" ' % args.destination + \
-          '--run-times %s' % args.run_times
+    cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
+           '--local-addr %s --sender-side remote --remote-interface ppp0 '
+           '--local-info "%s" --remote-info "%s" --random-order --run-times %s'
+           % (destinations[args.destination], sources[args.source],
+              args.source, args.destination, args.run_times))
 
-    print(cmd + ' --run-only setup')
+    sys.stderr.write(cmd + ' --run-only setup\n')
     check_call(cmd + ' --run-only setup', shell=True)
 
-    print(cmd + ' --run-only test')
+    sys.stderr.write(cmd + ' --run-only test\n')
     check_call(cmd + ' --run-only test', shell=True)
 
     date = datetime.utcnow()
