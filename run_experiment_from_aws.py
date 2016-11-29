@@ -33,7 +33,7 @@ def main():
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
-    check_call('rm -f *.log *.json', shell=True)
+    check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp', shell=True)
 
     cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
            '--local-addr %s --sender-side remote --remote-interface ppp0 '
@@ -52,7 +52,7 @@ def main():
     s3_url = 's3://stanford-pantheon/real-world-results/%s/' % args.destination
     src_dir = date + '_logs'
     check_call(['mkdir', src_dir])
-    check_call('mv *.log *.json ' + src_dir, shell=True)
+    check_call('mv *.log *.json *.pdf' + src_dir, shell=True)
 
     src_archive = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_archive + ' ' + src_dir, shell=True)
@@ -61,6 +61,7 @@ def main():
     check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
 
     sys.stderr.write('file uploaded to: %s\n' % dst_file)
+
 
 if __name__ == '__main__':
     main()
