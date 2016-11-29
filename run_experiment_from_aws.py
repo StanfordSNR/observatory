@@ -7,23 +7,22 @@ from datetime import datetime
 from subprocess import Popen, PIPE, check_call, check_output
 import argparse
 
-sources = {
-    'AWS Brazil': '52.67.203.197',
-    'AWS California': '52.52.80.245',
-    'AWS Korea': '52.79.43.78',
-}
-
-destinations = {
-    'Stanford': 'pi@171.67.76.32',
-    'Brazil': 'pi@177.234.144.122',
-    'Colombia': 'pi@138.121.201.58',
-    'India': 'pi@109.73.164.122',
-    'Mexico': 'pi@143.255.56.146',
-    'China': 'yanyu@101.6.97.145'
-}
-
 
 def main():
+    sources = {
+        'AWS Brazil': '52.67.203.197',
+        'AWS California': '52.52.80.245',
+        'AWS Korea': '52.79.43.78',
+    }
+
+    destinations = {
+        'Stanford': 'pi@171.67.76.32',
+        'Brazil': 'pi@177.234.144.122',
+        'Colombia': 'pi@138.121.201.58',
+        'Mexico': 'pi@143.255.56.146',
+        'China': 'yanyu@101.6.97.145'
+    }
+
     parser = argparse.ArgumentParser()
     parser.add_argument('source', type=str, choices=sources.keys())
     parser.add_argument('destination', type=str, choices=destinations.keys())
