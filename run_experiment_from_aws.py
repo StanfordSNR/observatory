@@ -27,6 +27,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('source', type=str, choices=sources.keys())
     parser.add_argument('destination', type=str, choices=destinations.keys())
+    parser.add_argument(
+            '--run-times', metavar='TIMES', action='store', dest='run_times',
+            type=int, default=1, help='run times of each test')
     args = parser.parse_args()
 
     test_dir = os.path.expanduser('~/pantheon/test/')
@@ -46,7 +49,7 @@ def main():
           '--local-addr ' + sources[args.source] + ' ' + \
           '--local-info "%s" ' % args.source + \
           '--remote-interface ppp0 --remote-info "%s" ' % args.destination + \
-          '--run-times 10'
+          '--run-times %s' % args.run_times
 
     print(cmd + ' --run-only setup')
     check_call(cmd + ' --run-only setup', shell=True)
