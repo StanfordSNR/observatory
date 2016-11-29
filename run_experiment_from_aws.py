@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import sys
 import os
+import sys
+import argparse
 from os import path
 from datetime import datetime
 from subprocess import Popen, PIPE, check_call, check_output
-import argparse
 
 
 def main():
@@ -33,13 +33,6 @@ def main():
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
-
-    local_head = check_output(['git', 'rev-parse', 'HEAD'])
-    remote_head = check_output(['ssh', destinations[args.destination], 'git',
-                                '-C', 'pantheon', 'rev-parse', 'HEAD'])
-    assert (local_head == remote_head
-            ), "pantheon versions differ between local (%s) and remote (%s)" \
-        % (local_head[:-1], remote_head[:-1])
 
     check_call('rm -f *.log *.json', shell=True)
 
