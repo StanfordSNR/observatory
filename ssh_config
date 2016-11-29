@@ -28,8 +28,15 @@ Host 143.255.56.146
     ControlPersist 5m
 
 # stanford
-Host 171.66.3.239
-    HostName 171.66.3.239
+Host 171.67.76.32
+    HostName 171.67.76.32
+    ControlPath ~/.ssh/controlmasters/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 5m
+
+# china
+Host 101.6.97.145
+    HostName 101.6.97.145
     ControlPath ~/.ssh/controlmasters/%r@%h:%p
     ControlMaster auto
     ControlPersist 5m
