@@ -1,6 +1,6 @@
 # /etc/ppp/options_observatory
 ttyUSB0
-115200
+921600
 noipdefault
 usepeerdns
 defaultroute
