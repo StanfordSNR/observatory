@@ -5,7 +5,7 @@ import sys
 import argparse
 from os import path
 from datetime import datetime
-from subprocess import Popen, PIPE, check_call, check_output
+from subprocess import check_call
 
 
 def main():
@@ -49,8 +49,7 @@ def main():
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
-    s3_url = 's3://stanford-pantheon/real-world-results/' + args.destination \
-             + '/'
+    s3_url = 's3://stanford-pantheon/real-world-results/%s/' % args.destination
     src_dir = date + '_logs'
     check_call(['mkdir', src_dir])
     check_call('mv *.log *.json ' + src_dir, shell=True)
@@ -61,7 +60,7 @@ def main():
     dst_file = s3_url + src_archive
     check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
 
-    print('file uploaded to: ' + dst_file)
+    sys.stderr.write('file uploaded to: %s\n' % dst_file)
 
 if __name__ == '__main__':
     main()
