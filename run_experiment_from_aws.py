@@ -16,7 +16,7 @@ def main():
     }
 
     destinations = {
-        'Stanford': 'pi@171.67.76.32',
+        'Stanford': 'pi@171.66.3.65',
         'Brazil': 'pi@177.234.144.122',
         'Colombia': 'pi@138.121.201.58',
         'Mexico': 'pi@143.255.56.146',
