@@ -52,7 +52,7 @@ def main():
     s3_url = 's3://stanford-pantheon/real-world-results/%s/' % args.destination
     src_dir = date + '-logs'
     check_call(['mkdir', src_dir])
-    check_call('mv *.log *.json ' + src_dir, shell=True)
+    check_call('cp *.log *.json ' + src_dir, shell=True)
 
     src_archive = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_archive + ' ' + src_dir, shell=True)
@@ -61,6 +61,7 @@ def main():
     check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
 
     sys.stderr.write('file uploaded to: %s\n' % dst_file)
+    check_call(['rm', '-rf', src_dir, src_archive])
 
 
 if __name__ == '__main__':
