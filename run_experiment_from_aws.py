@@ -3,6 +3,7 @@
 import os
 import sys
 import argparse
+from slack_post import slack_post
 from os import path
 from datetime import datetime
 from subprocess import check_call
@@ -42,6 +43,18 @@ def main():
         dest='remote_if', help='remote interface to run tunnel on')
     args = parser.parse_args()
 
+    if args.sender_side is 'remote':
+        experiment_text = "experiment uploading from %s to %s" % (args.remote,
+                                                                  args.local)
+    else:
+        experiment_text = "experiment uploading from %s to %s" % (args.local,
+                                                                  args.remote)
+    if args.remote_if:
+        experiment_text += " over interface %s" % args.remote_if
+
+    experiment_text += " repeating %d times" % args.run_times
+    slack_post("Running " + experiment_text + ".")
+
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
     check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp', shell=True)
@@ -62,19 +75,22 @@ def main():
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
-    s3_url = 's3://stanford-pantheon/real-world-results/%s/' % args.remote
+
     src_dir = date + '-logs'
     check_call(['mkdir', src_dir])
     check_call('cp *.log *.json ' + src_dir, shell=True)
 
-    src_archive = src_dir + '.tar.xz'
-    check_call('tar cJf ' + src_archive + ' ' + src_dir, shell=True)
+    src_tar = src_dir + '.tar.xz'
+    check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
 
-    dst_file = s3_url + src_archive
-    check_call('aws s3 cp ' + src_archive + ' ' + dst_file, shell=True)
+    s3_folder = '/real-world-results/%s/' % args.remote
+    s3_url = 's3://stanford-pantheon' + s3_folder + src_tar
+    check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
-    sys.stderr.write('file uploaded to: %s\n' % dst_file)
-    check_call(['rm', '-rf', src_dir, src_archive])
+    url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
+    slack_post("Logs archive of %s uploaded to <%s>" % (experiment_text, url))
+    sys.stderr.write('Logs archive uploaded to: %s\n' % url)
+    check_call(['rm', '-rf', src_dir, src_tar])
 
 
 if __name__ == '__main__':
