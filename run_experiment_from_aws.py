@@ -88,7 +88,11 @@ def main():
     check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
     url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
-    slack_post("Logs archive of %s uploaded to <%s>" % (experiment_text, url))
+    slack_text = ("Logs archive of %s uploaded to <%s>\n"
+                  "To generate report run: `pantheon/analyze/analyze.py "
+                  "--s3-link %s`" % (experiment_text, url, url))
+    slack_post(slack_text)
+
     sys.stderr.write('Logs archive uploaded to: %s\n' % url)
     check_call(['rm', '-rf', src_dir, src_tar])
 
