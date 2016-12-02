@@ -13,6 +13,7 @@ def main():
         'AWS Brazil': '52.67.203.197',
         'AWS California': '52.52.80.245',
         'AWS Korea': '52.79.43.78',
+        'AWS India': '35.154.48.15',
     }
 
     remote_sides = {
