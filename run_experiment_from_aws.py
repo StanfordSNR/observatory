@@ -24,6 +24,7 @@ def main():
         'Mexico': 'pi@143.255.56.146',
         'China': 'yanyu@101.6.97.145',
         'Nepal': 'nepal6',  # uses ssh alias, currently only AWS India works
+        'India': 'pi@109.73.164.122',
     }
 
     parser = argparse.ArgumentParser()
