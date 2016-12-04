@@ -94,8 +94,8 @@ def main():
     check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
     url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
-    slack_text = ("Logs archive of %s uploaded to <%s>\n"
-                  "To generate report run: `pantheon/analyze/analyze.py "
+    slack_text = ("Logs archive of %s uploaded to:\n<%s>\n"
+                  "To generate report run:\n`pantheon/analyze/analyze.py "
                   "--s3-link %s`" % (experiment_title, url, url))
     slack_post(slack_text)
 
