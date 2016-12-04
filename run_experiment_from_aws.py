@@ -44,17 +44,22 @@ def main():
         dest='remote_if', help='remote interface to run tunnel on')
     args = parser.parse_args()
 
-    if args.sender_side is 'remote':
-        experiment_text = "experiment uploading from %s to %s" % (args.remote,
-                                                                  args.local)
-    else:
-        experiment_text = "experiment uploading from %s to %s" % (args.local,
-                                                                  args.remote)
-    if args.remote_if:
-        experiment_text += " over interface %s" % args.remote_if
 
-    experiment_text += " repeating %d times" % args.run_times
-    slack_post("Running " + experiment_text + ".")
+    if args.remote_if:
+        remote_text = '%s %s' % (args.remote, args.remote_if)
+    else:
+        remote_text = args.remote
+
+    if args.sender_side is 'remote':
+        uploader = remote_text
+        downloader = args.local
+    else:
+        uploader = args.local
+        downloader = remote_text
+
+    experiment_title = '%s to %s %d runs' % (uploader, downloader, args.run_times)
+
+    slack_post('Running experiment uploading from ' + experiment_text + ".")
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
@@ -77,7 +82,7 @@ def main():
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
 
-    src_dir = date + '-logs'
+    src_dir = '%s-%s-logs' % (date, experiment_title.replace(' ', '-'))
     check_call(['mkdir', src_dir])
     check_call('cp *.log *.json ' + src_dir, shell=True)
 
