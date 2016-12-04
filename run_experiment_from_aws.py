@@ -59,7 +59,7 @@ def main():
 
     experiment_title = '%s to %s %d runs' % (uploader, downloader, args.run_times)
 
-    slack_post('Running experiment uploading from ' + experiment_text + ".")
+    slack_post('Running experiment uploading from ' + experiment_title + ".")
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
@@ -96,7 +96,7 @@ def main():
     url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
     slack_text = ("Logs archive of %s uploaded to <%s>\n"
                   "To generate report run: `pantheon/analyze/analyze.py "
-                  "--s3-link %s`" % (experiment_text, url, url))
+                  "--s3-link %s`" % (experiment_title, url, url))
     slack_post(slack_text)
 
     sys.stderr.write('Logs archive uploaded to: %s\n' % url)
