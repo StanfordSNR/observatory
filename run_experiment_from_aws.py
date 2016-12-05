@@ -77,7 +77,11 @@ def main():
     check_call(cmd + ' --run-only setup', shell=True)
 
     sys.stderr.write(cmd + ' --run-only test\n')
-    check_call(cmd + ' --run-only test', shell=True)
+    try:
+        check_call(cmd + ' --run-only test', shell=True)
+    except:
+        experiment_title += ' FAILED'
+
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
