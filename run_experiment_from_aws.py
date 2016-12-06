@@ -89,6 +89,7 @@ def main():
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
+    date = date[:-3]  # strip seconds
 
     src_dir = '%s-%s-logs' % (date, experiment_title.replace(' ', '-'))
     check_call(['mkdir', src_dir])
