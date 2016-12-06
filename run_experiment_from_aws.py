@@ -74,7 +74,11 @@ def main():
         cmd += ' --remote-interface ' + args.remote_if
 
     sys.stderr.write(cmd + ' --run-only setup\n')
-    check_call(cmd + ' --run-only setup', shell=True)
+    try:
+        check_call(cmd + ' --run-only setup', shell=True)
+    except:
+        slack_post('Experiment uploading from ' + experiment_title + " failed during setup phase.")
+        return
 
     sys.stderr.write(cmd + ' --run-only test\n')
     try:
