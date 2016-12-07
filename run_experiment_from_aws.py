@@ -42,7 +42,10 @@ def main():
     parser.add_argument(
         '--remote-interface', metavar='INTERFACE', action='store',
         dest='remote_if', help='remote interface to run tunnel on')
-    parser.add_argument('--no-setup', action='store_true', help='skip running setup of schemes')
+    parser.add_argument(
+        '--no-setup', action='store_true',
+        help='skip running setup of schemes')
+    parser.add_argument('--skip-analysis', action='store_true', help='skip running setup of schemes')
     args = parser.parse_args()
 
 
@@ -87,13 +90,15 @@ def main():
         check_call(cmd + ' --run-only test', shell=True)
     except:
         experiment_title += ' FAILED'
+        args.skip_analysis = False
 
 
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     date = date[:-3]  # strip seconds
 
-    src_dir = '%s-%s-logs' % (date, experiment_title.replace(' ', '-'))
+    experiment_file_prefix = '%s-%s' % (date, experiment_title.replace(' ', '-'))
+    src_dir = '%s-logs' % experiment_file_prefix
     check_call(['mkdir', src_dir])
     check_call('mv *.log *.json ' + src_dir, shell=True)
 
@@ -111,6 +116,16 @@ def main():
     slack_post(slack_text)
 
     sys.stderr.write('Logs archive uploaded to: %s\n' % url)
+
+    if not args.skip_analysis:
+        cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
+        check_call(cmd, shell=True)
+        local_pdf = '%s/pantheon_report.pdf' % src_dir
+        s3_pdf = '%s%s_report.pdf' % (s3_folder + experiment_file_prefix)
+        check_call(['aws', 's3', 'cp', local_pdf, s3_pdf])
+        slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, s3_pdf)
+        slack_post(slack_text)
+
     check_call(['rm', '-rf', src_dir, src_tar])
 
 
