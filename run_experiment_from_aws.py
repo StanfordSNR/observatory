@@ -47,6 +47,9 @@ def main():
     parser.add_argument(
         '--skip-analysis', action='store_true',
         help='skip running setup of schemes')
+    parser.add_argument(
+        '--no-git-pull', action='store_true',
+        help='skip updating pantheon repo on local and remote sides')
     args = parser.parse_args()
 
     if args.remote_if:
@@ -64,12 +67,29 @@ def main():
     experiment_title = '%s to %s %d runs' % (uploader, downloader,
                                              args.run_times)
 
-    slack_post('Running experiment uploading from %s.' % experiment_title)
-
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
+
+    # Update pantheon git repos on both sides
+    if not args.no_git_pull:
+        try:
+            check_call('git pull --ff-only', shell=True)
+            check_call('git submodule update --init --recursive', shell=True)
+            # assumption pantheon directory is in ~ on remote side
+            remote = remote_sides[args.remote]
+            remote_git_prefix = 'ssh %s git -C pantheon ' % remote
+            check_call(remote_git_prefix + 'pull --ff-only', shell=True)
+            check_call(remote_git_prefix +
+                       'submodule update --init --recursive', shell=True)
+        except:
+            slack_post('Experiment uploading from ' + experiment_title +
+                       ' failed during git update phase.')
+            return
+
     # Clean up test directory
     check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp', shell=True)
+
+    slack_post('Running experiment uploading from %s.' % experiment_title)
 
     cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
            '--local-addr %s --sender-side %s --local-info "%s" '
