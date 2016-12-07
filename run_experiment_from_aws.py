@@ -50,26 +50,31 @@ def main():
     parser.add_argument(
         '--no-git-pull', action='store_true',
         help='skip updating pantheon repo on local and remote sides')
+    parser.add_argument(
+        '--bidirectional', action='store_true',
+        help='run both --sender-side remote and --sender-side local, '
+             'using --sender-side defines which experiment runs first')
     args = parser.parse_args()
 
     if args.remote_if:
-        remote_text = '%s %s' % (args.remote, args.remote_if)
+        remote_txt = '%s %s' % (args.remote, args.remote_if)
     else:
-        remote_text = args.remote
+        remote_txt = args.remote
 
     if args.sender_side is 'remote':
-        uploader = remote_text
-        downloader = args.local
+        senders_to_run = ['remote']
+        if args.bidirectional:
+            senders_to_run.append('local')
     else:
-        uploader = args.local
-        downloader = remote_text
-
-    experiment_title = '%s to %s %d runs' % (uploader, downloader,
-                                             args.run_times)
+        senders_to_run = ['local']
+        if args.bidirectional:
+            senders_to_run.append('remote')
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
 
+    experiment_meta_txt = 'Experiment between %s and %s ' % (args.local,
+                                                             args.remote)
     # Update pantheon git repos on both sides
     if not args.no_git_pull:
         try:
@@ -82,101 +87,112 @@ def main():
             check_call(remote_git_prefix +
                        'submodule update --init --recursive', shell=True)
         except:
-            slack_post('Experiment uploading from ' + experiment_title +
-                       ' failed during git update phase.')
+            slack_post(experiment_meta_txt + 'failed during git update phase.')
             return
 
-    # Clean up test directory
-    check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp', shell=True)
-
-    slack_post('Running experiment uploading from %s.' % experiment_title)
-
-    cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
-           '--local-addr %s --sender-side %s --local-info "%s" '
-           '--remote-info "%s" --random-order --run-times %s'
-           % (remote_sides[args.remote], local_sides[args.local],
-              args.sender_side, args.local, args.remote, args.run_times))
+    common_cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
+                  '--local-addr %s --local-info "%s" '
+                  '--remote-info "%s" --random-order --run-times %s'
+                  % (remote_sides[args.remote], local_sides[args.local],
+                     args.local, args.remote, args.run_times))
     if args.remote_if:
-        cmd += ' --remote-interface ' + args.remote_if
+        common_cmd += ' --remote-interface ' + args.remote_if
 
     # Run setup
     if not args.no_setup:
-        sys.stderr.write(cmd + ' --run-only setup\n')
+        sys.stderr.write(common_cmd + ' --run-only setup\n')
         try:
-            check_call(cmd + ' --run-only setup', shell=True)
+            check_call(common_cmd + ' --run-only setup', shell=True)
         except:
-            slack_post('Experiment uploading from ' + experiment_title +
-                       ' failed during setup phase.')
+            slack_post(experiment_meta_txt + 'failed during setup phase.')
             return
 
-    # Run Test
-    sys.stderr.write(cmd + ' --run-only test\n')
-    try:
-        check_call(cmd + ' --run-only test', shell=True)
-    except:
-        experiment_title += ' FAILED'
-        args.skip_analysis = False
+    for sender_side in senders_to_run:
+        if sender_side is 'remote':
+            uploader = remote_txt
+            downloader = args.local
+        else:
+            uploader = args.local
+            downloader = remote_txt
 
-    # Pack logs in archive and upload to S3
-    date = datetime.utcnow()
-    date = date.replace(microsecond=0).isoformat().replace(':', '-')
-    date = date[:-3]  # strip seconds
+        experiment_title = '%s to %s %d runs' % (uploader, downloader,
+                                                 args.run_times)
 
-    experiment_file_prefix = '%s-%s' % (date,
-                                        experiment_title.replace(' ', '-'))
-    src_dir = '%s-logs' % experiment_file_prefix
-    check_call(['mkdir', src_dir])
-    check_call('mv *.log *.json ' + src_dir, shell=True)
+        # Clean up test directory
+        check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
+                   shell=True)
 
-    src_tar = src_dir + '.tar.xz'
-    check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
+        slack_post('Running experiment uploading from %s.' % experiment_title)
 
-    s3_base = 's3://stanford-pantheon/'
-    s3_folder = 'real-world-results/%s/' % args.remote
-    s3_url = s3_base + s3_folder + src_tar
-    check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
+        cmd = common_cmd + ' --sender-side ' + sender_side
+        # Run Test
+        sys.stderr.write(cmd + ' --run-only test\n')
+        try:
+            check_call(cmd + ' --run-only test', shell=True)
+        except:
+            experiment_title += ' FAILED'
+            args.skip_analysis = False
 
-    http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
-    http_url = http_base + s3_folder + src_tar
-    slack_text = ('Logs archive of %s uploaded to:\n<%s>\n'
-                  'To generate report run:\n`pantheon/analyze/analyze.py '
-                  '--s3-link %s`' % (experiment_title, http_url, http_url))
-    slack_post(slack_text)
+        # Pack logs in archive and upload to S3
+        date = datetime.utcnow()
+        date = date.replace(microsecond=0).isoformat().replace(':', '-')
+        date = date[:-3]  # strip seconds
 
-    sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
+        experiment_file_prefix = '%s-%s' % (date,
+                                            experiment_title.replace(' ', '-'))
+        src_dir = '%s-logs' % experiment_file_prefix
+        check_call(['mkdir', src_dir])
+        check_call('mv *.log *.json ' + src_dir, shell=True)
 
-    # Perform analysis and upload results to S3
-    if not args.skip_analysis:
-        cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
-        check_call(cmd, shell=True)
+        src_tar = src_dir + '.tar.xz'
+        check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
 
-        local_pdf = '%s/pantheon_report.pdf' % src_dir
-        s3_analysis_folder = s3_folder + 'reports/'
-        s3_pdf = experiment_file_prefix + '_report.pdf'
-        s3_url = s3_base + s3_analysis_folder + s3_pdf
-        check_call(['aws', 's3', 'cp', local_pdf, s3_url])
+        s3_base = 's3://stanford-pantheon/'
+        s3_folder = 'real-world-results/%s/' % args.remote
+        s3_url = s3_base + s3_folder + src_tar
+        check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
-        http_url = http_base + s3_analysis_folder + s3_pdf
-        slack_text = 'Analysis of %s uploaded to:\n<%s>\n' % (experiment_title,
-                                                              http_url)
-        slack_post(slack_text)
+        http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
+        http_url = http_base + s3_folder + src_tar
+        slack_txt = ('Logs archive of %s uploaded to:\n<%s>\n'
+                     'To generate report run:\n`pantheon/analyze/analyze.py '
+                     '--s3-link %s`' % (experiment_title, http_url, http_url))
+        slack_post(slack_txt)
 
-        imgs_to_upload = ['pantheon_summary.png']
-        # Don't post summary means chart if there is only one run
-        if args.run_times > 1:
-            imgs_to_upload.append('pantheon_summary_mean.png')
+        sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
 
-        for img in imgs_to_upload:
-            local_img = '%s/%s' % (src_dir, img)
-            s3_img = experiment_file_prefix + '_' + img
-            s3_url = s3_base + s3_analysis_folder + s3_img
-            check_call(['aws', 's3', 'cp', local_img, s3_url])
-            img_title = '%s from %s' % (img, experiment_title)
-            http_url = http_base + s3_analysis_folder + s3_img
-            slack_post_img(img_title, http_url)
+        # Perform analysis and upload results to S3
+        if not args.skip_analysis:
+            cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
+            check_call(cmd, shell=True)
 
-    # Clean up files generated
-    check_call(['rm', '-rf', src_dir, src_tar])
+            local_pdf = '%s/pantheon_report.pdf' % src_dir
+            s3_analysis_folder = s3_folder + 'reports/'
+            s3_pdf = experiment_file_prefix + '_report.pdf'
+            s3_url = s3_base + s3_analysis_folder + s3_pdf
+            check_call(['aws', 's3', 'cp', local_pdf, s3_url])
+
+            http_url = http_base + s3_analysis_folder + s3_pdf
+            slack_txt = 'Analysis of %s uploaded to:' % experiment_title
+            slack_txt += '\n<%s>\n' % http_url
+            slack_post(slack_txt)
+
+            imgs_to_upload = ['pantheon_summary.png']
+            # Don't post summary means chart if there is only one run
+            if args.run_times > 1:
+                imgs_to_upload.append('pantheon_summary_mean.png')
+
+            for img in imgs_to_upload:
+                local_img = '%s/%s' % (src_dir, img)
+                s3_img = experiment_file_prefix + '_' + img
+                s3_url = s3_base + s3_analysis_folder + s3_img
+                check_call(['aws', 's3', 'cp', local_img, s3_url])
+                img_title = '%s from %s' % (img, experiment_title)
+                http_url = http_base + s3_analysis_folder + s3_img
+                slack_post_img(img_title, http_url)
+
+        # Clean up files generated
+        check_call(['rm', '-rf', src_dir, src_tar])
 
 
 if __name__ == '__main__':
