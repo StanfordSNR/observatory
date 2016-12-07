@@ -95,7 +95,7 @@ def main():
 
     src_dir = '%s-%s-logs' % (date, experiment_title.replace(' ', '-'))
     check_call(['mkdir', src_dir])
-    check_call('cp *.log *.json ' + src_dir, shell=True)
+    check_call('mv *.log *.json ' + src_dir, shell=True)
 
     src_tar = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
