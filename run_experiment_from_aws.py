@@ -42,7 +42,7 @@ def main():
     parser.add_argument(
         '--remote-interface', metavar='INTERFACE', action='store',
         dest='remote_if', help='remote interface to run tunnel on')
-    parser.add_argument('--no-setup', action='store_false', help='skip running setup of schemes')
+    parser.add_argument('--no-setup', action='store_true', help='skip running setup of schemes')
     args = parser.parse_args()
 
 
