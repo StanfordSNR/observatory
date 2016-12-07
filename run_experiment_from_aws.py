@@ -3,7 +3,7 @@
 import os
 import sys
 import argparse
-from slack_post import slack_post
+from slack_post import slack_post, slack_post_img
 from os import path
 from datetime import datetime
 from subprocess import check_call
