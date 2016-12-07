@@ -117,7 +117,7 @@ def main():
                   "--s3-link %s`" % (experiment_title, http_url, http_url))
     slack_post(slack_text)
 
-    sys.stderr.write('Logs archive uploaded to: %s\n' % url)
+    sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
 
     if not args.skip_analysis:
         cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
