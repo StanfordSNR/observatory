@@ -42,6 +42,7 @@ def main():
     parser.add_argument(
         '--remote-interface', metavar='INTERFACE', action='store',
         dest='remote_if', help='remote interface to run tunnel on')
+    parser.add_argument('--no-setup', action='store_false', help='skip running setup of schemes')
     args = parser.parse_args()
 
 
@@ -73,12 +74,13 @@ def main():
     if args.remote_if:
         cmd += ' --remote-interface ' + args.remote_if
 
-    sys.stderr.write(cmd + ' --run-only setup\n')
-    try:
-        check_call(cmd + ' --run-only setup', shell=True)
-    except:
-        slack_post('Experiment uploading from ' + experiment_title + " failed during setup phase.")
-        return
+    if not args.no_setup:
+        sys.stderr.write(cmd + ' --run-only setup\n')
+        try:
+            check_call(cmd + ' --run-only setup', shell=True)
+        except:
+            slack_post('Experiment uploading from ' + experiment_title + " failed during setup phase.")
+            return
 
     sys.stderr.write(cmd + ' --run-only test\n')
     try:
