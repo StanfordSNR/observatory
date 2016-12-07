@@ -3,10 +3,9 @@
 import os
 import sys
 import argparse
-from slack_post import slack_post, slack_post_img
-from os import path
 from datetime import datetime
 from subprocess import check_call
+from slack_post import slack_post, slack_post_img
 
 
 def main():
@@ -133,7 +132,7 @@ def main():
         slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, http_url)
         slack_post(slack_text)
 
-        imgs_to_upload = ['pantheon_summary.png'] 
+        imgs_to_upload = ['pantheon_summary.png']
         # Don't post summary means chart if there is only one run
         if args.run_times > 1:
             imgs_to_upload.append('pantheon_summary_mean.png')
