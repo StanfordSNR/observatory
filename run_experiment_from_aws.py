@@ -100,8 +100,8 @@ def main():
     src_tar = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
 
-    s3_folder = '/real-world-results/%s/' % args.remote
-    s3_url = 's3://stanford-pantheon' + s3_folder + src_tar
+    s3_folder = 's3://stanford-pantheon/real-world-results/%s/' % args.remote
+    s3_url = s3_folder + src_tar
     check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
     url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
