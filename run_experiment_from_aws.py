@@ -68,6 +68,7 @@ def main():
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
+    # Clean up test directory
     check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp', shell=True)
 
     cmd = ('./run.py -r %s:~/pantheon -t 30 --tunnel-server local '
@@ -78,6 +79,7 @@ def main():
     if args.remote_if:
         cmd += ' --remote-interface ' + args.remote_if
 
+    # Run setup
     if not args.no_setup:
         sys.stderr.write(cmd + ' --run-only setup\n')
         try:
@@ -87,6 +89,7 @@ def main():
                        ' failed during setup phase.')
             return
 
+    # Run Test
     sys.stderr.write(cmd + ' --run-only test\n')
     try:
         check_call(cmd + ' --run-only test', shell=True)
@@ -94,6 +97,7 @@ def main():
         experiment_title += ' FAILED'
         args.skip_analysis = False
 
+    # Pack logs in archive and upload to S3
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     date = date[:-3]  # strip seconds
@@ -121,6 +125,7 @@ def main():
 
     sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
 
+    # Perform analysis and upload results to S3
     if not args.skip_analysis:
         cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
         check_call(cmd, shell=True)
@@ -150,6 +155,7 @@ def main():
             http_url = http_base + s3_analysis_folder + s3_img
             slack_post_img(img_title, http_url)
 
+    # Clean up files generated
     check_call(['rm', '-rf', src_dir, src_tar])
 
 
