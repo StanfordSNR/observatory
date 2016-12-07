@@ -121,10 +121,23 @@ def main():
         cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
         check_call(cmd, shell=True)
         local_pdf = '%s/pantheon_report.pdf' % src_dir
-        s3_pdf = '%s%s_report.pdf' % (s3_folder + experiment_file_prefix)
+        s3_analysis_folder = '%s/reports/' % s3_folder
+        s3_pdf = '%s%s_report.pdf' % (s3_analysis_folder, experiment_file_prefix)
         check_call(['aws', 's3', 'cp', local_pdf, s3_pdf])
         slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, s3_pdf)
         slack_post(slack_text)
+
+        imgs_to_upload = ['pantheon_summary.png'] 
+        # Don't post summary means chart if there is only one run
+        if args.run_times > 1:
+            imgs_to_upload.append('pantheon_summary_mean.png')
+
+        for img in imgs_to_upload:
+            local_img = '%s/%s' % (src_dir, img)
+            s3_img = '%s%s%s' % (s3_analysis_folder, experiment_file_prefix, img)
+            check_call(['aws', 's3', 'cp', local_img, s3_img])
+            img_title = '%s from %s' % (img, experiment_title)
+            slack_post_img(img_title, s3_img)
 
     check_call(['rm', '-rf', src_dir, src_tar])
 
