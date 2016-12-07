@@ -73,8 +73,19 @@ def main():
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
 
-    experiment_meta_txt = 'Experiment between %s and %s ' % (args.local,
-                                                             args.remote)
+    experiment_meta_txt = 'Experiment between %s' % args.local
+    experiment_meta_txt += ' and %s with ' % args.remote
+    experiment_meta_txt += '%d runs per side ' % args.run_times
+
+    if args.no_git_pull and args.no_setup and not args.bidirectional:
+        # Post below should be enough in this case
+        pass
+    else:
+        slack_txt = 'Setting up '
+        if args.bidirectional:
+            slack_txt += 'bidirectional '
+        slack_post(slack_txt + 'e' + experiment_meta_txt[1:-1] + '.')
+
     # Update pantheon git repos on both sides
     if not args.no_git_pull:
         try:
