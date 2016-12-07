@@ -44,9 +44,10 @@ def main():
     parser.add_argument(
         '--no-setup', action='store_true',
         help='skip running setup of schemes')
-    parser.add_argument('--skip-analysis', action='store_true', help='skip running setup of schemes')
+    parser.add_argument(
+        '--skip-analysis', action='store_true',
+        help='skip running setup of schemes')
     args = parser.parse_args()
-
 
     if args.remote_if:
         remote_text = '%s %s' % (args.remote, args.remote_if)
@@ -60,9 +61,10 @@ def main():
         uploader = args.local
         downloader = remote_text
 
-    experiment_title = '%s to %s %d runs' % (uploader, downloader, args.run_times)
+    experiment_title = '%s to %s %d runs' % (uploader, downloader,
+                                             args.run_times)
 
-    slack_post('Running experiment uploading from ' + experiment_title + ".")
+    slack_post('Running experiment uploading from %s.' % experiment_title)
 
     test_dir = os.path.expanduser('~/pantheon/test/')
     os.chdir(test_dir)
@@ -81,7 +83,8 @@ def main():
         try:
             check_call(cmd + ' --run-only setup', shell=True)
         except:
-            slack_post('Experiment uploading from ' + experiment_title + " failed during setup phase.")
+            slack_post('Experiment uploading from ' + experiment_title +
+                       ' failed during setup phase.')
             return
 
     sys.stderr.write(cmd + ' --run-only test\n')
@@ -91,12 +94,12 @@ def main():
         experiment_title += ' FAILED'
         args.skip_analysis = False
 
-
     date = datetime.utcnow()
     date = date.replace(microsecond=0).isoformat().replace(':', '-')
     date = date[:-3]  # strip seconds
 
-    experiment_file_prefix = '%s-%s' % (date, experiment_title.replace(' ', '-'))
+    experiment_file_prefix = '%s-%s' % (date,
+                                        experiment_title.replace(' ', '-'))
     src_dir = '%s-logs' % experiment_file_prefix
     check_call(['mkdir', src_dir])
     check_call('mv *.log *.json ' + src_dir, shell=True)
@@ -111,9 +114,9 @@ def main():
 
     http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
     http_url = http_base + s3_folder + src_tar
-    slack_text = ("Logs archive of %s uploaded to:\n<%s>\n"
-                  "To generate report run:\n`pantheon/analyze/analyze.py "
-                  "--s3-link %s`" % (experiment_title, http_url, http_url))
+    slack_text = ('Logs archive of %s uploaded to:\n<%s>\n'
+                  'To generate report run:\n`pantheon/analyze/analyze.py '
+                  '--s3-link %s`' % (experiment_title, http_url, http_url))
     slack_post(slack_text)
 
     sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
@@ -129,7 +132,8 @@ def main():
         check_call(['aws', 's3', 'cp', local_pdf, s3_url])
 
         http_url = http_base + s3_analysis_folder + s3_pdf
-        slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, http_url)
+        slack_text = 'Analysis of %s uploaded to:\n<%s>\n' % (experiment_title,
+                                                              http_url)
         slack_post(slack_text)
 
         imgs_to_upload = ['pantheon_summary.png']
