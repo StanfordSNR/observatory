@@ -75,7 +75,7 @@ def main():
 
     experiment_meta_txt = 'Experiment between %s' % args.local
     experiment_meta_txt += ' and %s with ' % args.remote
-    experiment_meta_txt += '%d runs per side ' % args.run_times
+    experiment_meta_txt += '%d runs ' % args.run_times
 
     if args.no_git_pull and args.no_setup and not args.bidirectional:
         # Post below should be enough in this case
@@ -84,6 +84,7 @@ def main():
         slack_txt = 'Setting up '
         if args.bidirectional:
             slack_txt += 'bidirectional '
+            experiment_meta_txt += 'per side '
         slack_post(slack_txt + 'e' + experiment_meta_txt[1:-1] + '.')
 
     # Update pantheon git repos on both sides
