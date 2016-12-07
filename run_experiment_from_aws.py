@@ -105,14 +105,16 @@ def main():
     src_tar = src_dir + '.tar.xz'
     check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
 
-    s3_folder = 's3://stanford-pantheon/real-world-results/%s/' % args.remote
-    s3_url = s3_folder + src_tar
+    s3_base = 's3://stanford-pantheon/'
+    s3_folder = 'real-world-results/%s/' % args.remote
+    s3_url = s3_base + s3_folder + src_tar
     check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
 
-    url = 'https://stanford-pantheon.s3.amazonaws.com' + s3_folder + src_tar
+    http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
+    http_url = http_base + s3_folder + src_tar
     slack_text = ("Logs archive of %s uploaded to:\n<%s>\n"
                   "To generate report run:\n`pantheon/analyze/analyze.py "
-                  "--s3-link %s`" % (experiment_title, url, url))
+                  "--s3-link %s`" % (experiment_title, http_url, http_url))
     slack_post(slack_text)
 
     sys.stderr.write('Logs archive uploaded to: %s\n' % url)
@@ -120,11 +122,15 @@ def main():
     if not args.skip_analysis:
         cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
         check_call(cmd, shell=True)
+
         local_pdf = '%s/pantheon_report.pdf' % src_dir
-        s3_analysis_folder = '%s/reports/' % s3_folder
-        s3_pdf = '%s%s_report.pdf' % (s3_analysis_folder, experiment_file_prefix)
-        check_call(['aws', 's3', 'cp', local_pdf, s3_pdf])
-        slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, s3_pdf)
+        s3_analysis_folder = s3_folder + 'reports/'
+        s3_pdf = experiment_file_prefix + '_report.pdf'
+        s3_url = s3_base + s3_analysis_folder + s3_pdf
+        check_call(['aws', 's3', 'cp', local_pdf, s3_url])
+
+        http_url = http_base + s3_analysis_folder + s3_pdf
+        slack_text = "Analysis of %s uploaded to:\n<%s>\n" % (experiment_title, http_url)
         slack_post(slack_text)
 
         imgs_to_upload = ['pantheon_summary.png'] 
@@ -134,10 +140,12 @@ def main():
 
         for img in imgs_to_upload:
             local_img = '%s/%s' % (src_dir, img)
-            s3_img = '%s%s%s' % (s3_analysis_folder, experiment_file_prefix, img)
-            check_call(['aws', 's3', 'cp', local_img, s3_img])
+            s3_img = experiment_file_prefix + '_' + img
+            s3_url = s3_base + s3_analysis_folder + s3_img
+            check_call(['aws', 's3', 'cp', local_img, s3_url])
             img_title = '%s from %s' % (img, experiment_title)
-            slack_post_img(img_title, s3_img)
+            http_url = http_base + s3_analysis_folder + s3_img
+            slack_post_img(img_title, http_url)
 
     check_call(['rm', '-rf', src_dir, src_tar])
 
