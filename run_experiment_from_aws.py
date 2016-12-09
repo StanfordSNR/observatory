@@ -132,8 +132,12 @@ def main():
                                                  args.run_times)
 
         # Clean up test directory
-        check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
-                   shell=True)
+        try:
+            check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
+                       shell=True)
+        except:
+            slack_post(experiment_meta_txt + ' could not remove files from'
+                       'test directory, proceeding anyway..')
 
         slack_post('Running experiment uploading from %s.' % experiment_title)
 
@@ -154,16 +158,26 @@ def main():
         experiment_file_prefix = '%s-%s' % (date,
                                             experiment_title.replace(' ', '-'))
         src_dir = '%s-logs' % experiment_file_prefix
-        check_call(['mkdir', src_dir])
-        check_call('mv *.log *.json ' + src_dir, shell=True)
+        try:
+            check_call(['mkdir', src_dir])
+            check_call('mv *.log *.json ' + src_dir, shell=True)
 
-        src_tar = src_dir + '.tar.xz'
-        check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
+            src_tar = src_dir + '.tar.xz'
+            check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
+        except:
+            slack_post('Experiment uploading from %s failed to create archive '
+                       'of results. Disk space issue?' % experiment_title)
+            return
 
         s3_base = 's3://stanford-pantheon/'
         s3_folder = 'real-world-results/%s/' % args.remote
         s3_url = s3_base + s3_folder + src_tar
-        check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
+        try:
+            check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
+        except:
+            slack_post('Experiment uploading from %s failed to upload to s3.'
+                       % experiment_title)
+            return
 
         http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
         http_url = http_base + s3_folder + src_tar
@@ -177,35 +191,45 @@ def main():
         # Perform analysis and upload results to S3
         if do_analysis:
             cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
-            check_call(cmd, shell=True)
+            try:
+                check_call(cmd, shell=True)
 
-            local_pdf = '%s/pantheon_report.pdf' % src_dir
-            s3_analysis_folder = s3_folder + 'reports/'
-            s3_pdf = experiment_file_prefix + '_report.pdf'
-            s3_url = s3_base + s3_analysis_folder + s3_pdf
-            check_call(['aws', 's3', 'cp', local_pdf, s3_url])
+                local_pdf = '%s/pantheon_report.pdf' % src_dir
+                s3_analysis_folder = s3_folder + 'reports/'
+                s3_pdf = experiment_file_prefix + '_report.pdf'
+                s3_url = s3_base + s3_analysis_folder + s3_pdf
+                check_call(['aws', 's3', 'cp', local_pdf, s3_url])
 
-            http_url = http_base + s3_analysis_folder + s3_pdf
-            slack_txt = 'Analysis of %s uploaded to:' % experiment_title
-            slack_txt += '\n<%s>\n' % http_url
-            slack_post(slack_txt)
+                http_url = http_base + s3_analysis_folder + s3_pdf
+                slack_txt = 'Analysis of %s uploaded to:' % experiment_title
+                slack_txt += '\n<%s>\n' % http_url
+                slack_post(slack_txt)
 
-            imgs_to_upload = ['pantheon_summary.png']
-            # Don't post summary means chart if there is only one run
-            if args.run_times > 1:
-                imgs_to_upload.append('pantheon_summary_mean.png')
+                imgs_to_upload = ['pantheon_summary.png']
+                # Don't post summary means chart if there is only one run
+                if args.run_times > 1:
+                    imgs_to_upload.append('pantheon_summary_mean.png')
 
-            for img in imgs_to_upload:
-                local_img = '%s/%s' % (src_dir, img)
-                s3_img = experiment_file_prefix + '_' + img
-                s3_url = s3_base + s3_analysis_folder + s3_img
-                check_call(['aws', 's3', 'cp', local_img, s3_url])
-                img_title = '%s from %s' % (img, experiment_title)
-                http_url = http_base + s3_analysis_folder + s3_img
-                slack_post_img(img_title, http_url)
+                for img in imgs_to_upload:
+                    local_img = '%s/%s' % (src_dir, img)
+                    s3_img = experiment_file_prefix + '_' + img
+                    s3_url = s3_base + s3_analysis_folder + s3_img
+                    check_call(['aws', 's3', 'cp', local_img, s3_url])
+                    img_title = '%s from %s' % (img, experiment_title)
+                    http_url = http_base + s3_analysis_folder + s3_img
+                    slack_post_img(img_title, http_url)
+            except:
+                slack_post('Experiment uploading from %s failed to perform or '
+                           'upload analysis.' % experiment_title)
 
-        # Clean up files generated
-        check_call(['rm', '-rf', src_dir, src_tar])
+        try:
+            # Clean up files generated
+            check_call(['rm', '-rf', src_dir, src_tar])
+        except:
+            slack_post('Experiment uploading from %s could not remove files'
+                       'from test directory after running experiment.'
+                       % experiment_title)
+            return
 
 
 if __name__ == '__main__':
