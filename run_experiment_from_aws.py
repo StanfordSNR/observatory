@@ -166,7 +166,7 @@ def main():
             src_tar = src_dir + '.tar.xz'
             check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
         except:
-            slack_post('Experiment uploading from %s failed to create archive '
+            slack_post('Experiment uploading from %s could not create archive '
                        'of results. Disk space issue?' % experiment_title)
             return
 
@@ -176,7 +176,7 @@ def main():
         try:
             check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
         except:
-            slack_post('Experiment uploading from %s failed to upload to s3.'
+            slack_post('Experiment uploading from %s could not upload to s3.'
                        % experiment_title)
             return
 
@@ -220,7 +220,7 @@ def main():
                     http_url = http_base + s3_analysis_folder + s3_img
                     slack_post_img(img_title, http_url)
             except:
-                slack_post('Experiment uploading from %s failed to perform or '
+                slack_post('Experiment uploading from %s could not perform or '
                            'upload analysis.' % experiment_title)
 
         try:
