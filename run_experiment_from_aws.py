@@ -167,7 +167,8 @@ def main():
             check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
         except:
             slack_post('Experiment uploading from %s could not create archive '
-                       'of results. Disk space issue?' % experiment_title)
+                       'of results. Probably disk space issue or no results '
+                       'existed.' % experiment_title)
             return
 
         s3_base = 's3://stanford-pantheon/'
