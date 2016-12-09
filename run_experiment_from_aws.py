@@ -131,13 +131,14 @@ def main():
         experiment_title = '%s to %s %d runs' % (uploader, downloader,
                                                  args.run_times)
 
-        # Clean up test directory
         try:
+            # Clean up test directory, pantheon unmerged logs
+            check_call('rm -rf /tmp/pantheon-tmp', shell=True)
             check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
                        shell=True)
         except:
             slack_post(experiment_meta_txt + ' could not remove files from'
-                       'test directory, proceeding anyway..')
+                       'test directory or pantheon-tmp, proceeding anyway..')
 
         slack_post('Running experiment uploading from %s.' % experiment_title)
 
