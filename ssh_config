@@ -9,4 +9,4 @@ Host nepal6
 Host *
     ControlMaster auto
     ControlPath ~/.ssh/controlmasters/%r@%h:%p
-    ControlPersist 5m
+    ControlPersist 50m
