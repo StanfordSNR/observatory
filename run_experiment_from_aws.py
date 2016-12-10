@@ -224,9 +224,13 @@ def main():
                            'upload analysis.' % experiment_title)
 
         try:
-            # Clean up files generated, pantheon unmerged logs
-            check_call('rm -rf /tmp/pantheon-tmp', shell=True)
+            # Clean up files generated
             check_call(['rm', '-rf', src_dir, src_tar])
+            # Clean up pantheon unmerged logs on both local and remote
+            pantheon_tmp_rm_cmd = 'rm -rf /tmp/pantheon-tmp'
+            check_call(pantheon_tmp_rm_cmd, shell=True)
+            check_call('ssh %s %s' % (remote_sides[args.remote],
+                                      pantheon_tmp_rm_cmd), shell=True)
         except:
             slack_post('Experiment uploading from %s could not remove files'
                        'from test directory after running experiment.'
