@@ -132,8 +132,7 @@ def main():
                                                  args.run_times)
 
         try:
-            # Clean up test directory, pantheon unmerged logs
-            check_call('rm -rf /tmp/pantheon-tmp', shell=True)
+            # Clean up test directory
             check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
                        shell=True)
         except:
@@ -225,7 +224,8 @@ def main():
                            'upload analysis.' % experiment_title)
 
         try:
-            # Clean up files generated
+            # Clean up files generated, pantheon unmerged logs
+            check_call('rm -rf /tmp/pantheon-tmp', shell=True)
             check_call(['rm', '-rf', src_dir, src_tar])
         except:
             slack_post('Experiment uploading from %s could not remove files'
