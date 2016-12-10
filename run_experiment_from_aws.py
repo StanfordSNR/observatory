@@ -119,6 +119,22 @@ def main():
             slack_post(experiment_meta_txt + 'failed during setup phase.')
             return
 
+    # Make sure /tmp/pantheon-tmp exists and we can grab experiment lock
+    experiment_lock_command = 'mkdir /tmp/pantheon-tmp/experiment_lock'
+    try:
+        check_call(experiment_lock_command, shell=True)
+    except:
+        slack_post(experiment_meta_txt + ' could not aquire lock locally to '
+                   'run experiment: another experiment could already be '
+                   'running or a previous experiment ended messily.')
+    try:
+        check_call('ssh %s ' % remote_sides[args.remote] +
+                   experiment_lock_command, shell=True)
+    except:
+        slack_post(experiment_meta_txt + ' could not aquire lock remotely to '
+                   'run experiment: another experiment could already be '
+                   'running or a previous experiment ended messily.')
+
     for sender_side in senders_to_run:
         do_analysis = not args.skip_analysis
         if sender_side is 'remote':
@@ -227,6 +243,7 @@ def main():
             # Clean up files generated
             check_call(['rm', '-rf', src_dir, src_tar])
             # Clean up pantheon unmerged logs on both local and remote
+            # also removes experiment lock directory
             pantheon_tmp_rm_cmd = 'rm -rf /tmp/pantheon-tmp'
             check_call(pantheon_tmp_rm_cmd, shell=True)
             check_call('ssh %s %s' % (remote_sides[args.remote],
