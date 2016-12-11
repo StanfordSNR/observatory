@@ -52,7 +52,7 @@ def main():
         '--no-setup', action='store_true',
         help='skip running setup of schemes')
     parser.add_argument(
-        '--no-ntp', action='store_true',
+        '--no-ntp', action='store_false',
         help='don\'t check ntp offset of both sides while running')
     parser.add_argument(
         '--skip-analysis', action='store_true',
