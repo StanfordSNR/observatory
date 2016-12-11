@@ -155,6 +155,7 @@ def main():
         slack_post(experiment_meta_txt + ' could not aquire lock remotely to '
                    'run experiment: another experiment could already be '
                    'running or a previous experiment ended messily.')
+        return
 
     for sender_side in senders_to_run:
         do_analysis = not args.skip_analysis
