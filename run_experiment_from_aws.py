@@ -16,6 +16,13 @@ def main():
         'AWS India': '35.154.48.15',
     }
 
+    aws_to_ntp_server = {
+        'AWS Brazil': 'gps.ntp.br',
+        'AWS California': 'time.stanford.edu',
+        'AWS Korea': 'ntp.nict.jp',
+        'AWS India': 'ntp1.andysen.com',
+    }
+
     remote_sides = {
         'Stanford': 'pi@171.66.3.65',
         'Brazil': 'pi@177.234.144.122',
@@ -44,6 +51,9 @@ def main():
     parser.add_argument(
         '--no-setup', action='store_true',
         help='skip running setup of schemes')
+    parser.add_argument(
+        '--no-ntp', action='store_true',
+        help='don\'t check ntp offset of both sides while running')
     parser.add_argument(
         '--skip-analysis', action='store_true',
         help='skip running setup of schemes')
@@ -109,6 +119,19 @@ def main():
                      args.local, args.remote, args.run_times))
     if args.remote_if:
         common_cmd += ' --remote-interface ' + args.remote_if
+
+    # If using NTP, make sure NTP server we intend to use is up
+    if not args.no_ntp:
+        ntp_server = aws_to_ntp_server[args.local]
+        if args.remote_if:
+            common_cmd += ' --ntp-addr ' + ntp_server
+
+        try:
+            check_call(['ntpdate', '-quv', ntp_server])
+        except:
+            slack_post(experiment_meta_txt + ' could not sync with ntp server '
+                       '%s, aborting.' % ntp_server)
+            return
 
     # Run setup
     if not args.no_setup:
