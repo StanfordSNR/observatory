@@ -123,9 +123,7 @@ def main():
     # If using NTP, make sure NTP server we intend to use is up
     if not args.no_ntp:
         ntp_server = aws_to_ntp_server[args.local]
-        if args.remote_if:
-            common_cmd += ' --ntp-addr ' + ntp_server
-
+        common_cmd += ' --ntp-addr ' + ntp_server
         try:
             check_call(['ntpdate', '-quv', ntp_server])
         except:
