@@ -148,6 +148,7 @@ def main():
         slack_post(experiment_meta_txt + ' could not aquire lock locally to '
                    'run experiment: another experiment could already be '
                    'running or a previous experiment ended messily.')
+        return
     try:
         check_call('ssh %s ' % remote_sides[args.remote] +
                    experiment_lock_command, shell=True)
