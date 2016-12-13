@@ -176,7 +176,7 @@ def main():
                        shell=True)
         except:
             slack_post(experiment_meta_txt + ' could not remove files from'
-                       'test directory or pantheon-tmp, proceeding anyway..')
+                       'test directory, proceeding anyway..')
 
         slack_post('Running experiment uploading from %s.' % experiment_title)
 
