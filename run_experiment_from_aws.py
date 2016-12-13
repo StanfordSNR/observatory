@@ -10,15 +10,19 @@ from slack_post import slack_post, slack_post_img
 
 def main():
     local_sides = {
-        'AWS Brazil': '52.67.203.197',
-        'AWS California': '52.52.80.245',
+        'AWS Brazil 1': '52.67.203.197',
+        'AWS Brazil 2': '52.67.180.153',
+        'AWS California 1': '52.52.80.245',
+        'AWS California 2': '52.52.200.167',
         'AWS Korea': '52.79.43.78',
         'AWS India': '35.154.48.15',
     }
 
     aws_to_ntp_server = {
-        'AWS Brazil': 'gps.ntp.br',
-        'AWS California': 'time.stanford.edu',
+        'AWS Brazil 1': 'gps.ntp.br',
+        'AWS Brazil 2': 'gps.ntp.br',
+        'AWS California 1': 'time.stanford.edu',
+        'AWS California 2': 'time.stanford.edu',
         'AWS Korea': 'ntp.nict.jp',
         'AWS India': 'ntp1.andysen.com',
     }
