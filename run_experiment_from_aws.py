@@ -101,11 +101,13 @@ def main():
     if not args.no_git_pull:
         try:
             check_call('git pull --ff-only', shell=True)
+            check_call('git submodule sync', shell=True)
             check_call('git submodule update --init --recursive', shell=True)
             # assumption pantheon directory is in ~ on remote side
             remote = remote_sides[args.remote]
             remote_git_prefix = 'ssh %s git -C pantheon ' % remote
             check_call(remote_git_prefix + 'pull --ff-only', shell=True)
+            check_call(remote_git_prefix + 'submodule sync', shell=True)
             check_call(remote_git_prefix +
                        'submodule update --init --recursive', shell=True)
         except:
