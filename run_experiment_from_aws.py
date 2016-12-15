@@ -142,15 +142,36 @@ def main():
     if args.remote_if:
         common_cmd += ' --remote-interface ' + args.remote_if
 
-    # If using NTP, make sure NTP server we intend to use is up
+    # If using NTP, make sure NTP server we intend to use is up and synced well
     if not args.no_ntp:
         ntp_server = aws_to_ntp_server[args.local]
         common_cmd += ' --ntp-addr ' + ntp_server
+
         try:
-            check_call(['ntpdate', '-quv', ntp_server])
+            local_ntp_cmd = ['ntpdate', '-quv', ntp_server]
+            local_clock_offset = check_output(local_ntp_cmd).split()[-2]
         except:
             slack_post(experiment_meta_txt + ' could not sync with ntp server '
-                       '%s, aborting.' % ntp_server)
+                       '%s locally, aborting.' % ntp_server)
+            return
+        if abs(float(local_clock_offset)) > .032:
+            slack_post(experiment_meta_txt + ' had excessive local offset to '
+                       'ntp server %s (%s seconds), aborting.'
+                       % (ntp_server, local_clock_offset))
+            return
+
+        try:
+            remote_ntp_cmd = ['ssh', remote_sides[args.remote]] + local_ntp_cmd
+            remote_clock_offset = check_output(remote_ntp_cmd).split()[-2]
+        except:
+            slack_post(experiment_meta_txt + ' could not sync with ntp server '
+                       '%s remotely, aborting.' % ntp_server)
+            return
+
+        if abs(float(remote_clock_offset)) > .032:
+            slack_post(experiment_meta_txt + ' had excessive remote offset to '
+                       'ntp server %s (%s seconds), aborting.'
+                       % (ntp_server, remote_clock_offset))
             return
 
     # Run setup
