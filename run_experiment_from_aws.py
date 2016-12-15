@@ -2,9 +2,10 @@
 
 import os
 import sys
+import string
 import argparse
 from datetime import datetime
-from subprocess import check_call
+from subprocess import check_call, check_output
 from slack_post import slack_post, slack_post_img
 
 
@@ -100,6 +101,21 @@ def main():
             slack_txt += 'bidirectional '
             experiment_meta_txt += 'per side '
         slack_post(slack_txt + 'e' + experiment_meta_txt[1:-1] + '.')
+
+    # double check local IP is what we expect
+    try:
+        my_ip = check_output("dig TXT +short o-o.myaddr.l.google.com "
+                             "@ns1.google.com", shell=True)
+    except:
+        slack_post(experiment_meta_txt + 'failed to check local IP address.')
+        return
+
+    my_ip = string.strip(my_ip, '"\n')  # strip " and \n
+    if local_sides[args.local] != my_ip:
+        slack_post(experiment_meta_txt + 'failed: local IP address %s did not '
+                   'match expected IP for %s %s.' % (my_ip, args.local,
+                                                     local_sides[args.local]))
+        return
 
     # Update pantheon git repos on both sides
     if not args.no_git_pull:
