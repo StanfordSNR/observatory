@@ -68,6 +68,9 @@ def main():
         '--bidirectional', action='store_true',
         help='run both --sender-side remote and --sender-side local, '
              'using --sender-side defines which experiment runs first')
+    parser.add_argument(
+        '--both-remote-ifs', action='store_true',
+        help='Run with --remote-if and without')
     args = parser.parse_args()
 
     if args.remote_if:
@@ -88,8 +91,15 @@ def main():
     os.chdir(test_dir)
 
     experiment_meta_txt = 'Experiment between %s' % args.local
-    experiment_meta_txt += ' and %s with ' % args.remote
-    experiment_meta_txt += '%d runs ' % args.run_times
+    experiment_meta_txt += ' and %s ' % args.remote
+    if args.remote_if:
+        experiment_meta_txt += ' over interface %s ' % args.remote_if
+        if args.both_remote_ifs:
+            experiment_meta_txt += ' and then ethernet '
+    else:
+        experiment_meta_txt += ' over ethernet '
+
+    experiment_meta_txt += 'with %d runs ' % args.run_times
 
     if args.no_git_pull and args.no_setup and not args.bidirectional:
         # Post below should be enough in this case
@@ -123,8 +133,6 @@ def main():
                   '--remote-info "%s" --random-order --run-times %s'
                   % (remote_sides[args.remote], local_sides[args.local],
                      args.local, args.remote, args.run_times))
-    if args.remote_if:
-        common_cmd += ' --remote-interface ' + args.remote_if
 
     # If using NTP, make sure NTP server we intend to use is up
     if not args.no_ntp:
@@ -139,9 +147,12 @@ def main():
 
     # Run setup
     if not args.no_setup:
-        sys.stderr.write(common_cmd + ' --run-only setup\n')
+        setup_cmd = common_cmd + ' --run-only setup'
+        if args.remote_if:
+            setup_cmd += ' --remote-interface ' + args.remote_if
+        sys.stderr.write(setup_cmd + '\n')
         try:
-            check_call(common_cmd + ' --run-only setup', shell=True)
+            check_call(setup_cmd, shell=True)
         except:
             slack_post(experiment_meta_txt + 'failed during setup phase.')
             return
@@ -164,124 +175,138 @@ def main():
                    'running or a previous experiment ended messily.')
         return
 
-    for sender_side in senders_to_run:
-        do_analysis = not args.skip_analysis
-        if sender_side is 'remote':
-            uploader = remote_txt
-            downloader = args.local
-        else:
-            uploader = args.local
-            downloader = remote_txt
+    if args.remote_if:
+        remote_interface_args = [' --remote-interface ' + args.remote_if]
+        if args.both_remote_ifs:
+            remote_interface_args.append('')
+    else:
+        remote_interface_args = ['']
 
-        experiment_title = '%s to %s %d runs' % (uploader, downloader,
-                                                 args.run_times)
+    for remote_interface_arg in remote_interface_args:
+        for sender_side in senders_to_run:
+            do_analysis = not args.skip_analysis
+            if sender_side is 'remote':
+                uploader = remote_txt
+                downloader = args.local
+            else:
+                uploader = args.local
+                downloader = remote_txt
+
+            experiment_title = '%s to %s %d runs' % (uploader, downloader,
+                                                     args.run_times)
+            if remote_interface_arg == '':
+                experiment_title += ' over ethernet'
+            else:
+                experiment_title += ' over %s' % args.remote_if
+
+            try:
+                # Clean up test directory
+                check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
+                           shell=True)
+            except:
+                slack_post(experiment_meta_txt + ' could not remove files from'
+                           'test directory, proceeding anyway..')
+
+            slack_post('Running experiment uploading from %s.' % experiment_title)
+
+            cmd = common_cmd + ' --sender-side ' + sender_side
+            cmd += remote_interface_arg
+
+            # Run Test
+            sys.stderr.write(cmd + ' --run-only test\n')
+            try:
+                check_call(cmd + ' --run-only test', shell=True)
+            except:
+                experiment_title += ' FAILED'
+                do_analysis = False
+
+            # Pack logs in archive and upload to S3
+            date = datetime.utcnow()
+            date = date.replace(microsecond=0).isoformat().replace(':', '-')
+            date = date[:-3]  # strip seconds
+
+            experiment_file_prefix = '%s-%s' % (date,
+                                                experiment_title.replace(' ', '-'))
+            src_dir = '%s-logs' % experiment_file_prefix
+            try:
+                check_call(['mkdir', src_dir])
+                check_call('mv *.log *.json ' + src_dir, shell=True)
+
+                src_tar = src_dir + '.tar.xz'
+                check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
+            except:
+                slack_post('Experiment uploading from %s could not create archive '
+                           'of results. Probably disk space issue or no results '
+                           'existed.' % experiment_title)
+                break
+
+            s3_base = 's3://stanford-pantheon/'
+            s3_folder = 'real-world-results/%s/' % args.remote
+            s3_url = s3_base + s3_folder + src_tar
+            try:
+                check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
+            except:
+                slack_post('Experiment uploading from %s could not upload to s3.'
+                           % experiment_title)
+                break
+
+            http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
+            http_url = http_base + s3_folder + src_tar
+            slack_txt = ('Logs archive of %s uploaded to:\n<%s>\n'
+                         'To generate report run:\n`pantheon/analyze/analyze.py '
+                         '--s3-link %s`' % (experiment_title, http_url, http_url))
+            slack_post(slack_txt)
+
+            sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
+
+            # Perform analysis and upload results to S3
+            if do_analysis:
+                cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
+                try:
+                    check_call(cmd, shell=True)
+
+                    local_pdf = '%s/pantheon_report.pdf' % src_dir
+                    s3_analysis_folder = s3_folder + 'reports/'
+                    s3_pdf = experiment_file_prefix + '_report.pdf'
+                    s3_url = s3_base + s3_analysis_folder + s3_pdf
+                    check_call(['aws', 's3', 'cp', local_pdf, s3_url])
+
+                    http_url = http_base + s3_analysis_folder + s3_pdf
+                    slack_txt = 'Analysis of %s uploaded to:' % experiment_title
+                    slack_txt += '\n<%s>\n' % http_url
+                    slack_post(slack_txt)
+
+                    imgs_to_upload = ['pantheon_summary.png']
+                    # Don't post summary means chart if there is only one run
+                    if args.run_times > 1:
+                        imgs_to_upload.append('pantheon_summary_mean.png')
+
+                    for img in imgs_to_upload:
+                        local_img = '%s/%s' % (src_dir, img)
+                        s3_img = experiment_file_prefix + '_' + img
+                        s3_url = s3_base + s3_analysis_folder + s3_img
+                        check_call(['aws', 's3', 'cp', local_img, s3_url])
+                        img_title = '%s from %s' % (img, experiment_title)
+                        http_url = http_base + s3_analysis_folder + s3_img
+                        slack_post_img(img_title, http_url)
+                except:
+                    slack_post('Experiment uploading from %s could not perform or '
+                               'upload analysis.' % experiment_title)
 
         try:
-            # Clean up test directory
-            check_call('rm -rf *.log *.json *.png *.pdf *.out verus_tmp',
-                       shell=True)
+            # Clean up files generated
+            check_call(['rm', '-rf', src_dir, src_tar])
+            # Clean up pantheon unmerged logs on both local and remote
+            # also removes experiment lock directory
+            pantheon_tmp_rm_cmd = 'rm -rf /tmp/pantheon-tmp'
+            check_call(pantheon_tmp_rm_cmd, shell=True)
+            check_call('ssh %s %s' % (remote_sides[args.remote],
+                                      pantheon_tmp_rm_cmd), shell=True)
         except:
-            slack_post(experiment_meta_txt + ' could not remove files from'
-                       'test directory, proceeding anyway..')
-
-        slack_post('Running experiment uploading from %s.' % experiment_title)
-
-        cmd = common_cmd + ' --sender-side ' + sender_side
-        # Run Test
-        sys.stderr.write(cmd + ' --run-only test\n')
-        try:
-            check_call(cmd + ' --run-only test', shell=True)
-        except:
-            experiment_title += ' FAILED'
-            do_analysis = False
-
-        # Pack logs in archive and upload to S3
-        date = datetime.utcnow()
-        date = date.replace(microsecond=0).isoformat().replace(':', '-')
-        date = date[:-3]  # strip seconds
-
-        experiment_file_prefix = '%s-%s' % (date,
-                                            experiment_title.replace(' ', '-'))
-        src_dir = '%s-logs' % experiment_file_prefix
-        try:
-            check_call(['mkdir', src_dir])
-            check_call('mv *.log *.json ' + src_dir, shell=True)
-
-            src_tar = src_dir + '.tar.xz'
-            check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
-        except:
-            slack_post('Experiment uploading from %s could not create archive '
-                       'of results. Probably disk space issue or no results '
-                       'existed.' % experiment_title)
-            break
-
-        s3_base = 's3://stanford-pantheon/'
-        s3_folder = 'real-world-results/%s/' % args.remote
-        s3_url = s3_base + s3_folder + src_tar
-        try:
-            check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
-        except:
-            slack_post('Experiment uploading from %s could not upload to s3.'
+            slack_post('Experiment uploading from %s could not remove files'
+                       'from test directory after running experiment.'
                        % experiment_title)
             break
-
-        http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
-        http_url = http_base + s3_folder + src_tar
-        slack_txt = ('Logs archive of %s uploaded to:\n<%s>\n'
-                     'To generate report run:\n`pantheon/analyze/analyze.py '
-                     '--s3-link %s`' % (experiment_title, http_url, http_url))
-        slack_post(slack_txt)
-
-        sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
-
-        # Perform analysis and upload results to S3
-        if do_analysis:
-            cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
-            try:
-                check_call(cmd, shell=True)
-
-                local_pdf = '%s/pantheon_report.pdf' % src_dir
-                s3_analysis_folder = s3_folder + 'reports/'
-                s3_pdf = experiment_file_prefix + '_report.pdf'
-                s3_url = s3_base + s3_analysis_folder + s3_pdf
-                check_call(['aws', 's3', 'cp', local_pdf, s3_url])
-
-                http_url = http_base + s3_analysis_folder + s3_pdf
-                slack_txt = 'Analysis of %s uploaded to:' % experiment_title
-                slack_txt += '\n<%s>\n' % http_url
-                slack_post(slack_txt)
-
-                imgs_to_upload = ['pantheon_summary.png']
-                # Don't post summary means chart if there is only one run
-                if args.run_times > 1:
-                    imgs_to_upload.append('pantheon_summary_mean.png')
-
-                for img in imgs_to_upload:
-                    local_img = '%s/%s' % (src_dir, img)
-                    s3_img = experiment_file_prefix + '_' + img
-                    s3_url = s3_base + s3_analysis_folder + s3_img
-                    check_call(['aws', 's3', 'cp', local_img, s3_url])
-                    img_title = '%s from %s' % (img, experiment_title)
-                    http_url = http_base + s3_analysis_folder + s3_img
-                    slack_post_img(img_title, http_url)
-            except:
-                slack_post('Experiment uploading from %s could not perform or '
-                           'upload analysis.' % experiment_title)
-
-    try:
-        # Clean up files generated
-        check_call(['rm', '-rf', src_dir, src_tar])
-        # Clean up pantheon unmerged logs on both local and remote
-        # also removes experiment lock directory
-        pantheon_tmp_rm_cmd = 'rm -rf /tmp/pantheon-tmp'
-        check_call(pantheon_tmp_rm_cmd, shell=True)
-        check_call('ssh %s %s' % (remote_sides[args.remote],
-                                  pantheon_tmp_rm_cmd), shell=True)
-    except:
-        slack_post('Experiment uploading from %s could not remove files'
-                   'from test directory after running experiment.'
-                   % experiment_title)
-        return
 
 
 if __name__ == '__main__':
