@@ -213,7 +213,7 @@ def main():
             slack_post('Experiment uploading from %s could not create archive '
                        'of results. Probably disk space issue or no results '
                        'existed.' % experiment_title)
-            return
+            break
 
         s3_base = 's3://stanford-pantheon/'
         s3_folder = 'real-world-results/%s/' % args.remote
@@ -223,7 +223,7 @@ def main():
         except:
             slack_post('Experiment uploading from %s could not upload to s3.'
                        % experiment_title)
-            return
+            break
 
         http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
         http_url = http_base + s3_folder + src_tar
