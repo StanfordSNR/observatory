@@ -202,7 +202,6 @@ def main():
         return
 
     for sender_side in senders_to_run:
-        do_analysis = not args.skip_analysis
         if sender_side is 'remote':
             uploader = remote_txt
             downloader = args.local
@@ -230,7 +229,6 @@ def main():
             check_call(cmd + ' --run-only test', shell=True)
         except:
             experiment_title += ' FAILED'
-            do_analysis = False
 
         # Pack logs in archive and upload to S3
         date = datetime.utcnow()
@@ -272,7 +270,7 @@ def main():
         sys.stderr.write('Logs archive uploaded to: %s\n' % http_url)
 
         # Perform analysis and upload results to S3
-        if do_analysis:
+        if not args.skip_analysis:
             cmd = ('../analyze/analyze.py --data-dir ../test/%s' % src_dir)
             try:
                 check_call(cmd, shell=True)
