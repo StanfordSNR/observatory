@@ -303,18 +303,32 @@ def main():
                 slack_post('Experiment uploading from %s could not perform or '
                            'upload analysis.' % experiment_title)
 
+    # Clean up files generated
     try:
-        # Clean up files generated
         check_call(['rm', '-rf', src_dir, src_tar])
-        # Clean up pantheon unmerged logs on both local and remote
-        # also removes experiment lock directory
+    except:
+        slack_post('Experiment uploading from %s failed: could not logs from '
+                   'source directory after running experiment.'
+                   % experiment_title)
+        return
+
+    # Clean up pantheon unmerged logs on both local and remote
+    # also removes experiment lock directory
+    try:
         pantheon_tmp_rm_cmd = 'rm -rf /tmp/pantheon-tmp'
         check_call(pantheon_tmp_rm_cmd, shell=True)
+    except:
+        slack_post('Experiment uploading from %s failed: local side could not '
+                   'remove files from test directory after running experiment.'
+                   % experiment_title)
+        return
+
+    try:
         check_call('ssh %s %s' % (remote_sides[args.remote],
                                   pantheon_tmp_rm_cmd), shell=True)
     except:
         slack_post('Experiment uploading from %s failed: could not remove '
-                   'files from test directory after running experiment.'
+                   'files from remote test directory after running experiment.'
                    % experiment_title)
         return
 
