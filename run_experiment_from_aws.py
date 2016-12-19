@@ -151,12 +151,12 @@ def main():
             local_ntp_cmd = ['ntpdate', '-quv', ntp_server]
             local_clock_offset = check_output(local_ntp_cmd).split()[-2]
         except:
-            slack_post(experiment_meta_txt + ' could not sync with ntp server '
-                       '%s locally, aborting.' % ntp_server)
+            slack_post(experiment_meta_txt + ' failed: could not sync with ntp'
+                       'server %s locally, aborting.' % ntp_server)
             return
         if abs(float(local_clock_offset)) > .032:
-            slack_post(experiment_meta_txt + ' had excessive local offset to '
-                       'ntp server %s (%s seconds), aborting.'
+            slack_post(experiment_meta_txt + ' failed: had excessive local '
+                       'offset to ntp server %s (%s seconds), aborting.'
                        % (ntp_server, local_clock_offset))
             return
 
@@ -164,13 +164,13 @@ def main():
             remote_ntp_cmd = ['ssh', remote_sides[args.remote]] + local_ntp_cmd
             remote_clock_offset = check_output(remote_ntp_cmd).split()[-2]
         except:
-            slack_post(experiment_meta_txt + ' could not sync with ntp server '
-                       '%s remotely, aborting.' % ntp_server)
+            slack_post(experiment_meta_txt + ' failed: could not sync with ntp'
+                       'server %s remotely, aborting.' % ntp_server)
             return
 
         if abs(float(remote_clock_offset)) > .032:
-            slack_post(experiment_meta_txt + ' had excessive remote offset to '
-                       'ntp server %s (%s seconds), aborting.'
+            slack_post(experiment_meta_txt + ' failed: had excessive remote '
+                       'offset to ntp server %s (%s seconds), aborting.'
                        % (ntp_server, remote_clock_offset))
             return
 
@@ -188,17 +188,17 @@ def main():
     try:
         check_call(experiment_lock_command, shell=True)
     except:
-        slack_post(experiment_meta_txt + ' could not aquire lock locally to '
-                   'run experiment: another experiment could already be '
-                   'running or a previous experiment ended messily.')
+        slack_post(experiment_meta_txt + ' failed: could not aquire lock '
+                   'locally to run experiment: another experiment could '
+                   'already be running or previous experiment ended messily.')
         return
     try:
         check_call('ssh %s ' % remote_sides[args.remote] +
                    experiment_lock_command, shell=True)
     except:
-        slack_post(experiment_meta_txt + ' could not aquire lock remotely to '
-                   'run experiment: another experiment could already be '
-                   'running or a previous experiment ended messily.')
+        slack_post(experiment_meta_txt + ' failed: could not aquire lock '
+                   'remotely to run experiment: another experiment could '
+                   'already be running or previous experiment ended messily.')
         return
 
     for sender_side in senders_to_run:
@@ -245,9 +245,9 @@ def main():
             src_tar = src_dir + '.tar.xz'
             check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
         except:
-            slack_post('Experiment uploading from %s could not create archive '
-                       'of results. Probably disk space issue or no results '
-                       'existed.' % experiment_title)
+            slack_post('Experiment uploading from %s failed: could not create '
+                       'archive of results. Probably disk space issue or no '
+                       'results existed.' % experiment_title)
             break
 
         s3_base = 's3://stanford-pantheon/'
@@ -256,8 +256,8 @@ def main():
         try:
             check_call('aws s3 cp ' + src_tar + ' ' + s3_url, shell=True)
         except:
-            slack_post('Experiment uploading from %s could not upload to s3.'
-                       % experiment_title)
+            slack_post('Experiment uploading from %s failed: could not upload '
+                       'to s3.' % experiment_title)
             break
 
         http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
@@ -313,8 +313,8 @@ def main():
         check_call('ssh %s %s' % (remote_sides[args.remote],
                                   pantheon_tmp_rm_cmd), shell=True)
     except:
-        slack_post('Experiment uploading from %s could not remove files'
-                   'from test directory after running experiment.'
+        slack_post('Experiment uploading from %s failed: could not remove '
+                   'files from test directory after running experiment.'
                    % experiment_title)
         return
 
