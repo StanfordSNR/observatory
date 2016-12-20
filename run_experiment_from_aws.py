@@ -248,6 +248,7 @@ def main():
             slack_post('Experiment uploading from %s failed: could not create '
                        'archive of results. Probably disk space issue or no '
                        'results existed.' % experiment_title)
+            # won't run other side if bidirectional
             break
 
         s3_base = 's3://stanford-pantheon/'
@@ -258,6 +259,7 @@ def main():
         except:
             slack_post('Experiment uploading from %s failed: could not upload '
                        'to s3.' % experiment_title)
+            # won't run other side if bidirectional
             break
 
         http_base = 'https://stanford-pantheon.s3.amazonaws.com/'
