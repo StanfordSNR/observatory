@@ -307,8 +307,8 @@ def main():
     try:
         check_call(['rm', '-rf', src_dir, src_tar])
     except:
-        slack_post('Experiment uploading from %s failed: could not logs from '
-                   'source directory after running experiment.'
+        slack_post('Experiment uploading from %s failed: could not remove logs'
+                   'from source directory after running experiment.'
                    % experiment_title)
         return
 
