@@ -238,9 +238,14 @@ def main():
         experiment_file_prefix = '%s-%s' % (date,
                                             experiment_title.replace(' ', '-'))
         src_dir = '%s-logs' % experiment_file_prefix
+        raw_logs_dir = src_dir + '/raw_logs'
         try:
             check_call(['mkdir', src_dir])
             check_call('mv *.log *.json ' + src_dir, shell=True)
+
+            check_call(['mkdir', raw_logs_dir])
+            check_call('mv /tmp/pantheon-tmp/*.log.*gress ' + raw_logs_dir,
+                       shell=True)
 
             src_tar = src_dir + '.tar.xz'
             check_call('tar cJf ' + src_tar + ' ' + src_dir, shell=True)
