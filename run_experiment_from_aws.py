@@ -310,14 +310,14 @@ def main():
                 slack_post('Experiment uploading from %s could not perform or '
                            'upload analysis.' % experiment_title)
 
-    # Clean up files generated
-    try:
-        check_call(['rm', '-rf', src_dir, src_tar])
-    except:
-        slack_post('Experiment uploading from %s failed: could not remove logs'
-                   'from source directory after running experiment.'
-                   % experiment_title)
-        return
+        # Clean up files generated
+        try:
+            check_call(['rm', '-rf', src_dir, src_tar])
+        except:
+            slack_post('Experiment uploading from %s failed: could not remove '
+                       'logs from source directory after running experiment.'
+                       % experiment_title)
+            return
 
     # Clean up pantheon unmerged logs on both local and remote
     # also removes experiment lock directory
