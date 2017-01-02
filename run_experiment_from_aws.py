@@ -8,6 +8,8 @@ from datetime import datetime
 from subprocess import check_call, check_output
 from slack_post import slack_post, slack_post_img
 
+max_ntp_offset_seconds = .016
+
 
 def main():
     local_sides = {
@@ -154,7 +156,7 @@ def main():
             slack_post(experiment_meta_txt + ' failed: could not sync with ntp'
                        'server %s locally, aborting.' % ntp_server)
             return
-        if abs(float(local_clock_offset)) > .032:
+        if abs(float(local_clock_offset)) > max_ntp_offset_seconds:
             slack_post(experiment_meta_txt + ' failed: had excessive local '
                        'offset to ntp server %s (%s seconds), aborting.'
                        % (ntp_server, local_clock_offset))
@@ -168,7 +170,7 @@ def main():
                        'server %s remotely, aborting.' % ntp_server)
             return
 
-        if abs(float(remote_clock_offset)) > .032:
+        if abs(float(remote_clock_offset)) > max_ntp_offset_seconds:
             slack_post(experiment_meta_txt + ' failed: had excessive remote '
                        'offset to ntp server %s (%s seconds), aborting.'
                        % (ntp_server, remote_clock_offset))
