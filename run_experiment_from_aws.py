@@ -78,7 +78,7 @@ def main():
     else:
         remote_txt = args.remote
 
-    if args.sender_side is 'remote':
+    if args.sender_side == 'remote':
         senders_to_run = ['remote']
         if args.bidirectional:
             senders_to_run.append('local')
