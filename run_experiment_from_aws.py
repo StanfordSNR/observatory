@@ -204,7 +204,7 @@ def main():
         return
 
     for sender_side in senders_to_run:
-        if sender_side is 'remote':
+        if sender_side == 'remote':
             uploader = remote_txt
             downloader = args.local
         else:
