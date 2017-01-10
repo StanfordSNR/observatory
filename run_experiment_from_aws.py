@@ -27,7 +27,7 @@ def main():
         'AWS California 1': 'time.stanford.edu',
         'AWS California 2': 'time.stanford.edu',
         'AWS Korea': 'ntp.nict.jp',
-        'AWS India': 'ntp1.andysen.com',
+        'AWS India': 'ntp.nict.jp',
     }
 
     remote_sides = {
