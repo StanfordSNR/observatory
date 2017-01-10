@@ -19,6 +19,7 @@ def main():
         'AWS California 2': '52.52.200.167',
         'AWS Korea': '52.79.43.78',
         'AWS India': '35.154.48.15',
+        'AWS India 2': '35.154.104.68',
     }
 
     aws_to_ntp_server = {
@@ -28,6 +29,7 @@ def main():
         'AWS California 2': 'time.stanford.edu',
         'AWS Korea': 'ntp.nict.jp',
         'AWS India': '210.23.25.77',
+        'AWS India 2': '210.23.25.77',
     }
 
     remote_sides = {
