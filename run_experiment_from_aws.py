@@ -8,7 +8,7 @@ from datetime import datetime
 from subprocess import check_call, check_output
 from slack_post import slack_post, slack_post_img
 
-max_ntp_offset_seconds = .016
+max_ntp_offset_seconds = .032
 
 
 def main():
