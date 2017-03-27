@@ -298,10 +298,13 @@ def main():
                 slack_txt += '\n<%s>\n' % http_url
                 slack_post(slack_txt)
 
-                imgs_to_upload = ['pantheon_summary.png']
+                imgs_to_upload = []
                 # Don't post summary means chart if there is only one run
                 if args.run_times > 1:
                     imgs_to_upload.append('pantheon_summary_mean.png')
+
+                imgs_to_upload.append('pantheon_summary.png')
+                imgs_to_upload.append('pantheon_summary_power.png')
 
                 for img in imgs_to_upload:
                     local_img = '%s/%s' % (src_dir, img)
