@@ -1,5 +1,5 @@
 # mkdir -p ~/.ssh/controlmasters
-# ln -s ~/observatory_box_scripts/ssh_config ~/.ssh/config
+# ln -s ~/pantheon-observatory/ssh_config ~/.ssh/config
 
 Host nepal5
     User pi
