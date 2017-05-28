@@ -24,7 +24,7 @@ cloud_servers:
     desc: AWS India
 
 measurement_nodes:
-  stanford:
+  286-blackmagic:
     user: fyy
     addr: 286-blackmagic.stanford.edu
     desc: Stanford

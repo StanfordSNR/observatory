@@ -12,7 +12,8 @@ class Console(object):
 
         self.server_host = '%s@%s' % (self.server['user'], self.server['addr'])
         self.node_host = '%s@%s' % (self.node['user'], self.node['addr'])
-        self.ssh_cmd = ['ssh', self.server_host]
+        self.ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
+                        self.server_host]
 
         self.run_times = args.run_times
 
@@ -45,15 +46,16 @@ class Console(object):
 
             title = title.replace(' ', '-')
             d[sender]['title'] = '%s-%s' % (utc_date(), title)
-            d[sender]['data_dir'] = '~/pantheon/test/%s' % d[sender]['title']
+            d[sender]['data_dir'] = '/tmp/%s' % d[sender]['title']
+            d[sender]['job_log'] = '/tmp/%s.log' % d[sender]['title']
 
             # run experiments
-            cmd = common_cmd + ' --sender %s --data-dir %s' % (
-                sender, d[sender]['data_dir'])
+            cmd = common_cmd + ' --sender %s --data-dir %s >> %s 2>&1' % (
+                sender, d[sender]['data_dir'], d[sender]['job_log'])
             check_call(self.ssh_cmd + [cmd])
 
             # compress logs
-            cmd = 'cd ~/pantheon/test && tar cJf %s %s' % (
+            cmd = 'cd /tmp && tar cJf %s %s' % (
                 d[sender]['title'] + '.tar.xz', d[sender]['title'])
             procs.append(Popen(self.ssh_cmd + [cmd]))
 
@@ -66,12 +68,12 @@ class Console(object):
 
     def analyze(self):
         d = self.d
-
-        analyze_cmd = '~/pantheon/analysis/analyze.py --data-dir '
+        analyze_cmd = '~/pantheon/analysis/analyze.py --data-dir %s >> %s 2>&1'
 
         procs = []
         for sender in ['local', 'remote']:
-            cmd = analyze_cmd + d[sender]['data_dir']
+            cmd = analyze_cmd % (
+                d[sender]['data_dir'], d[sender]['job_log'])
             procs.append(Popen(self.ssh_cmd + [cmd]))
 
         for proc in procs:
@@ -79,10 +81,10 @@ class Console(object):
 
     def upload(self):
         d = self.d
-
         node_desc = self.node['desc'].replace(' ', '-')
         s3_base = 's3://stanford-pantheon/real-world/%s' % node_desc
         s3_reports = s3_base + '/reports'
+        s3_job_logs = s3_base + '/job-logs'
         reports_to_upload = [
             'pantheon_report.pdf', 'pantheon_summary.png',
             'pantheon_summary_mean.png', 'pantheon_summary_power.png']
@@ -102,13 +104,24 @@ class Console(object):
                 cmd = 'aws s3 cp %s %s' % (src_path, dst_path)
                 procs.append(Popen(self.ssh_cmd + [cmd]))
 
+            cmd = 'aws s3 cp %s %s/%s' % (
+                d[sender]['job_log'], s3_job_logs,
+                path.basename(d[sender]['job_log']))
+            procs.append(Popen(self.ssh_cmd + [cmd]))
+
         for proc in procs:
             proc.wait()
 
         # remove data directories and tar
+        procs = []
+
         for sender in ['local', 'remote']:
-            cmd = 'rm -rf %s %s' % (d[sender]['data_dir'], d[sender]['tar'])
-            check_call(self.ssh_cmd + [cmd])
+            cmd = 'rm -rf %s %s %s /tmp/pantheon-tmp' % (
+                d[sender]['data_dir'], d[sender]['tar'], d[sender]['job_log'])
+            procs.append(Popen(self.ssh_cmd + [cmd]))
+
+        for proc in procs:
+            proc.wait()
 
     def run(self):
         # run bidirectional experiments
@@ -134,8 +147,9 @@ def main():
         help='run times of each scheme (default 1)')
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--all', action='store_true',
-                       help='set up all schemes specified in src/config.yml')
+    group.add_argument(
+        '--all', action='store_true',
+        help='set up all schemes specified in src/vantage_points.yml')
     group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
                        help='set up a space-separated list of schemes')
     args = parser.parse_args()

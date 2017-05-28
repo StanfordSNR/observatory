@@ -3,7 +3,6 @@ from os import path
 import subprocess
 from datetime import datetime
 from time import strftime
-from colorama import Fore, Style
 import yaml
 import project_root
 
@@ -17,8 +16,7 @@ def print_cmd(cmd):
         cmd_to_print = ''
 
     if cmd_to_print:
-        sys.stderr.write(Fore.BLUE + '$ ' + Style.RESET_ALL +
-                         cmd_to_print + '\n')
+        sys.stderr.write('$ %s\n' % cmd_to_print)
 
 
 def call(cmd, **kwargs):
@@ -42,7 +40,7 @@ def Popen(cmd, **kwargs):
 
 
 def parse_config():
-    with open(path.join(project_root.DIR, 'config.yml')) as config:
+    with open(path.join(project_root.DIR, 'vantage_points.yml')) as config:
         return yaml.load(config)
 
 
