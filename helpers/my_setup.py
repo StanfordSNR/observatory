@@ -13,6 +13,13 @@ def aws_key_setup(host):
         'echo \'$KEY\' >> .ssh/authorized_keys"' % host)
     check_call(cmd, shell=True)
 
+    cmd = (
+        'KEY=$(cat ~/.ssh/pantheon_aws.pub); '
+        'ssh %s '
+        '"grep -qF \'$KEY\' .ssh/authorized_keys || '
+        'echo \'$KEY\' >> .ssh/authorized_keys"' % host)
+    check_call(cmd, shell=True)
+
     cmd = 'scp ~/.ssh/pantheon_aws %s:~/.ssh/id_rsa' % host
     check_call(cmd, shell=True)
 
@@ -26,6 +33,12 @@ def aws_key_setup(host):
 
 
 def clone_setup(host):
+    cmd = 'scp ~/.vimrc %s:~' % host
+    check_call(cmd, shell=True)
+
+    cmd = 'scp ~/pantheon-observatory/helpers/bashrc %s:~/.bashrc' % host
+    check_call(cmd, shell=True)
+
     cmd = ['ssh', '-t', host,
            'git clone https://github.com/StanfordSNR/pantheon.git && '
            'cd ~/pantheon && '

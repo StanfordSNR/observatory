@@ -1,0 +1,30 @@
+cloud_servers:
+  aws_california:
+    user: ubuntu
+    addr: 13.56.50.180
+    ntp: time.stanford.edu
+    desc: AWS California
+
+  aws_brazil:
+    user: ubuntu
+    addr: 54.233.106.170
+    ntp: gps.ntp.br
+    desc: AWS Brazil
+
+  aws_korea:
+    user: ubuntu
+    addr: 13.124.31.209
+    ntp: ntp.nict.jp
+    desc: AWS Korea
+
+  aws_india:
+    user: ubuntu
+    addr: 35.154.240.73
+    ntp: nets.org.sg
+    desc: AWS India
+
+measurement_nodes:
+  stanford:
+    user: fyy
+    addr: 286-blackmagic.stanford.edu
+    desc: Stanford
