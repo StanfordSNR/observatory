@@ -96,32 +96,30 @@ class Console(object):
                 d[sender]['tar'], s3_base, path.basename(d[sender]['tar']))
             procs.append(Popen(self.ssh_cmd + [cmd]))
 
-            # upload reports
+        for proc in procs:
+            proc.wait()
+
+        # upload reports and job logs
+        for sender in ['local', 'remote']:
             for report in reports_to_upload:
                 src_path = '%s/%s' % (d[sender]['data_dir'], report)
                 dst_path = '%s/%s-%s' % (
                     s3_reports, d[sender]['title'], report.replace('_', '-'))
                 cmd = 'aws s3 cp %s %s' % (src_path, dst_path)
-                procs.append(Popen(self.ssh_cmd + [cmd]))
+                check_call(self.ssh_cmd + [cmd])
 
             cmd = 'aws s3 cp %s %s/%s' % (
                 d[sender]['job_log'], s3_job_logs,
                 path.basename(d[sender]['job_log']))
-            procs.append(Popen(self.ssh_cmd + [cmd]))
+            check_call(self.ssh_cmd + [cmd])
 
-        for proc in procs:
-            proc.wait()
 
         # remove data directories and tar
-        procs = []
-
         for sender in ['local', 'remote']:
             cmd = 'rm -rf %s %s %s /tmp/pantheon-tmp' % (
                 d[sender]['data_dir'], d[sender]['tar'], d[sender]['job_log'])
-            procs.append(Popen(self.ssh_cmd + [cmd]))
+            check_call(self.ssh_cmd + [cmd])
 
-        for proc in procs:
-            proc.wait()
 
     def run(self):
         # run bidirectional experiments
