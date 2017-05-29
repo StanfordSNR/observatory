@@ -39,7 +39,6 @@ def add_pantheon_key(host):
 def clone_setup(host):
     cmd = ('git clone https://github.com/StanfordSNR/pantheon.git && '
            'cd ~/pantheon && '
-           'git checkout refactor && '
            './install_deps.sh && '
            './test/setup.py --all --install-deps && '
            './test/setup.py --all --setup')
@@ -76,10 +75,9 @@ def pkill(host):
 
 def git_pull(host, force=False):
     if not force:
-        cmd = 'cd ~/pantheon && git checkout refactor && git pull'
+        cmd = 'cd ~/pantheon && git pull'
     else:
-        cmd = ('cd ~/pantheon && git checkout refactor && '
-               'git reset --hard @ && git pull')
+        cmd = 'cd ~/pantheon && git reset --hard @ && git pull'
 
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
