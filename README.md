@@ -1,2 +1,2 @@
-# pantheon-observatory
-Pantheon Observatory Management Scripts
+# observatory
+Management scripts for Pantheon observatory

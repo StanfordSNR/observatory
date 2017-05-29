@@ -47,6 +47,11 @@ measurement_nodes:
     addr: 171.66.3.65
     desc: Stanford
 
+  mexico:
+    user: pi
+    addr: 143.255.56.146
+    desc: Mexico
+
   brazil:
     user: pi
     addr: 177.234.144.122
@@ -62,10 +67,10 @@ measurement_nodes:
     addr: 109.73.164.122
     desc: India
 
-  mexico:
+  nepal:
     user: pi
-    addr: 143.255.56.146
-    desc: Mexico
+    addr: nepal6
+    desc: Nepal
 
   286-blackmagic:
     user: fyy

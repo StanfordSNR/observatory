@@ -49,7 +49,7 @@ def copy_ssh_config(host):
     cmd = 'mkdir -p ~/.ssh/controlmasters'
     check_call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
-    helpers_dir = '~/pantheon-observatory/helpers'
+    helpers_dir = '~/observatory/helpers'
     cmd = 'scp -o StrictHostKeyChecking=no %s/ssh_config %s:~/.ssh/config' % (
         helpers_dir, host)
     check_call(cmd, shell=True)
@@ -59,7 +59,7 @@ def copy_rc(host):
     cmd = 'scp -o StrictHostKeyChecking=no ~/.vimrc %s:~' % host
     check_call(cmd, shell=True)
 
-    helpers_dir = '~/pantheon-observatory/helpers'
+    helpers_dir = '~/observatory/helpers'
     cmd = 'scp -o StrictHostKeyChecking=no %s/bashrc %s:~/.bashrc' % (
         helpers_dir, host)
     check_call(cmd, shell=True)

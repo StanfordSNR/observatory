@@ -1,10 +1,10 @@
 #!/bin/sh
 
-console=/home/ubuntu/pantheon-observatory/console.py
-$console --schemes "default_tcp vegas" aws_california_1 286-blackmagic
-$console --schemes "default_tcp vegas" aws_brazil_1 286-blackmagic
-$console --schemes "default_tcp vegas" aws_india_1 286-blackmagic
-$console --schemes "default_tcp vegas" aws_california_2 286-blackmagic
-$console --schemes "default_tcp vegas" aws_brazil_2 286-blackmagic
-$console --schemes "default_tcp vegas" aws_india_2 286-blackmagic
-$console --schemes "default_tcp vegas" aws_korea 286-blackmagic
+console=~/observatory/console.py
+$console --schemes --all aws_california_1 stanford
+$console --schemes --all aws_california_2 mexico
+$console --schemes --all aws_brazil_1 brazil
+$console --schemes --all aws_brazil_2 colombia
+$console --schemes --all aws_india_1 india
+$console --schemes --all aws_india_2 nepal
+$console --schemes --all aws_korea 286-blackmagic
