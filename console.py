@@ -2,7 +2,7 @@
 
 from os import path
 import argparse
-from helpers.helpers import parse_config, check_call, Popen, utc_date
+from helpers.helpers import parse_config, check_call, utc_date
 
 
 class Console(object):
@@ -34,7 +34,8 @@ class Console(object):
         expt_title = '%s to %s' + ' %d %s' % (self.run_times, runs_str)
 
         d = {}
-        procs = []
+
+        # run experiments
         for sender in ['local', 'remote']:
             d[sender] = {}
             if sender == 'local':
@@ -49,38 +50,29 @@ class Console(object):
             d[sender]['data_dir'] = '/tmp/%s' % d[sender]['title']
             d[sender]['job_log'] = '/tmp/%s.log' % d[sender]['title']
 
-            # run experiments
             cmd = common_cmd + ' --sender %s --data-dir %s >> %s 2>&1' % (
                 sender, d[sender]['data_dir'], d[sender]['job_log'])
             check_call(self.ssh_cmd + [cmd])
 
-            # compress logs
-            cmd = 'cd /tmp && tar cJf %s %s' % (
-                d[sender]['title'] + '.tar.xz', d[sender]['title'])
-            procs.append(Popen(self.ssh_cmd + [cmd]))
+        # compress logs
+        for sender in ['local', 'remote']:
+            cmd = 'cd /tmp && tar cJf %s.tar.xz %s' % (
+                d[sender]['title'], d[sender]['title'])
+            check_call(self.ssh_cmd + [cmd])
 
             d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
 
-        for proc in procs:
-            proc.wait()
+        return d
 
-        self.d = d
-
-    def analyze(self):
-        d = self.d
+    def analyze(self, d):
         analyze_cmd = '~/pantheon/analysis/analyze.py --data-dir %s >> %s 2>&1'
 
-        procs = []
         for sender in ['local', 'remote']:
             cmd = analyze_cmd % (
                 d[sender]['data_dir'], d[sender]['job_log'])
-            procs.append(Popen(self.ssh_cmd + [cmd]))
+            check_call(self.ssh_cmd + [cmd])
 
-        for proc in procs:
-            proc.wait()
-
-    def upload(self):
-        d = self.d
+    def upload(self, d):
         node_desc = self.node['desc'].replace(' ', '-')
         s3_base = 's3://stanford-pantheon/real-world/%s' % node_desc
         s3_reports = s3_base + '/reports'
@@ -89,18 +81,13 @@ class Console(object):
             'pantheon_report.pdf', 'pantheon_summary.png',
             'pantheon_summary_mean.png', 'pantheon_summary_power.png']
 
-        # upload data
-        procs = []
         for sender in ['local', 'remote']:
+            # upload data logs
             cmd = 'aws s3 cp %s %s/%s' % (
                 d[sender]['tar'], s3_base, path.basename(d[sender]['tar']))
-            procs.append(Popen(self.ssh_cmd + [cmd]))
+            check_call(self.ssh_cmd + [cmd])
 
-        for proc in procs:
-            proc.wait()
-
-        # upload reports and job logs
-        for sender in ['local', 'remote']:
+            # upload reports and job logs
             for report in reports_to_upload:
                 src_path = '%s/%s' % (d[sender]['data_dir'], report)
                 dst_path = '%s/%s-%s' % (
@@ -108,11 +95,9 @@ class Console(object):
                 cmd = 'aws s3 cp %s %s' % (src_path, dst_path)
                 check_call(self.ssh_cmd + [cmd])
 
-            cmd = 'aws s3 cp %s %s/%s' % (
-                d[sender]['job_log'], s3_job_logs,
-                path.basename(d[sender]['job_log']))
+            cmd = 'aws s3 cp %s %s/%s' % (d[sender]['job_log'], s3_job_logs,
+                                          path.basename(d[sender]['job_log']))
             check_call(self.ssh_cmd + [cmd])
-
 
         # remove data directories and tar
         for sender in ['local', 'remote']:
@@ -123,13 +108,13 @@ class Console(object):
 
     def run(self):
         # run bidirectional experiments
-        self.test()
+        d = self.test()
 
         # generate graphs and report
-        self.analyze()
+        self.analyze(d)
 
         # upload results to S3
-        self.upload()
+        self.upload(d)
 
 
 def main():
@@ -145,11 +130,9 @@ def main():
         help='run times of each scheme (default 1)')
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        '--all', action='store_true',
-        help='set up all schemes specified in src/vantage_points.yml')
+    group.add_argument('--all', action='store_true', help='run all schemes')
     group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
-                       help='set up a space-separated list of schemes')
+                       help='run a space-separated list of schemes')
     args = parser.parse_args()
 
     Console(args, config).run()

@@ -1,27 +1,45 @@
 cloud_servers:
-  aws_california:
+  aws_california_1:
     user: ubuntu
     addr: 13.56.50.180
     ntp: time.stanford.edu
-    desc: AWS California
+    desc: AWS California 1
 
-  aws_brazil:
+  aws_california_2:
+    user: ubuntu
+    addr: 13.56.84.214
+    ntp: time.stanford.edu
+    desc: AWS California 2
+
+  aws_brazil_1:
     user: ubuntu
     addr: 54.233.106.170
     ntp: gps.ntp.br
-    desc: AWS Brazil
+    desc: AWS Brazil 1
+
+  aws_brazil_2:
+    user: ubuntu
+    addr: 54.233.99.159
+    ntp: gps.ntp.br
+    desc: AWS Brazil 2
+
+  aws_india_1:
+    user: ubuntu
+    addr: 35.154.240.73
+    ntp: nets.org.sg
+    desc: AWS India 1
+
+  aws_india_2:
+    user: ubuntu
+    addr: 13.126.30.111
+    ntp: nets.org.sg
+    desc: AWS India 2
 
   aws_korea:
     user: ubuntu
     addr: 13.124.31.209
     ntp: ntp.nict.jp
     desc: AWS Korea
-
-  aws_india:
-    user: ubuntu
-    addr: 35.154.240.73
-    ntp: nets.org.sg
-    desc: AWS India
 
 measurement_nodes:
   286-blackmagic:
