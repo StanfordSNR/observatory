@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from helpers.helpers import check_call, Popen, parse_config
+from helpers.helpers import check_call, call, Popen, parse_config
 
 
 def aws_key_setup(host, ssh_identity):
@@ -28,7 +28,7 @@ def aws_key_setup(host, ssh_identity):
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 
-def nodes_key_setup(host):
+def add_pantheon_key(host):
     cmd = ('KEY=$(cat ~/.ssh/pantheon_aws.pub); '
            'ssh -o StrictHostKeyChecking=no %s '
            '"grep -qF \'$KEY\' .ssh/authorized_keys || '
@@ -46,24 +46,32 @@ def clone_setup(host):
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 
-def config_copy(host):
+def copy_ssh_config(host):
     cmd = 'mkdir -p ~/.ssh/controlmasters'
     check_call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
-    cmd = 'scp ~/.vimrc %s:~' % host
+    helpers_dir = '~/pantheon-observatory/helpers'
+    cmd = 'scp -o StrictHostKeyChecking=no %s/ssh_config %s:~/.ssh/config' % (
+        helpers_dir, host)
+    check_call(cmd, shell=True)
+
+
+def copy_rc(host):
+    cmd = 'scp -o StrictHostKeyChecking=no ~/.vimrc %s:~' % host
     check_call(cmd, shell=True)
 
     helpers_dir = '~/pantheon-observatory/helpers'
-    cmd = 'scp %s/bashrc %s:~/.bashrc' % (helpers_dir, host)
-    check_call(cmd, shell=True)
-
-    cmd = 'scp %s/ssh_config %s:~/.ssh/config' % (helpers_dir, host)
+    cmd = 'scp -o StrictHostKeyChecking=no %s/bashrc %s:~/.bashrc' % (
+        helpers_dir, host)
     check_call(cmd, shell=True)
 
 
 def pkill(host):
-    cmd = '~/pantheon/helpers/pkill.py --kill-dir ~/pantheon'
-    return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    cmd = 'pkill -f pantheon'
+    call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+
+    cmd = 'pkill -f iperf'
+    call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 
 def git_pull(host, force=False):
@@ -75,6 +83,7 @@ def git_pull(host, force=False):
 
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
+
 def run_cmd(args, host, procs):
     cmd = args.cmd
 
@@ -82,12 +91,14 @@ def run_cmd(args, host, procs):
         procs.append(aws_key_setup(host, args.i))
     elif cmd == 'clone_setup':
         procs.append(clone_setup(host))
-    elif cmd == 'config_copy':
-        config_copy(host)
-    elif cmd == 'nodes_key_setup':
-        procs.append(nodes_key_setup(host))
+    elif cmd == 'copy_ssh_config':
+        copy_ssh_config(host)
+    elif cmd == 'copy_rc':
+        copy_rc(host)
+    elif cmd == 'add_pantheon_key':
+        procs.append(add_pantheon_key(host))
     elif cmd == 'pkill':
-        procs.append(pkill(host))
+        pkill(host)
     elif cmd == 'git_pull':
         procs.append(git_pull(host))
     elif cmd == 'git_force_pull':
@@ -100,12 +111,20 @@ def run_cmd(args, host, procs):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         '--all', action='store_true',
         help='all hosts listed in config.yml')
-    parser.add_argument(
+    group.add_argument(
+        '--measurement-nodes', action='store_true',
+        help='all measurement nodes listed in config.yml')
+    group.add_argument(
+        '--cloud-servers', action='store_true',
+        help='all cloud servers listed in config.yml')
+    group.add_argument(
         '--hosts', metavar='"HOST1,HOST2..."',
         help='comma-separated list of hosts listed in config.yml')
+
     parser.add_argument(
         '--ip', metavar='"IP1,IP2..."',
         help='comma-separated list of IP addresses of remote hosts')
@@ -115,27 +134,32 @@ def main():
     parser.add_argument(
         '-i', metavar='identify_file', help='ssh identity file')
     parser.add_argument(
-        'cmd', help='aws_key_setup, nodes_key_setup, clone_setup, config_copy,'
-        ' pkill, git_pull, git_force_pull, etc.')
+        'cmd', help='aws_key_setup, add_pantheon_key, clone_setup, '
+        'copy_ssh_config, copy_rc, pkill, git_pull, git_force_pull, etc.')
     args = parser.parse_args()
 
     procs = []
 
-    if args.all:
-        config = parse_config()
-
-        for machine_type in config:
-            for location in config[machine_type]:
-                site = config[machine_type][location]
-                host = site['user'] + '@' + site['addr']
-                run_cmd(args, host, procs)
-    elif args.hosts is not None:
-        config = parse_config()
-
+    hosts = None
+    if args.hosts is not None:
         hosts = args.hosts.split(',')
+
+    if (args.all or args.measurement_nodes or args.cloud_servers or
+            hosts is not None):
+        config = parse_config()
+
         for machine_type in config:
+            if hosts is None:
+                if machine_type == 'measurement_nodes':
+                    if not args.all and not args.measurement_nodes:
+                        continue
+
+                if machine_type == 'cloud_servers':
+                    if not args.all and not args.cloud_servers:
+                        continue
+
             for location in config[machine_type]:
-                if location not in hosts:
+                if hosts is not None and location not in hosts:
                     continue
 
                 site = config[machine_type][location]
