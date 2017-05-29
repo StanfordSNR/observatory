@@ -43,15 +43,22 @@ def clone_setup(host):
            './install_deps.sh && '
            './test/setup.py --all --install-deps && '
            './test/setup.py --all --setup')
-    proc = Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+
+
+def config_copy(host):
+    cmd = 'mkdir -p ~/.ssh/controlmasters'
+    check_call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
     cmd = 'scp ~/.vimrc %s:~' % host
     check_call(cmd, shell=True)
 
-    cmd = 'scp ~/pantheon-observatory/helpers/bashrc %s:~/.bashrc' % host
+    helpers_dir = '~/pantheon-observatory/helpers'
+    cmd = 'scp %s/bashrc %s:~/.bashrc' % (helpers_dir, host)
     check_call(cmd, shell=True)
 
-    return proc
+    cmd = 'scp %s/ssh_config %s:~/.ssh/config' % (helpers_dir, host)
+    check_call(cmd, shell=True)
 
 
 def pkill(host):
@@ -75,6 +82,8 @@ def run_cmd(args, host, procs):
         procs.append(aws_key_setup(host, args.i))
     elif cmd == 'clone_setup':
         procs.append(clone_setup(host))
+    elif cmd == 'config_copy':
+        config_copy(host)
     elif cmd == 'nodes_key_setup':
         procs.append(nodes_key_setup(host))
     elif cmd == 'pkill':
@@ -106,9 +115,8 @@ def main():
     parser.add_argument(
         '-i', metavar='identify_file', help='ssh identity file')
     parser.add_argument(
-        'cmd', help='command to run: '
-        'aws_key_setup, nodes_key_setup, clone_setup, pkill, git_pull, '
-        'git_force_pull, etc.')
+        'cmd', help='aws_key_setup, nodes_key_setup, clone_setup, config_copy,'
+        ' pkill, git_pull, git_force_pull, etc.')
     args = parser.parse_args()
 
     procs = []

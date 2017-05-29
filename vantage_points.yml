@@ -42,6 +42,31 @@ cloud_servers:
     desc: AWS Korea
 
 measurement_nodes:
+  stanford:
+    user: pi
+    addr: 171.66.3.65
+    desc: Stanford
+
+  brazil:
+    user: pi
+    addr: 177.234.144.122
+    desc: Brazil
+
+  colombia:
+    user: pi
+    addr: 138.121.201.58
+    desc: Colombia
+
+  india:
+    user: pi
+    addr: 109.73.164.122
+    desc: India
+
+  mexico:
+    user: pi
+    addr: 143.255.56.146
+    desc: Mexico
+
   286-blackmagic:
     user: fyy
     addr: 286-blackmagic.stanford.edu
