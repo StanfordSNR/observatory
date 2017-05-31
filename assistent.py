@@ -46,9 +46,6 @@ def clone_setup(host):
 
 
 def copy_ssh_config(host):
-    cmd = 'mkdir -p ~/.ssh/controlmasters'
-    check_call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
-
     helpers_dir = '~/observatory/helpers'
     cmd = 'scp -o StrictHostKeyChecking=no %s/ssh_config %s:~/.ssh/config' % (
         helpers_dir, host)
@@ -66,10 +63,10 @@ def copy_rc(host):
 
 
 def pkill(host):
-    cmd = 'pkill -f pantheon'
+    cmd = '~/pantheon/helpers/pkill.py'
     call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
-    cmd = 'pkill -f iperf'
+    cmd = 'rm -rf /tmp/2017-*-run* /tmp/pantheon-tmp'
     call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 

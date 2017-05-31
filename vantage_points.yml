@@ -67,12 +67,22 @@ measurement_nodes:
     addr: 109.73.164.122
     desc: India
 
+  china:
+    user: yanyu
+    addr: 101.6.97.145
+    desc: China
+
   nepal:
     user: pi
     addr: nepal6
     desc: Nepal
 
-  286-blackmagic:
+  nepal_pokhara:
+    user: pi
+    addr: nepal5
+    desc: Nepal Pokhara
+
+  stanford_blackmagic:
     user: fyy
     addr: 286-blackmagic.stanford.edu
-    desc: Stanford
+    desc: Stanford Blackmagic
