@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import os
 from os import path
 import argparse
+import requests
 from helpers.helpers import parse_config, check_call, utc_date
 
 
@@ -9,6 +11,7 @@ class Console(object):
     def __init__(self, args, config):
         self.server = config['cloud_servers'][args.cloud_server]
         self.node = config['measurement_nodes'][args.measurement_node]
+        self.measurement_node = args.measurement_node
 
         self.server_host = '%s@%s' % (self.server['user'], self.server['addr'])
         self.node_host = '%s@%s' % (self.node['user'], self.node['addr'])
@@ -25,7 +28,7 @@ class Console(object):
     def test(self):
         common_cmd = (
             '~/pantheon/test/test.py remote {s.node_host}:~/pantheon '
-            '{s.schemes} --random-order --run-times {s.run_times} '
+            '{s.schemes} --random-order -t 30 --run-times {s.run_times} '
             '--tunnel-server local --local-addr {s.server[addr]} '
             '--local-desc "{s.server[desc]}" --remote-desc "{s.node[desc]}" '
             '--ntp-addr {s.server[ntp]} --pkill-cleanup').format(s=self)
@@ -46,7 +49,8 @@ class Console(object):
                     self.node['desc'], self.server['desc'])
 
             title = title.replace(' ', '-')
-            d[sender]['title'] = '%s-%s' % (utc_date(), title)
+            d[sender]['time'] = utc_date()
+            d[sender]['title'] = '%s-%s' % (d[sender]['time'], title)
             d[sender]['data_dir'] = '/tmp/%s' % d[sender]['title']
             d[sender]['job_log'] = '/tmp/%s.log' % d[sender]['title']
 
@@ -56,8 +60,8 @@ class Console(object):
 
         # compress logs
         for sender in ['local', 'remote']:
-            cmd = 'cd /tmp && tar cJf %s.tar.xz %s' % (
-                d[sender]['title'], d[sender]['title'])
+            cmd = 'cd /tmp && tar cJf {title}.tar.xz {title}'.format(
+                title=d[sender]['title'])
             check_call(self.ssh_cmd + [cmd])
 
             d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
@@ -72,32 +76,82 @@ class Console(object):
                 d[sender]['data_dir'], d[sender]['job_log'])
             check_call(self.ssh_cmd + [cmd])
 
+    def post_to_website(self, payload):
+        update_url = os.environ['UPDATE_URL']
+        url = 'http://52.8.182.100/%s/' % update_url
+
+        client = requests.session()
+        response = client.get(url)
+
+        csrftoken = client.cookies['csrftoken']
+        payload['csrfmiddlewaretoken'] = csrftoken
+
+        client.post(url, data=payload, headers=dict(Referer=url))
+
     def upload(self, d):
         node_desc = self.node['desc'].replace(' ', '-')
-        s3_base = 's3://stanford-pantheon/real-world/%s' % node_desc
-        s3_reports = s3_base + '/reports'
-        s3_job_logs = s3_base + '/job-logs'
+        s3_base = 's3://stanford-pantheon/real-world/%s/' % node_desc
+        s3_reports = s3_base + 'reports/'
+        s3_job_logs = s3_base + 'job-logs/'
+
+        url = 'https://s3.amazonaws.com/stanford-pantheon/real-world/%s/'
+        s3_key_base = url % node_desc
+        s3_key_reports = s3_key_base + 'reports/'
+
         reports_to_upload = [
             'pantheon_report.pdf', 'pantheon_summary.png',
             'pantheon_summary_mean.png', 'pantheon_summary_power.png']
 
+        if 'nepal' in self.measurement_node:
+            link = 'wireless'
+        else:
+            link = 'ethernet'
+
         for sender in ['local', 'remote']:
+            to_node = True if sender == 'local' else False
+            payload = {
+                'node': self.measurement_node,
+                'link': link,
+                'to_node': to_node,
+                'time': d[sender]['time'],
+            }
+
             # upload data logs
-            cmd = 'aws s3 cp %s %s/%s' % (
-                d[sender]['tar'], s3_base, path.basename(d[sender]['tar']))
+            data_logs = path.basename(d[sender]['tar'])
+
+            cmd = 'aws s3 cp %s %s' % (
+                d[sender]['tar'], path.join(s3_base, data_logs))
             check_call(self.ssh_cmd + [cmd])
+
+            payload['data'] = path.join(s3_key_base, data_logs)
 
             # upload reports and job logs
             for report in reports_to_upload:
-                src_path = '%s/%s' % (d[sender]['data_dir'], report)
-                dst_path = '%s/%s-%s' % (
-                    s3_reports, d[sender]['title'], report.replace('_', '-'))
-                cmd = 'aws s3 cp %s %s' % (src_path, dst_path)
+                src_path = path.join(d[sender]['data_dir'], report)
+
+                dst_file = '%s-%s' % (
+                    d[sender]['title'], report.replace('_', '-'))
+                dst_url = path.join(s3_reports, dst_file)
+
+                cmd = 'aws s3 cp %s %s' % (src_path, dst_url)
                 check_call(self.ssh_cmd + [cmd])
 
-            cmd = 'aws s3 cp %s %s/%s' % (d[sender]['job_log'], s3_job_logs,
-                                          path.basename(d[sender]['job_log']))
+                # add s3 file to payload of POST request
+                s3_key_file = path.join(s3_key_reports, dst_file)
+                if 'pantheon-summary.png' in s3_key_file:
+                    payload['summary'] = s3_key_file
+                elif 'pantheon-summary-mean.png' in s3_key_file:
+                    payload['summary_mean'] = s3_key_file
+                elif 'pantheon-report.pdf' in s3_key_file:
+                    payload['report'] = s3_key_file
+
+            job_log = path.basename(d[sender]['job_log'])
+            cmd = 'aws s3 cp %s %s' % (
+                d[sender]['job_log'], path.join(s3_job_logs, job_log))
             check_call(self.ssh_cmd + [cmd])
+
+            # post update to website
+            self.post_to_website(payload)
 
         # remove data directories and tar
         for sender in ['local', 'remote']:

@@ -24,7 +24,8 @@ def aws_key_setup(host, ssh_identity):
     check_call(cmd, shell=True)
 
     cmd = ('sudo apt-get update && '
-           'sudo apt-get -y install python-minimal awscli')
+           'sudo apt-get -y install python-minimal awscli && '
+           'sudo pip install requests')
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 
@@ -79,6 +80,12 @@ def git_pull(host, force=False):
     return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
 
+def ssh_key_remove(host):
+    ip = host.split('@')[-1]
+    cmd = 'ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R ' + ip
+    check_call(cmd, shell=True)
+
+
 def run_cmd(args, host, procs):
     cmd = args.cmd
 
@@ -98,6 +105,8 @@ def run_cmd(args, host, procs):
         procs.append(git_pull(host))
     elif cmd == 'git_force_pull':
         procs.append(git_pull(host, force=True))
+    elif cmd == 'ssh_key_remove':
+        ssh_key_remove(host)
     else:
         procs.append(
             Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd]))
@@ -130,7 +139,8 @@ def main():
         '-i', metavar='identify_file', help='ssh identity file')
     parser.add_argument(
         'cmd', help='aws_key_setup, add_pantheon_key, clone_setup, '
-        'copy_ssh_config, copy_rc, pkill, git_pull, git_force_pull, etc.')
+        'copy_ssh_config, copy_rc, pkill, git_pull, git_force_pull, '
+        'ssh_key_remove, etc.')
     args = parser.parse_args()
 
     procs = []
