@@ -67,9 +67,6 @@ def pkill(host):
     cmd = '~/pantheon/helpers/pkill.py'
     call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
 
-    cmd = 'rm -rf /tmp/2017-*-run* /tmp/pantheon-tmp'
-    call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
-
 
 def git_pull(host, force=False):
     if not force:

@@ -9,21 +9,34 @@ from helpers.helpers import parse_config, check_call, utc_date
 
 class Console(object):
     def __init__(self, args, config):
+        self.measurement_node = args.measurement_node
+        self.run_times = args.run_times
+
         self.server = config['cloud_servers'][args.cloud_server]
         self.node = config['measurement_nodes'][args.measurement_node]
-        self.measurement_node = args.measurement_node
+
+        self.ppp0 = args.ppp0
+        if self.ppp0:
+            self.link = 'cellular'
+        else:
+            if 'nepal' in self.measurement_node:
+                self.link = 'wireless'
+            else:
+                self.link = 'ethernet'
 
         self.server_host = '%s@%s' % (self.server['user'], self.server['addr'])
         self.node_host = '%s@%s' % (self.node['user'], self.node['addr'])
         self.ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
                         self.server_host]
 
-        self.run_times = args.run_times
-
         if args.all:
             self.schemes = '--all'
         elif args.schemes is not None:
             self.schemes = '--schemes "%s"' % args.schemes
+
+        self.pdata = '~/pantheon_data'
+        cmd = 'mkdir -p ' + self.pdata
+        check_call(self.ssh_cmd + [cmd])
 
     def test(self):
         common_cmd = (
@@ -32,6 +45,11 @@ class Console(object):
             '--tunnel-server local --local-addr {s.server[addr]} '
             '--local-desc "{s.server[desc]}" --remote-desc "{s.node[desc]}" '
             '--ntp-addr {s.server[ntp]} --pkill-cleanup').format(s=self)
+
+        title_node_desc = self.node['desc']
+        if self.ppp0:
+            common_cmd += ' --remote-if ppp0'
+            title_node_desc += ' ppp0'
 
         runs_str = 'runs' if self.run_times > 1 else 'run'
         expt_title = '%s to %s' + ' %d %s' % (self.run_times, runs_str)
@@ -42,17 +60,17 @@ class Console(object):
         for sender in ['local', 'remote']:
             d[sender] = {}
             if sender == 'local':
-                title = expt_title % (
-                    self.server['desc'], self.node['desc'])
+                title = expt_title % (self.server['desc'], title_node_desc)
             else:
-                title = expt_title % (
-                    self.node['desc'], self.server['desc'])
+                title = expt_title % (title_node_desc, self.server['desc'])
 
             title = title.replace(' ', '-')
             d[sender]['time'] = utc_date()
             d[sender]['title'] = '%s-%s' % (d[sender]['time'], title)
-            d[sender]['data_dir'] = '/tmp/%s' % d[sender]['title']
-            d[sender]['job_log'] = '/tmp/%s.log' % d[sender]['title']
+
+            d[sender]['data_dir'] = path.join(self.pdata, d[sender]['title'])
+            d[sender]['job_log'] = path.join(
+                self.pdata, '%s.log' % d[sender]['title'])
 
             cmd = common_cmd + ' --sender %s --data-dir %s >> %s 2>&1' % (
                 sender, d[sender]['data_dir'], d[sender]['job_log'])
@@ -60,8 +78,8 @@ class Console(object):
 
         # compress logs
         for sender in ['local', 'remote']:
-            cmd = 'cd /tmp && tar cJf {title}.tar.xz {title}'.format(
-                title=d[sender]['title'])
+            cmd = 'cd {pdata} && tar cJf {t}.tar.xz {t}'.format(
+                pdata=self.pdata, t=d[sender]['title'])
             check_call(self.ssh_cmd + [cmd])
 
             d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
@@ -78,7 +96,7 @@ class Console(object):
 
     def post_to_website(self, payload):
         update_url = os.environ['UPDATE_URL']
-        url = 'http://52.8.182.100/%s/' % update_url
+        url = 'http://pantheon.stanford.edu/%s/' % update_url
 
         client = requests.session()
         response = client.get(url)
@@ -102,16 +120,11 @@ class Console(object):
             'pantheon_report.pdf', 'pantheon_summary.png',
             'pantheon_summary_mean.png', 'pantheon_summary_power.png']
 
-        if 'nepal' in self.measurement_node:
-            link = 'wireless'
-        else:
-            link = 'ethernet'
-
         for sender in ['local', 'remote']:
             to_node = True if sender == 'local' else False
             payload = {
                 'node': self.measurement_node,
-                'link': link,
+                'link': self.link,
                 'to_node': to_node,
                 'time': d[sender]['time'],
             }
@@ -154,10 +167,8 @@ class Console(object):
             self.post_to_website(payload)
 
         # remove data directories and tar
-        for sender in ['local', 'remote']:
-            cmd = 'rm -rf %s %s %s /tmp/pantheon-tmp' % (
-                d[sender]['data_dir'], d[sender]['tar'], d[sender]['job_log'])
-            check_call(self.ssh_cmd + [cmd])
+        cmd = 'rm -rf %s /tmp/pantheon-tmp' % self.pdata
+        check_call(self.ssh_cmd + [cmd])
 
 
     def run(self):
@@ -182,6 +193,8 @@ def main():
     parser.add_argument(
         '--run-times', metavar='TIMES', type=int, default=1,
         help='run times of each scheme (default 1)')
+    parser.add_argument('--ppp0', action='store_true',
+                        help='use ppp0 interface on node')
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--all', action='store_true', help='run all schemes')
