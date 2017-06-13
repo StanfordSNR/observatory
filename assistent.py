@@ -26,12 +26,12 @@ def aws_key_setup(host, ssh_identity):
     cmd = ('sudo apt-get update && '
            'sudo apt-get -y install python-minimal awscli && '
            'sudo pip install requests')
-    return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    return Popen(['ssh', host, cmd])
 
 
 def add_pantheon_key(host):
     cmd = ('KEY=$(cat ~/.ssh/pantheon_aws.pub); '
-           'ssh -o StrictHostKeyChecking=no %s '
+           'ssh %s '
            '"grep -qF \'$KEY\' .ssh/authorized_keys || '
            'echo \'$KEY\' >> .ssh/authorized_keys"' % host)
     return Popen(cmd, shell=True)
@@ -43,29 +43,41 @@ def clone_setup(host):
            './install_deps.sh && '
            './test/setup.py --all --install-deps && '
            './test/setup.py --all --setup')
-    return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    return Popen(['ssh', host, cmd])
+
+
+def setup(host, interface=None):
+    if interface:
+        cmd = ('cd ~/pantheon && '
+               './test/setup.py --all --setup --interface %s' % interface)
+    else:
+        cmd = 'cd ~/pantheon && ./test/setup.py --all --setup'
+    return Popen(['ssh', host, cmd])
 
 
 def copy_ssh_config(host):
     helpers_dir = '~/observatory/helpers'
-    cmd = 'scp -o StrictHostKeyChecking=no %s/ssh_config %s:~/.ssh/config' % (
+    cmd = 'scp %s/ssh_config %s:~/.ssh/config' % (
         helpers_dir, host)
     check_call(cmd, shell=True)
 
 
 def copy_rc(host):
-    cmd = 'scp -o StrictHostKeyChecking=no ~/.vimrc %s:~' % host
+    cmd = 'scp ~/.vimrc %s:~' % host
     check_call(cmd, shell=True)
 
     helpers_dir = '~/observatory/helpers'
-    cmd = 'scp -o StrictHostKeyChecking=no %s/bashrc %s:~/.bashrc' % (
+    cmd = 'scp %s/bashrc %s:~/.bashrc' % (
         helpers_dir, host)
     check_call(cmd, shell=True)
 
 
 def pkill(host):
     cmd = '~/pantheon/helpers/pkill.py'
-    call(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    call(['ssh', host, cmd])
+
+    cmd = 'rm -rf ~/pantheon_data /tmp/pantheon-tmp'
+    call(['ssh', host, cmd])
 
 
 def git_pull(host, force=False):
@@ -74,7 +86,7 @@ def git_pull(host, force=False):
     else:
         cmd = 'cd ~/pantheon && git reset --hard @ && git pull'
 
-    return Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd])
+    return Popen(['ssh', host, cmd])
 
 
 def ssh_key_remove(host):
@@ -98,6 +110,10 @@ def run_cmd(args, host, procs):
         procs.append(add_pantheon_key(host))
     elif cmd == 'pkill':
         pkill(host)
+    elif cmd == 'setup':
+        procs.append(setup(host))
+    elif cmd == 'setup_ppp0':
+        procs.append(setup(host, 'ppp0'))
     elif cmd == 'git_pull':
         procs.append(git_pull(host))
     elif cmd == 'git_force_pull':
@@ -106,7 +122,7 @@ def run_cmd(args, host, procs):
         ssh_key_remove(host)
     else:
         procs.append(
-            Popen(['ssh', '-o', 'StrictHostKeyChecking=no', host, cmd]))
+            Popen(['ssh', host, cmd]))
 
 
 def main():

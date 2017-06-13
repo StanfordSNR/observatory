@@ -18,7 +18,7 @@ def main():
         if server in config[machine_type]:
             site = config[machine_type][server]
             host = site['user'] + '@' + site['addr']
-            check_call(['ssh', '-o', 'StrictHostKeyChecking=no', host])
+            check_call(['ssh', host])
 
 
 if __name__ == '__main__':

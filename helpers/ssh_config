@@ -16,3 +16,8 @@ Host thu-v6
     User yanyu
     HostName 2402:f000:6:6003:161a:b9db:dbba:5f67
     Port 22222
+
+Host *
+   ControlMaster auto
+   ControlPath ~/.ssh/master-socket/%r@%h:%p
+   ControlPersist 10m

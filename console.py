@@ -26,8 +26,7 @@ class Console(object):
 
         self.server_host = '%s@%s' % (self.server['user'], self.server['addr'])
         self.node_host = '%s@%s' % (self.node['user'], self.node['addr'])
-        self.ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
-                        self.server_host]
+        self.ssh_cmd = ['ssh', self.server_host]
 
         if args.all:
             self.schemes = '--all'
