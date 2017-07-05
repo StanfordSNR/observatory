@@ -1,0 +1,5 @@
+# /etc/ppp/peers/india
+file /etc/ppp/options_observatory
+user ""
+password ""
+connect "/usr/sbin/chat -v -f /etc/chatscripts/india.chat"

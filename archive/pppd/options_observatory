@@ -14,4 +14,4 @@ noauth
 hide-password
 persist
 holdoff 10
-maxfail 0
+maxfail 3
