@@ -24,7 +24,7 @@ def aws_key_setup(host, ssh_identity):
     check_call(cmd, shell=True)
 
     cmd = ('sudo apt-get update && '
-           'sudo apt-get -y install python-minimal awscli && '
+           'sudo apt-get -y install python-minimal pxz awscli && '
            'sudo pip install requests')
     return Popen(['ssh', host, cmd])
 
@@ -48,10 +48,10 @@ def clone_setup(host):
 
 def setup(host, interface=None):
     if interface:
-        cmd = ('cd ~/pantheon && '
+        cmd = ('cd ~/pantheon && git pull && '
                './test/setup.py --all --setup --interface %s' % interface)
     else:
-        cmd = 'cd ~/pantheon && ./test/setup.py --all --setup'
+        cmd = 'cd ~/pantheon && git pull && ./test/setup.py --all --setup'
     return Popen(['ssh', host, cmd])
 
 

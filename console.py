@@ -11,6 +11,7 @@ class Console(object):
     def __init__(self, args, config):
         self.measurement_node = args.measurement_node
         self.run_times = args.run_times
+        self.multi_flow = args.multi_flow
 
         self.server = config['cloud_servers'][args.cloud_server]
         self.node = config['measurement_nodes'][args.measurement_node]
@@ -53,6 +54,10 @@ class Console(object):
         runs_str = 'runs' if self.run_times > 1 else 'run'
         expt_title = '%s to %s' + ' %d %s' % (self.run_times, runs_str)
 
+        if self.multi_flow:
+            common_cmd += ' -f 3 --interval 10'
+            expt_title += ' 3 flows'
+
         d = {}
 
         # run experiments
@@ -77,7 +82,7 @@ class Console(object):
 
         # compress logs
         for sender in ['local', 'remote']:
-            cmd = 'cd {pdata} && tar cJf {t}.tar.xz {t}'.format(
+            cmd = 'cd {pdata} && tar -I pxz -cf {t}.tar.xz {t}'.format(
                 pdata=self.pdata, t=d[sender]['title'])
             check_call(self.ssh_cmd + [cmd])
 
@@ -121,10 +126,12 @@ class Console(object):
 
         for sender in ['local', 'remote']:
             to_node = True if sender == 'local' else False
+            flow_scenario = 'multiple' if self.multi_flow else 'single'
             payload = {
                 'node': self.measurement_node,
                 'link': self.link,
                 'to_node': to_node,
+                'flow': flow_scenario,
                 'time': d[sender]['time'],
             }
 
@@ -194,6 +201,8 @@ def main():
         help='run times of each scheme (default 1)')
     parser.add_argument('--ppp0', action='store_true',
                         help='use ppp0 interface on node')
+    parser.add_argument('--multi-flow', action='store_true',
+                        help='run multiple flows')
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--all', action='store_true', help='run all schemes')

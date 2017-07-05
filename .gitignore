@@ -1,2 +1,2 @@
-.secret_slack_url
 *.pyc
+/run_script
