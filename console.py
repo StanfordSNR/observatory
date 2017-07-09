@@ -122,7 +122,7 @@ class Console(object):
 
         reports_to_upload = [
             'pantheon_report.pdf', 'pantheon_summary.png',
-            'pantheon_summary_mean.png', 'pantheon_summary_power.png']
+            'pantheon_summary_mean.png']
 
         for sender in ['local', 'remote']:
             to_node = True if sender == 'local' else False

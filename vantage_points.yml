@@ -71,3 +71,8 @@ measurement_nodes:
     user: pi
     addr: nepal5
     desc: Nepal
+
+  china:
+    user: yanyu
+    addr: 166.111.17.79
+    desc: China
