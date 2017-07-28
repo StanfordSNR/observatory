@@ -1,5 +1,5 @@
 # /etc/ppp/peers/colombia
 file /etc/ppp/options_observatory
-user "comcel"
-password "comcel"
+user "movistar"
+password "movistar"
 connect "/usr/sbin/chat -v -f /etc/chatscripts/colombia.chat"

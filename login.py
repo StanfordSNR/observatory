@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from helpers.helpers import check_call, parse_config
+from helpers.helpers import call, parse_config
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
         if server in config[machine_type]:
             site = config[machine_type][server]
             host = site['user'] + '@' + site['addr']
-            check_call(['ssh', host])
+            call(['ssh', host])
 
 
 if __name__ == '__main__':
