@@ -26,7 +26,7 @@ def call(cmd, **kwargs):
 
 def check_call(cmd, **kwargs):
     print_cmd(cmd)
-    return subprocess.check_call(cmd, **kwargs)
+    # return subprocess.check_call(cmd, **kwargs)
 
 
 def check_output(cmd, **kwargs):

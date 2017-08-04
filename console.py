@@ -9,86 +9,107 @@ from helpers.helpers import parse_config, check_call, utc_date
 
 class Console(object):
     def __init__(self, args, config):
-        self.measurement_node = args.measurement_node
+        # common args
+        self.expt_type = args.expt_type
+        self.flows = args.flows
         self.run_times = args.run_times
-        self.multi_flow = args.multi_flow
-
-        self.server = config['cloud_servers'][args.cloud_server]
-        self.node = config['measurement_nodes'][args.measurement_node]
-
-        self.ppp0 = args.ppp0
-        if self.ppp0:
-            self.link = 'cellular'
-        else:
-            if 'nepal' in self.measurement_node:
-                self.link = 'wireless'
-            else:
-                self.link = 'ethernet'
-
-        self.server_host = '%s@%s' % (self.server['user'], self.server['addr'])
-        self.node_host = '%s@%s' % (self.node['user'], self.node['addr'])
-        self.ssh_cmd = ['ssh', self.server_host]
 
         if args.all:
             self.schemes = '--all'
         elif args.schemes is not None:
             self.schemes = '--schemes "%s"' % args.schemes
 
-        self.pdata = '~/pantheon_data'
-        cmd = 'mkdir -p ' + self.pdata
-        check_call(self.ssh_cmd + [cmd])
+        # special args for each expt_type
+        if args.expt_type == 'node':
+            self.master_name = args.cloud
+            self.slave_name = args.node
+            self.master = config['aws_servers'][args.cloud]
+            self.slave = config['nodes'][args.node]
+            self.ppp0 = args.ppp0
+        elif args.expt_type == 'cloud':
+            self.master_name = args.cloud_master
+            self.slave_name = args.cloud_slave
+            self.master = config['gce_servers'][args.cloud_master]
+            self.slave = config['gce_servers'][args.cloud_slave]
+            self.ppp0 = False
+
+        self.master_host = self.master['user'] + '@' + self.master['addr']
+        self.slave_host = self.slave['user'] + '@' + self.slave['addr']
+
+        # default args
+        self.runtime = 30  # s
 
     def test(self):
-        common_cmd = (
-            '~/pantheon/test/test.py remote {s.node_host}:~/pantheon '
-            '{s.schemes} --random-order -t 30 --run-times {s.run_times} '
-            '--tunnel-server local --local-addr {s.server[addr]} '
-            '--local-desc "{s.server[desc]}" --remote-desc "{s.node[desc]}" '
-            '--ntp-addr {s.server[ntp]} --pkill-cleanup').format(s=self)
+        # create data dir
+        self.data_dir = '~/pantheon_data'
+        check_call(['ssh', self.master_host, 'mkdir -p ' + self.data_dir])
 
-        title_node_desc = self.node['desc']
+        cmd = (
+            '~/pantheon/test/test.py remote {s.slave_host}:~/pantheon '
+            '{s.schemes} -t {s.runtime} --run-times {s.run_times} '
+            '--tunnel-server local --local-addr {s.master[addr]} '
+            '--local-desc "{s.master[desc]}" --remote-desc "{s.slave[desc]}" '
+            '--random-order --pkill-cleanup').format(s=self)
+
+        title_template = '%s to %s'
+
+        # NTP
+        if 'ntp' in self.master:
+            cmd += ' --ntp-addr ' + self.master['ntp']
+
+        # runs
+        if self.run_times > 1:
+            title_template += ' %d runs' % self.run_times
+        else:
+            title_template += ' 1 run'
+
+        # flows
+        if self.flows > 1:
+            cmd += ' -f %d --interval %d' % (
+                self.flows, self.runtime / self.flows)
+            title_template += ' %d flows' % self.flows
+
+        # cellular link
+        slave_desc = self.slave['desc']
         if self.ppp0:
-            common_cmd += ' --remote-if ppp0'
-            title_node_desc += ' ppp0'
-
-        runs_str = 'runs' if self.run_times > 1 else 'run'
-        expt_title = '%s to %s' + ' %d %s' % (self.run_times, runs_str)
-
-        if self.multi_flow:
-            common_cmd += ' -f 3 --interval 10'
-            expt_title += ' 3 flows'
-
-        d = {}
+            cmd += ' --remote-if ppp0'
+            slave_desc += ' ppp0'
 
         # run experiments
+        d = {}
+
         for sender in ['local', 'remote']:
             d[sender] = {}
+
             if sender == 'local':
-                title = expt_title % (self.server['desc'], title_node_desc)
+                title = title_template % (self.master['desc'], slave_desc)
             else:
-                title = expt_title % (title_node_desc, self.server['desc'])
+                title = title_template % (slave_desc, self.master['desc'])
 
             title = title.replace(' ', '-')
+
             d[sender]['time'] = utc_date()
             d[sender]['title'] = '%s-%s' % (d[sender]['time'], title)
 
-            d[sender]['data_dir'] = path.join(self.pdata, d[sender]['title'])
+            d[sender]['data_dir'] = path.join(
+                self.data_dir, d[sender]['title'])
             d[sender]['job_log'] = path.join(
-                self.pdata, '%s.log' % d[sender]['title'])
+                self.data_dir, '%s.log' % d[sender]['title'])
 
-            cmd = common_cmd + ' --sender %s --data-dir %s >> %s 2>&1' % (
+            cmd_in_ssh = cmd + ' --sender %s --data-dir %s >> %s 2>&1' % (
                 sender, d[sender]['data_dir'], d[sender]['job_log'])
-            check_call(self.ssh_cmd + [cmd])
-
-        # compress logs
-        for sender in ['local', 'remote']:
-            cmd = 'cd {pdata} && tar -I pxz -cf {t}.tar.xz {t}'.format(
-                pdata=self.pdata, t=d[sender]['title'])
-            check_call(self.ssh_cmd + [cmd])
-
-            d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
+            check_call(['ssh', self.master_host, cmd_in_ssh])
 
         return d
+
+    def compress(self, d):
+        # compress logs
+        for sender in ['local', 'remote']:
+            cmd = 'cd {data_dir} && tar -I pxz -cf {t}.tar.xz {t}'.format(
+                data_dir=self.data_dir, t=d[sender]['title'])
+            check_call(['ssh', self.master_host, cmd])
+
+            d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
 
     def analyze(self, d):
         analyze_cmd = '~/pantheon/analysis/analyze.py --data-dir %s >> %s 2>&1'
@@ -96,11 +117,12 @@ class Console(object):
         for sender in ['local', 'remote']:
             cmd = analyze_cmd % (
                 d[sender]['data_dir'], d[sender]['job_log'])
-            check_call(self.ssh_cmd + [cmd])
+            check_call(['ssh', self.master_host, cmd])
 
     def post_to_website(self, payload):
         update_url = os.environ['UPDATE_URL']
-        url = 'http://pantheon.stanford.edu/%s/' % update_url
+        url = 'http://pantheon.stanford.edu/%s/%s/' % (update_url,
+                                                       self.expt_type)
 
         client = requests.session()
         response = client.get(url)
@@ -111,38 +133,55 @@ class Console(object):
         client.post(url, data=payload, headers=dict(Referer=url))
 
     def upload(self, d):
-        node_desc = self.node['desc'].replace(' ', '-')
-        s3_base = 's3://stanford-pantheon/real-world/%s/' % node_desc
+        slave_desc = self.slave['desc'].replace(' ', '-')
+
+        s3_base = 's3://stanford-pantheon/real-world/%s/' % slave_desc
         s3_reports = s3_base + 'reports/'
         s3_job_logs = s3_base + 'job-logs/'
 
-        url = 'https://s3.amazonaws.com/stanford-pantheon/real-world/%s/'
-        s3_key_base = url % node_desc
-        s3_key_reports = s3_key_base + 'reports/'
+        s3_url_base = ('https://s3.amazonaws.com/stanford-pantheon/'
+                       'real-world/%s/' % slave_desc)
+        s3_url_reports = s3_url_base + 'reports/'
 
-        reports_to_upload = [
-            'pantheon_report.pdf', 'pantheon_summary.png',
-            'pantheon_summary_mean.png']
+        reports_to_upload = ['pantheon_report.pdf', 'pantheon_summary.png',
+                             'pantheon_summary_mean.png']
 
         for sender in ['local', 'remote']:
             to_node = True if sender == 'local' else False
-            flow_scenario = 'multiple' if self.multi_flow else 'single'
-            payload = {
-                'node': self.measurement_node,
-                'link': self.link,
-                'to_node': to_node,
-                'flow': flow_scenario,
-                'time': d[sender]['time'],
-            }
+
+            if self.expt_type == 'node':
+                if self.ppp0:
+                    link = 'cellular'
+                else:
+                    if self.slave_name == 'nepal':
+                        link = 'wireless'
+                    else:
+                        link = 'ethernet'
+
+                payload = {
+                    'cloud': self.master_name,
+                    'node': self.slave_name,
+                    'to_node': to_node,
+                    'link': link,
+                    'flow': self.flows,
+                    'time': d[sender]['time'],
+                }
+            elif self.expt_type == 'cloud':
+                payload = {
+                    'src': self.master_name,
+                    'dst': self.slave_name,
+                    'flow': self.flows,
+                    'time': d[sender]['time'],
+                }
 
             # upload data logs
             data_logs = path.basename(d[sender]['tar'])
 
             cmd = 'aws s3 cp %s %s' % (
                 d[sender]['tar'], path.join(s3_base, data_logs))
-            check_call(self.ssh_cmd + [cmd])
+            check_call(['ssh', self.master_host, cmd])
 
-            payload['data'] = path.join(s3_key_base, data_logs)
+            payload['log'] = path.join(s3_url_base, data_logs)
 
             # upload reports and job logs
             for report in reports_to_upload:
@@ -153,33 +192,37 @@ class Console(object):
                 dst_url = path.join(s3_reports, dst_file)
 
                 cmd = 'aws s3 cp %s %s' % (src_path, dst_url)
-                check_call(self.ssh_cmd + [cmd])
+                check_call(['ssh', self.master_host, cmd])
 
                 # add s3 file to payload of POST request
-                s3_key_file = path.join(s3_key_reports, dst_file)
-                if 'pantheon-summary.png' in s3_key_file:
-                    payload['summary'] = s3_key_file
-                elif 'pantheon-summary-mean.png' in s3_key_file:
-                    payload['summary_mean'] = s3_key_file
-                elif 'pantheon-report.pdf' in s3_key_file:
-                    payload['report'] = s3_key_file
+                s3_url_file = path.join(s3_url_reports, dst_file)
+
+                if report == 'pantheon_report.pdf':
+                    payload['report'] = s3_url_file
+                elif report == 'pantheon_summary.png':
+                    payload['graph1'] = s3_url_file
+                elif report == 'pantheon_summary_mean.png':
+                    payload['graph2'] = s3_url_file
 
             job_log = path.basename(d[sender]['job_log'])
             cmd = 'aws s3 cp %s %s' % (
                 d[sender]['job_log'], path.join(s3_job_logs, job_log))
-            check_call(self.ssh_cmd + [cmd])
+            check_call(['ssh', self.master_host, cmd])
 
             # post update to website
             self.post_to_website(payload)
 
         # remove data directories and tar
-        cmd = 'rm -rf %s /tmp/pantheon-tmp' % self.pdata
-        check_call(self.ssh_cmd + [cmd])
+        cmd = 'rm -rf %s /tmp/pantheon-tmp' % self.data_dir
+        check_call(['ssh', self.master_host, cmd])
 
 
     def run(self):
         # run bidirectional experiments
         d = self.test()
+
+        # compress logs
+        self.compress(d)
 
         # generate graphs and report
         self.analyze(d)
@@ -190,24 +233,40 @@ class Console(object):
 
 def main():
     config = parse_config()
-
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'cloud_server', choices=config['cloud_servers'].keys())
-    parser.add_argument(
-        'measurement_node', choices=config['measurement_nodes'].keys())
-    parser.add_argument(
-        '--run-times', metavar='TIMES', type=int, default=1,
-        help='run times of each scheme (default 1)')
-    parser.add_argument('--ppp0', action='store_true',
-                        help='use ppp0 interface on node')
-    parser.add_argument('--multi-flow', action='store_true',
-                        help='run multiple flows')
 
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--all', action='store_true', help='run all schemes')
-    group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
-                       help='run a space-separated list of schemes')
+    subparsers = parser.add_subparsers(dest='expt_type')
+
+    node_parser = subparsers.add_parser(
+        'node', help='between a measurement node and the closest cloud server')
+    cloud_parser = subparsers.add_parser(
+        'cloud', help='between two cloud servers')
+
+    node_parser.add_argument('cloud', help='AWS cloud server',
+                             choices=config['aws_servers'].keys())
+    node_parser.add_argument('node', help='measurement node',
+                             choices=config['nodes'].keys())
+    node_parser.add_argument(
+        '--ppp0', action='store_true', help='use ppp0 interface on node')
+
+    cloud_parser.add_argument('cloud_master', help='GCE cloud server',
+                              choices=config['gce_servers'].keys())
+    cloud_parser.add_argument('cloud_slave', help='GCE cloud server',
+                              choices=config['gce_servers'].keys())
+
+    for subparser in [node_parser, cloud_parser]:
+        subparser.add_argument(
+            '-f', '--flows', metavar='FLOWS', type=int, default=1,
+            help='number of flows (default 1)')
+        subparser.add_argument(
+            '--run-times', metavar='TIMES', type=int, default=1,
+            help='run times of each scheme (default 1)')
+
+        group = subparser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '--all', action='store_true', help='run all schemes')
+        group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
+                           help='run a space-separated list of schemes')
     args = parser.parse_args()
 
     Console(args, config).run()
