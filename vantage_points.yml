@@ -1,4 +1,40 @@
-cloud_servers:
+nodes:
+  stanford:
+    user: pi
+    addr: 171.66.3.65
+    desc: Stanford
+
+  mexico:
+    user: pi
+    addr: 143.255.56.146
+    desc: Mexico
+
+  brazil:
+    user: pi
+    addr: 177.234.144.122
+    desc: Brazil
+
+  colombia:
+    user: pi
+    addr: 138.121.201.58
+    desc: Colombia
+
+  india:
+    user: pi
+    addr: 109.73.164.122
+    desc: India
+
+  nepal:
+    user: pi
+    addr: nepal5
+    desc: Nepal
+
+  china:
+    user: yanyu
+    addr: utils.vlionthu.com
+    desc: China
+
+aws_servers:
   aws_california_1:
     user: ubuntu
     addr: 13.56.50.180
@@ -41,38 +77,23 @@ cloud_servers:
     ntp: ntp.nict.jp
     desc: AWS Korea
 
-measurement_nodes:
-  stanford:
-    user: pi
-    addr: 171.66.3.65
-    desc: Stanford
+gce_servers:
+  gce_iowa:
+    user: ubuntu
+    addr: 35.184.255.184
+    desc: GCE Iowa
 
-  mexico:
-    user: pi
-    addr: 143.255.56.146
-    desc: Mexico
+  gce_london:
+    user: ubuntu
+    addr: 35.197.205.116
+    desc: GCE London
 
-  brazil:
-    user: pi
-    addr: 177.234.144.122
-    desc: Brazil
+  gce_sydney:
+    user: ubuntu
+    addr: 35.189.42.59
+    desc: GCE Sydney
 
-  colombia:
-    user: pi
-    addr: 138.121.201.58
-    desc: Colombia
-
-  india:
-    user: pi
-    addr: 109.73.164.122
-    desc: India
-
-  nepal:
-    user: pi
-    addr: nepal5
-    desc: Nepal
-
-  china:
-    user: yanyu
-    addr: utils.vlionthu.com
-    desc: China
+  gce_tokyo:
+    user: ubuntu
+    addr: 35.190.238.161
+    desc: GCE Tokyo

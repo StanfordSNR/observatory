@@ -1,197 +1,125 @@
 #!/usr/bin/env python
 
+import os
 import argparse
-from helpers.helpers import check_call, call, Popen, parse_config
+from helpers.helpers import (check_call, call, Popen, parse_config,
+                             run_cmd_on_hosts)
 
 
-def aws_key_setup(host, ssh_identity):
-    cmd = ('KEY=$(cat ~/.ssh/id_rsa.pub); '
-           'ssh -i %s -o StrictHostKeyChecking=no %s '
-           '"grep -qF \'$KEY\' .ssh/authorized_keys || '
-           'echo \'$KEY\' >> .ssh/authorized_keys"' % (ssh_identity, host))
-    check_call(cmd, shell=True)
-
-    cmd = ('KEY=$(cat ~/.ssh/pantheon_aws.pub); '
-           'ssh %s '
-           '"grep -qF \'$KEY\' .ssh/authorized_keys || '
-           'echo \'$KEY\' >> .ssh/authorized_keys"' % host)
-    check_call(cmd, shell=True)
-
-    cmd = 'scp ~/.ssh/pantheon_aws %s:~/.ssh/id_rsa' % host
-    check_call(cmd, shell=True)
-
-    cmd = 'scp ~/.ssh/pantheon_aws.pub %s:~/.ssh/id_rsa.pub' % host
-    check_call(cmd, shell=True)
-
+def clone_setup(hosts):
     cmd = ('sudo apt-get update && '
-           'sudo apt-get -y install python-minimal pxz awscli && '
-           'sudo pip install requests')
-    return Popen(['ssh', host, cmd])
-
-
-def add_pantheon_key(host):
-    cmd = ('KEY=$(cat ~/.ssh/pantheon_aws.pub); '
-           'ssh %s '
-           '"grep -qF \'$KEY\' .ssh/authorized_keys || '
-           'echo \'$KEY\' >> .ssh/authorized_keys"' % host)
-    return Popen(cmd, shell=True)
-
-
-def clone_setup(host):
-    cmd = ('git clone https://github.com/StanfordSNR/pantheon.git && '
+           'sudo apt-get -y install python-minimal python-pip pxz awscli && '
+           'sudo pip install requests && '
+           'git clone https://github.com/StanfordSNR/pantheon.git && '
            'cd ~/pantheon && '
            './install_deps.sh && '
            './test/setup.py --all --install-deps && '
            './test/setup.py --all --setup')
-    return Popen(['ssh', host, cmd])
+    run_cmd_on_hosts(cmd, hosts)
 
 
-def setup(host, interface=None):
-    if interface:
-        cmd = ('cd ~/pantheon && git pull && '
-               './test/setup.py --all --setup --interface %s' % interface)
+def git_pull(hosts):
+    cmd = 'cd ~/pantheon && git pull'
+    run_cmd_on_hosts(cmd, hosts)
+
+
+def pkill(hosts):
+    cmd = ('rm -rf ~/pantheon_data /tmp/pantheon-tmp; '
+           'python ~/pantheon/helpers/pkill.py')
+    run_cmd_on_hosts(cmd, hosts)
+
+
+def setup(hosts):
+    cmd = 'cd ~/pantheon && git pull && ./test/setup.py --all --setup'
+    run_cmd_on_hosts(cmd, hosts)
+
+
+def setup_ppp0(hosts):
+    cmd = ('cd ~/pantheon && git pull && '
+           './test/setup.py --all --setup --interface ppp0')
+    run_cmd_on_hosts(cmd, hosts)
+
+
+def add_pub_key(hosts):
+    key = raw_input()
+
+    procs = []
+    for host in hosts:
+        cmd = ('KEY=\'%s\'; '
+               'ssh %s '
+               '"grep -qF \'$KEY\' .ssh/authorized_keys || '
+               'echo \'$KEY\' >> .ssh/authorized_keys"' % (key, host))
+        procs.append(Popen(cmd, shell=True))
+
+    for proc in procs:
+        proc.wait()
+
+
+def get_hosts(args):
+    config = parse_config()
+
+    host_names = []
+
+    if args.hosts is not None:
+        host_names = args.hosts.split(',')
     else:
-        cmd = 'cd ~/pantheon && git pull && ./test/setup.py --all --setup'
-    return Popen(['ssh', host, cmd])
+        if args.all or args.nodes:
+            for server in config['nodes']:
+                host_names.append(server)
 
+        if args.all or args.aws_servers:
+            for server in config['aws_servers']:
+                host_names.append(server)
 
-def copy_ssh_config(host):
-    helpers_dir = '~/observatory/helpers'
-    cmd = 'scp %s/ssh_config %s:~/.ssh/config' % (
-        helpers_dir, host)
-    check_call(cmd, shell=True)
+        if args.all or args.gce_servers:
+            for server in config['gce_servers']:
+                host_names.append(server)
 
+    hosts = []
+    for server_type in config:
+        for server in config[server_type]:
+            if server in host_names:
+                server_cfg = config[server_type][server]
+                hosts.append(server_cfg['user'] + '@' + server_cfg['addr'])
 
-def copy_rc(host):
-    cmd = 'scp ~/.vimrc %s:~' % host
-    check_call(cmd, shell=True)
-
-    helpers_dir = '~/observatory/helpers'
-    cmd = 'scp %s/bashrc %s:~/.bashrc' % (
-        helpers_dir, host)
-    check_call(cmd, shell=True)
-
-
-def pkill(host):
-    cmd = '~/pantheon/helpers/pkill.py'
-    call(['ssh', host, cmd])
-
-    cmd = 'rm -rf ~/pantheon_data /tmp/pantheon-tmp'
-    call(['ssh', host, cmd])
-
-
-def git_pull(host, force=False):
-    if not force:
-        cmd = 'cd ~/pantheon && git pull'
-    else:
-        cmd = 'cd ~/pantheon && git reset --hard @ && git pull'
-
-    return Popen(['ssh', host, cmd])
-
-
-def ssh_key_remove(host):
-    ip = host.split('@')[-1]
-    cmd = 'ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R ' + ip
-    check_call(cmd, shell=True)
-
-
-def run_cmd(args, host, procs):
-    cmd = args.cmd
-
-    if cmd == 'aws_key_setup':
-        procs.append(aws_key_setup(host, args.i))
-    elif cmd == 'clone_setup':
-        procs.append(clone_setup(host))
-    elif cmd == 'copy_ssh_config':
-        copy_ssh_config(host)
-    elif cmd == 'copy_rc':
-        copy_rc(host)
-    elif cmd == 'add_pantheon_key':
-        procs.append(add_pantheon_key(host))
-    elif cmd == 'pkill':
-        pkill(host)
-    elif cmd == 'setup':
-        procs.append(setup(host))
-    elif cmd == 'setup_ppp0':
-        procs.append(setup(host, 'ppp0'))
-    elif cmd == 'git_pull':
-        procs.append(git_pull(host))
-    elif cmd == 'git_force_pull':
-        procs.append(git_pull(host, force=True))
-    elif cmd == 'ssh_key_remove':
-        ssh_key_remove(host)
-    else:
-        procs.append(
-            Popen(['ssh', host, cmd]))
+    return hosts
 
 
 def main():
     parser = argparse.ArgumentParser()
 
-    group = parser.add_mutually_exclusive_group()
+    group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         '--all', action='store_true',
         help='all hosts listed in config.yml')
     group.add_argument(
-        '--measurement-nodes', action='store_true',
+        '--nodes', action='store_true',
         help='all measurement nodes listed in config.yml')
     group.add_argument(
-        '--cloud-servers', action='store_true',
-        help='all cloud servers listed in config.yml')
+        '--aws-servers', action='store_true',
+        help='all AWS servers listed in config.yml')
+    group.add_argument(
+        '--gce-servers', action='store_true',
+        help='all GCE servers listed in config.yml')
     group.add_argument(
         '--hosts', metavar='"HOST1,HOST2..."',
         help='comma-separated list of hosts listed in config.yml')
 
-    parser.add_argument(
-        '--ip', metavar='"IP1,IP2..."',
-        help='comma-separated list of IP addresses of remote hosts')
-    parser.add_argument(
-        '--user', default='ubuntu',
-        help='username used in ssh and scp (default: ubuntu)')
-    parser.add_argument(
-        '-i', metavar='identify_file', help='ssh identity file')
-    parser.add_argument(
-        'cmd', help='aws_key_setup, add_pantheon_key, clone_setup, '
-        'copy_ssh_config, copy_rc, pkill, git_pull, git_force_pull, '
-        'ssh_key_remove, etc.')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--ssh', metavar='CMD', help='commands to run over SSH')
+    group.add_argument('-c', metavar='CMD', help='predefined commands.')
+
     args = parser.parse_args()
 
-    procs = []
+    # obtain a list of host addresses (USER@IP)
+    hosts = get_hosts(args)
 
-    hosts = None
-    if args.hosts is not None:
-        hosts = args.hosts.split(',')
-
-    if (args.all or args.measurement_nodes or args.cloud_servers or
-            hosts is not None):
-        config = parse_config()
-
-        for machine_type in config:
-            if hosts is None:
-                if machine_type == 'measurement_nodes':
-                    if not args.all and not args.measurement_nodes:
-                        continue
-
-                if machine_type == 'cloud_servers':
-                    if not args.all and not args.cloud_servers:
-                        continue
-
-            for location in config[machine_type]:
-                if hosts is not None and location not in hosts:
-                    continue
-
-                site = config[machine_type][location]
-                host = site['user'] + '@' + site['addr']
-                run_cmd(args, host, procs)
+    if args.ssh is not None:
+        # run commands over SSH
+        run_cmd_on_hosts(args.ssh, hosts)
     else:
-        ip_list = args.ip.split(',')
-
-        for ip in ip_list:
-            host = args.user + '@' + ip
-            run_cmd(args, host, procs)
-
-    for proc in procs:
-        proc.wait()
+        # call the function with the name args.c
+        globals()[args.c](hosts)
 
 
 if __name__ == '__main__':
