@@ -4,55 +4,8 @@ import os
 import argparse
 from helpers.helpers import (check_call, call, Popen, parse_config,
                              run_cmd_on_hosts)
-
-
-def clone_setup(hosts):
-    cmd = ('sudo apt-get update && '
-           'sudo apt-get -y install python-minimal python-pip pxz awscli && '
-           'sudo pip install requests && '
-           'git clone https://github.com/StanfordSNR/pantheon.git && '
-           'cd ~/pantheon && '
-           './install_deps.sh && '
-           './test/setup.py --all --install-deps && '
-           './test/setup.py --all --setup')
-    run_cmd_on_hosts(cmd, hosts)
-
-
-def git_pull(hosts):
-    cmd = 'cd ~/pantheon && git pull'
-    run_cmd_on_hosts(cmd, hosts)
-
-
-def pkill(hosts):
-    cmd = ('rm -rf ~/pantheon_data /tmp/pantheon-tmp; '
-           'python ~/pantheon/helpers/pkill.py')
-    run_cmd_on_hosts(cmd, hosts)
-
-
-def setup(hosts):
-    cmd = 'cd ~/pantheon && git pull && ./test/setup.py --all --setup'
-    run_cmd_on_hosts(cmd, hosts)
-
-
-def setup_ppp0(hosts):
-    cmd = ('cd ~/pantheon && git pull && '
-           './test/setup.py --all --setup --interface ppp0')
-    run_cmd_on_hosts(cmd, hosts)
-
-
-def add_pub_key(hosts):
-    key = raw_input()
-
-    procs = []
-    for host in hosts:
-        cmd = ('KEY=\'%s\'; '
-               'ssh %s '
-               '"grep -qF \'$KEY\' .ssh/authorized_keys || '
-               'echo \'$KEY\' >> .ssh/authorized_keys"' % (key, host))
-        procs.append(Popen(cmd, shell=True))
-
-    for proc in procs:
-        proc.wait()
+from helpers.commands import (clone_setup, git_pull, pkill, setup, setup_ppp0,
+                              add_pub_key, ssh_each_other)
 
 
 def get_hosts(args):
@@ -107,7 +60,7 @@ def main():
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--ssh', metavar='CMD', help='commands to run over SSH')
-    group.add_argument('-c', metavar='CMD', help='predefined commands.')
+    group.add_argument('-c', metavar='CMD', help='predefined commands')
 
     args = parser.parse_args()
 
