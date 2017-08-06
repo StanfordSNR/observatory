@@ -20,7 +20,9 @@ def git_pull(hosts):
 
 def pkill(hosts):
     cmd = ('rm -rf ~/pantheon_data /tmp/pantheon-tmp; '
-           'python ~/pantheon/helpers/pkill.py')
+           'python ~/pantheon/helpers/pkill.py; '
+           'sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
+           'pkill -f pantheon')
     run_cmd_on_hosts(cmd, hosts)
 
 

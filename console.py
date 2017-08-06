@@ -24,6 +24,7 @@ class Console(object):
         # special args for each expt_type
         if args.expt_type == 'emu':
             self.desc = args.desc
+            self.id = args.id
 
             self.uplink_trace = args.uplink_trace
             self.downlink_trace = args.downlink_trace
@@ -92,7 +93,7 @@ class Console(object):
 
         self.mm_cmd = self.mm_cmd.strip()
 
-        title = 'emu'
+        title = 'emu ' + self.id
 
         # runs
         if self.run_times > 1:
@@ -253,9 +254,16 @@ class Console(object):
                     'time_created': d[sender]['time'],
                 }
             elif self.expt_type == 'cloud':
+                if sender == 'local':
+                    src = self.master_name
+                    dst = self.slave_name
+                else:
+                    src = self.slave_name
+                    dst = self.master_name
+
                 payload = {
-                    'src': self.master_name,
-                    'dst': self.slave_name,
+                    'src': src,
+                    'dst': dst,
                     'flow': self.flows,
                     'time_created': d[sender]['time'],
                 }
@@ -356,6 +364,7 @@ def main():
     # emu
     emu_parser.add_argument('server', help='server to run emulation on')
     emu_parser.add_argument('--desc', help='description of emulation')
+    emu_parser.add_argument('--id', help='a distinguished ID used in filename')
     emu_parser.add_argument('--uplink-trace')
     emu_parser.add_argument('--downlink-trace')
     emu_parser.add_argument('--prepend-mm-cmds')
