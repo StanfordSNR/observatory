@@ -65,11 +65,16 @@ def utc_date():
     return datetime.utcnow().strftime('%Y-%m-%dT%H-%M')
 
 
+def wait_procs(procs):
+    for proc in procs:
+        if proc:
+            proc.wait()
+
+
 def run_cmd_on_hosts(cmd, hosts, sync=False):
     if sync:
         for host in hosts:
             check_call(['ssh', host, cmd])
     else:
         procs = [Popen(['ssh', host, cmd]) for host in hosts]
-        for proc in procs:
-            proc.wait()
+        wait_procs(procs)

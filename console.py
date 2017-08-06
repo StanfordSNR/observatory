@@ -217,7 +217,7 @@ class Console(object):
 
     def upload(self, d):
         if self.expt_type == 'emu':
-            s3_folder = 'stanford-pantheon/real-world/emu/'
+            s3_folder = 'stanford-pantheon/emulation/'
         else:
             slave_desc = self.slave['desc'].replace(' ', '-')
             s3_folder = 'stanford-pantheon/real-world/%s/' % slave_desc
