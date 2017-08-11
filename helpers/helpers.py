@@ -2,7 +2,6 @@ import sys
 from os import path
 import subprocess
 from datetime import datetime
-from time import strftime
 import yaml
 import project_root
 
@@ -55,10 +54,6 @@ class TimeoutError(Exception):
 
 def timeout_handler(signum, frame):
     raise TimeoutError()
-
-
-def format_time():
-    return strftime('%a, %d %b %Y %H:%M:%S %z')
 
 
 def utc_date():

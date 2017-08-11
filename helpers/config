@@ -1,0 +1,15 @@
+Host utils.vlionthu.com
+    Port 5022
+
+Host nepal5
+    HostName localhost
+    Port 22225
+
+Host nepal6
+    HostName localhost
+    Port 22226
+
+Host *
+   ControlMaster auto
+   ControlPath ~/.ssh/master-socket/%r@%h:%p
+   ControlPersist 10m

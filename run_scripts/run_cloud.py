@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 
+import argparse
 from os import path
 import project_root
 from helpers.helpers import Popen, check_call, wait_procs
 
 
-def main():
+def run(args):
     assistant = path.join(project_root.DIR, 'assistant.py')
     console = path.join(project_root.DIR, 'console.py')
 
-    check_call([assistant, '--gce-servers', '-c', 'pkill'])
+    check_call([assistant, '--gce-servers', '-c', 'cleanup'])
     check_call([assistant, '--gce-servers', '-c', 'setup'])
 
     base_cmd = [console, 'cloud', '--all', '--run-times', '10']
+
+    if args.flows > 1:
+        base_cmd += ['-f', str(args.flows)]
 
     # first round
     procs = []
@@ -31,6 +35,16 @@ def main():
     procs.append(Popen(base_cmd + ['gce_iowa', 'gce_tokyo']))
     procs.append(Popen(base_cmd + ['gce_sydney', 'gce_london']))
     wait_procs(procs)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-f', '--flows', metavar='FLOWS', type=int, default=1,
+        help='number of flows (default 1)')
+    args = parser.parse_args()
+
+    run(args)
 
 
 if __name__ == '__main__':

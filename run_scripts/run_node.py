@@ -27,7 +27,7 @@ def run(args):
 
     # setup
     if 'nepal' in nodes:
-        check_call([assistant, '--hosts', 'nepal', '--ssh', 'sudo ~/mount_readwrite.sh'])
+        check_call([assistant, '--hosts', 'nepal', '-c', 'mount_readwrite'])
 
     hosts = []
     for node in nodes:
@@ -35,15 +35,18 @@ def run(args):
         hosts.append(mappings[node])
     hosts = ','.join(hosts)
 
-    check_call([assistant, '--hosts', hosts, '-c', 'pkill'])
+    check_call([assistant, '--hosts', hosts, '-c', 'cleanup'])
     check_call([assistant, '--hosts', hosts, '-c', 'setup'])
 
     if args.ppp0:
         check_call([assistant, '--hosts', ','.join(nodes), '-c', 'setup_ppp0'])
 
     # run experiments
-    run_times = '3' if args.ppp0 else '10'
-    base_cmd = [console, 'node', '--run-times', run_times]
+    if args.ppp0:
+        base_cmd = [console, 'node', '--run-times', '3', '--ppp0']
+    else:
+        base_cmd = [console, 'node', '--run-times', '10']
+
     if args.flows > 1:
         base_cmd += ['-f', str(args.flows)]
 

@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
+import argparse
 from os import path
 import project_root
 from helpers.helpers import Popen, check_call, wait_procs
 
 
-def main():
+def run(args):
     assistant = path.join(project_root.DIR, 'assistant.py')
     console = path.join(project_root.DIR, 'console.py')
 
-    check_call([assistant, '--aws-servers', '-c', 'pkill'])
+    check_call([assistant, '--aws-servers', '-c', 'cleanup'])
     check_call([assistant, '--aws-servers', '-c', 'setup'])
 
     base_cmd = [console, 'emu', '--all', '--run-times', '10']
+    if args.flows > 1:
+        base_cmd += ['-f', str(args.flows)]
 
     procs = []
 
@@ -37,6 +40,16 @@ def main():
     procs.append(Popen(cmd))
 
     wait_procs(procs)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-f', '--flows', metavar='FLOWS', type=int, default=1,
+        help='number of flows (default 1)')
+    args = parser.parse_args()
+
+    run(args)
 
 
 if __name__ == '__main__':

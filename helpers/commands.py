@@ -1,4 +1,6 @@
-from helpers import run_cmd_on_hosts, Popen
+import project_root
+from os import path
+from helpers import run_cmd_on_hosts, Popen, wait_procs
 
 
 def clone_setup(hosts):
@@ -18,22 +20,21 @@ def git_pull(hosts):
     run_cmd_on_hosts(cmd, hosts)
 
 
-def pkill(hosts):
+def cleanup(hosts):
     cmd = ('rm -rf ~/pantheon_data /tmp/pantheon-tmp; '
            'python ~/pantheon/helpers/pkill.py; '
-           'sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
            'pkill -f pantheon')
     run_cmd_on_hosts(cmd, hosts)
 
 
 def setup(hosts):
-    cmd = 'cd ~/pantheon && git pull && ./test/setup.py --all --setup'
+    cmd = ('sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
+           'cd ~/pantheon && git pull && ./test/setup.py --all --setup')
     run_cmd_on_hosts(cmd, hosts)
 
 
 def setup_ppp0(hosts):
-    cmd = ('cd ~/pantheon && git pull && '
-           './test/setup.py --all --setup --interface ppp0')
+    cmd = 'cd ~/pantheon && ./test/setup.py --interface ppp0'
     run_cmd_on_hosts(cmd, hosts)
 
 
@@ -61,5 +62,20 @@ def ssh_each_other(hosts):
                 cmd = 'ssh -o StrictHostKeyChecking=no %s date' % host2
                 procs.append(Popen(['ssh', host1, cmd]))
 
-    for proc in procs:
-        proc.wait()
+    wait_procs(procs)
+
+
+def copy_ssh_config(hosts):
+    ssh_config = path.join(project_root.DIR, 'helpers', 'config')
+
+    procs = []
+    for host in hosts:
+        cmd = ['scp', ssh_config, '%s:~/.ssh/config' % host]
+        procs.append(Popen(cmd))
+
+    wait_procs(procs)
+
+
+def mount_readwrite(hosts):
+    cmd = 'sudo ~/mount_readwrite.sh'
+    run_cmd_on_hosts(cmd, hosts)

@@ -4,8 +4,9 @@ import os
 import argparse
 from helpers.helpers import (check_call, call, Popen, parse_config,
                              run_cmd_on_hosts)
-from helpers.commands import (clone_setup, git_pull, pkill, setup, setup_ppp0,
-                              add_pub_key, ssh_each_other)
+from helpers.commands import (
+    clone_setup, git_pull, cleanup, setup, setup_ppp0, add_pub_key,
+    ssh_each_other, copy_ssh_config, mount_readwrite)
 
 
 def get_hosts(args):
