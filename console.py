@@ -3,8 +3,11 @@
 import os
 from os import path
 import sys
+import json
+import pickle
 import argparse
 import requests
+import errno
 from helpers.helpers import parse_config, check_call, utc_date
 
 
@@ -201,6 +204,22 @@ class Console(object):
                 d[sender]['data_dir'], d[sender]['job_log'])
             check_call(['ssh', self.master_host, cmd])
 
+            # load the pkl file to add to payload
+            pkl_src = path.join(d[sender]['data_dir'], 'perf_data.pkl')
+            pkl_src = '%s:%s' % (self.master_host, pkl_src)
+            pkl_dest = '/tmp/pantheon-tmp/'
+            pkl_path = path.join(pkl_dest, 'perf_data.pkl')
+
+            try:
+                os.makedirs(pkl_dest)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
+
+            check_call(['scp', pkl_src, pkl_path])
+            with open(pkl_path) as pkl_file:
+                d[sender]['perf_data'] = json.dumps(pickle.load(pkl_file))
+
     def post_to_website(self, payload):
         sys.stderr.write('Posting results to website...\n')
 
@@ -250,8 +269,6 @@ class Console(object):
                     'node': self.slave_name,
                     'to_node': to_node,
                     'link': link,
-                    'flow': self.flows,
-                    'time_created': d[sender]['time'],
                 }
             elif self.expt_type == 'cloud':
                 if sender == 'local':
@@ -264,16 +281,16 @@ class Console(object):
                 payload = {
                     'src': src,
                     'dst': dst,
-                    'flow': self.flows,
-                    'time_created': d[sender]['time'],
                 }
             elif self.expt_type == 'emu':
                 payload  = {
                     'emu_cmd': self.mm_cmd,
                     'desc': self.desc,
-                    'flow': self.flows,
-                    'time_created': d[sender]['time'],
                 }
+
+            payload['flow'] = self.flows
+            payload['time_created'] = d[sender]['time']
+            payload['perf_data'] = d[sender]['perf_data']
 
             # upload data logs
             data_logs = path.basename(d[sender]['tar'])
@@ -328,7 +345,7 @@ class Console(object):
         # compress logs
         self.compress(d)
 
-        # generate graphs and report
+        # generate stats, graphs and report
         self.analyze(d)
 
         # upload results to S3
