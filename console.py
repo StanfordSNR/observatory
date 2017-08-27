@@ -288,7 +288,7 @@ class Console(object):
                     'desc': self.desc,
                 }
 
-            payload['flow'] = self.flows
+            payload['flows'] = self.flows
             payload['time_created'] = d[sender]['time']
             payload['perf_data'] = d[sender]['perf_data']
 
