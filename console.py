@@ -171,6 +171,8 @@ class Console(object):
             else:
                 title = title_template % (slave_desc, self.master['desc'])
 
+            d[sender]['desc'] = title
+
             title = title.replace(' ', '-')
 
             d[sender]['time'] = utc_date()
@@ -269,6 +271,7 @@ class Console(object):
                     'node': self.slave_name,
                     'to_node': to_node,
                     'link': link,
+                    'desc': d[sender]['desc'],
                 }
             elif self.expt_type == 'cloud':
                 if sender == 'local':
@@ -281,6 +284,7 @@ class Console(object):
                 payload = {
                     'src': src,
                     'dst': dst,
+                    'desc': d[sender]['desc'],
                 }
             elif self.expt_type == 'emu':
                 payload  = {
