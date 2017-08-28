@@ -289,6 +289,7 @@ class Console(object):
                 }
 
             payload['flows'] = self.flows
+            payload['runs'] = self.run_times
             payload['time_created'] = d[sender]['time']
             payload['perf_data'] = d[sender]['perf_data']
 
