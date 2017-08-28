@@ -171,8 +171,6 @@ class Console(object):
             else:
                 title = title_template % (slave_desc, self.master['desc'])
 
-            d[sender]['desc'] = title
-
             title = title.replace(' ', '-')
 
             d[sender]['time'] = utc_date()
@@ -251,8 +249,8 @@ class Console(object):
         s3_url_base = 'https://s3.amazonaws.com/' + s3_folder
         s3_url_reports = s3_url_base + 'reports/'
 
-        reports_to_upload = ['pantheon_report.pdf', 'pantheon_summary.png',
-                             'pantheon_summary_mean.png']
+        reports_to_upload = ['pantheon_report.pdf', 'pantheon_summary.svg',
+                             'pantheon_summary_mean.svg']
 
         for sender in d:
             if self.expt_type == 'node':
@@ -271,7 +269,6 @@ class Console(object):
                     'node': self.slave_name,
                     'to_node': to_node,
                     'link': link,
-                    'desc': d[sender]['desc'],
                 }
             elif self.expt_type == 'cloud':
                 if sender == 'local':
@@ -284,7 +281,6 @@ class Console(object):
                 payload = {
                     'src': src,
                     'dst': dst,
-                    'desc': d[sender]['desc'],
                 }
             elif self.expt_type == 'emu':
                 payload  = {
@@ -321,9 +317,9 @@ class Console(object):
 
                 if report == 'pantheon_report.pdf':
                     payload['report'] = s3_url_file
-                elif report == 'pantheon_summary.png':
+                elif report == 'pantheon_summary.svg':
                     payload['graph1'] = s3_url_file
-                elif report == 'pantheon_summary_mean.png':
+                elif report == 'pantheon_summary_mean.svg':
                     payload['graph2'] = s3_url_file
 
             job_log = path.basename(d[sender]['job_log'])
