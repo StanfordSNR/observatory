@@ -3,11 +3,15 @@ from os import path
 from helpers import run_cmd_on_hosts, Popen, wait_procs, call
 
 
-def clone_setup(hosts):
+def install_deps(hosts):
     cmd = ('sudo apt-get update && '
            'sudo apt-get -y install python-minimal python-pip pxz awscli && '
-           'sudo pip install requests && '
-           'git clone https://github.com/StanfordSNR/pantheon.git && '
+           'sudo pip install requests')
+    run_cmd_on_hosts(cmd, hosts)
+
+
+def clone_pantheon(hosts):
+    cmd = ('git clone https://github.com/StanfordSNR/pantheon.git && '
            'cd ~/pantheon && '
            './install_deps.sh && '
            './test/setup.py --all --install-deps && '
