@@ -97,3 +97,28 @@ gce_servers:
     user: ubuntu
     addr: 35.190.238.161
     desc: GCE Tokyo
+
+emu_servers:
+  emu_1:
+    user: ubuntu
+    addr: 35.184.22.165
+
+  emu_2:
+    user: ubuntu
+    addr: 35.184.28.249
+
+  emu_3:
+    user: ubuntu
+    addr: 35.184.59.193
+
+  emu_4:
+    user: ubuntu
+    addr: 35.184.43.3
+
+  emu_5:
+    user: ubuntu
+    addr: 35.184.16.36
+
+  emu_6:
+    user: ubuntu
+    addr: 35.184.20.4

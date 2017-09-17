@@ -29,6 +29,10 @@ def get_hosts(args):
             for server in config['gce_servers']:
                 host_names.append(server)
 
+        if args.all or args.emu_servers:
+            for server in config['emu_servers']:
+                host_names.append(server)
+
     hosts = []
     for server_type in config:
         for server in config[server_type]:
@@ -55,6 +59,9 @@ def main():
     group.add_argument(
         '--gce-servers', action='store_true',
         help='all GCE servers listed in config.yml')
+    group.add_argument(
+        '--emu-servers', action='store_true',
+        help='all servers reserved for emulation listed in config.yml')
     group.add_argument(
         '--hosts', metavar='"HOST1,HOST2..."',
         help='comma-separated list of hosts listed in config.yml')
