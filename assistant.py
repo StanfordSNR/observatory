@@ -6,7 +6,7 @@ from helpers.helpers import (check_call, call, Popen, parse_config,
                              run_cmd_on_hosts)
 from helpers.commands import (
     clone_setup, git_pull, cleanup, setup, setup_ppp0, add_pub_key,
-    ssh_each_other, copy_ssh_config, mount_readwrite)
+    ssh_each_other, copy_ssh_config, mount_readwrite, remove_key, test_ssh)
 
 
 def get_hosts(args):

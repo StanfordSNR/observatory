@@ -1,6 +1,6 @@
 import project_root
 from os import path
-from helpers import run_cmd_on_hosts, Popen, wait_procs
+from helpers import run_cmd_on_hosts, Popen, wait_procs, call
 
 
 def clone_setup(hosts):
@@ -79,3 +79,19 @@ def copy_ssh_config(hosts):
 def mount_readwrite(hosts):
     cmd = 'sudo ~/mount_readwrite.sh'
     run_cmd_on_hosts(cmd, hosts)
+
+
+def remove_key(hosts):
+    known_hosts = path.expanduser('~/.ssh/known_hosts')
+
+    for host in hosts:
+        ip = host.split('@')[1].strip()
+        cmd = 'ssh-keygen -f "%s" -R ' % known_hosts + ip
+        call(cmd, shell=True)
+
+
+def test_ssh(hosts):
+    for host in hosts:
+        cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
+                '-o', 'ConnectTimeout=5', host, 'echo $HOSTNAME']
+        call(cmd)
