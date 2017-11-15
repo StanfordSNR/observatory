@@ -17,17 +17,12 @@ def run(args):
         'colombia': 'aws_brazil_2',
         'india': 'aws_india_1',
         'china': 'aws_korea',
-        'nepal': 'aws_india_2',
     }
 
     if args.ppp0:
         nodes = ['stanford', 'mexico', 'brazil', 'colombia', 'india', 'china']
     else:
         nodes = ['stanford', 'mexico', 'brazil', 'colombia', 'india', 'china']
-
-    # setup
-    if 'nepal' in nodes:
-        check_call([assistant, '--hosts', 'nepal', '-c', 'mount_readwrite'])
 
     hosts = []
     for node in nodes:
@@ -53,10 +48,7 @@ def run(args):
     procs = []
 
     for node in nodes:
-        if node == 'nepal':
-            procs.append(Popen(base_cmd + ['--schemes', 'default_tcp vegas ledbat pcc verus sprout quic scream webrtc copa taova koho_cc calibrated_koho saturator', mappings['nepal'], 'nepal']))
-        else:
-            procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration', mappings[node], node]))
+        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration', mappings[node], node]))
 
     wait_procs(procs)
 

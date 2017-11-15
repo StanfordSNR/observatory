@@ -24,11 +24,6 @@ nodes:
     addr: 109.73.164.122
     desc: India
 
-  nepal:
-    user: pi
-    addr: nepal5
-    desc: Nepal
-
   china:
     user: yanyu
     addr: 166.111.17.77
@@ -64,12 +59,6 @@ aws_servers:
     addr: 35.154.240.73
     ntp: nets.org.sg
     desc: AWS India 1
-
-  aws_india_2:
-    user: ubuntu
-    addr: 13.126.30.111
-    ntp: nets.org.sg
-    desc: AWS India 2
 
   aws_korea:
     user: ubuntu
