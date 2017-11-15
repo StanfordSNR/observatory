@@ -31,7 +31,7 @@ nodes:
 
   china:
     user: yanyu
-    addr: 166.111.17.66
+    addr: 166.111.17.77
     desc: China
 
 aws_servers:
