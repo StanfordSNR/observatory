@@ -190,11 +190,11 @@ class Console(object):
     def compress(self, d):
         # compress logs
         for sender in d:
-            cmd = 'cd {data_dir} && tar -I pxz -cf {t}.tar.xz {t}'.format(
+            cmd = 'cd {data_dir} && tar czvf {t}.tar.gz {t}'.format(
                 data_dir=self.data_dir, t=d[sender]['title'])
             check_call(['ssh', self.master_host, cmd])
 
-            d[sender]['tar'] = d[sender]['data_dir'] + '.tar.xz'
+            d[sender]['tar'] = d[sender]['data_dir'] + '.tar.gz'
 
     def analyze(self, d):
         analyze_cmd = '~/pantheon/analysis/analyze.py --data-dir %s >> %s 2>&1'
