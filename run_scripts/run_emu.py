@@ -11,9 +11,9 @@ def run(args):
     console = path.join(project_root.DIR, 'console.py')
 
     check_call([assistant, '--emu-servers', '-c', 'cleanup'])
-    check_call([assistant, '--emu-servers', '-c', 'setup'])
+    check_call([assistant, '--emu-servers', '-c', 'setup_indigos'])
 
-    base_cmd = [console, 'emu', '--all', '--run-times', '10']
+    base_cmd = [console, 'emu', '--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration', '--run-times', '10']
     if args.flows > 1:
         base_cmd += ['-f', str(args.flows)]
 

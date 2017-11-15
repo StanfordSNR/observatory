@@ -42,6 +42,13 @@ def setup_ppp0(hosts):
     run_cmd_on_hosts(cmd, hosts)
 
 
+def setup_indigos(hosts):
+    cmd = ('sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
+           'cd ~/pantheon && git checkout indigos && git pull && '
+           './test/setup.py --all')
+    run_cmd_on_hosts(cmd, hosts)
+
+
 def add_pub_key(hosts):
     key = raw_input()
 
