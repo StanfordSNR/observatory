@@ -26,7 +26,7 @@ nodes:
 
   china:
     user: yanyu
-    addr: 166.111.17.77
+    addr: 166.111.17.90
     desc: China
 
 aws_servers:
@@ -35,57 +35,77 @@ aws_servers:
     addr: 13.56.50.180
     ntp: time.stanford.edu
     desc: AWS California 1
+    id: i-033ea18dabe60f843
+    region: us-west-1
 
   aws_california_2:
     user: ubuntu
     addr: 13.56.84.214
     ntp: time.stanford.edu
     desc: AWS California 2
+    id: i-0a5f1e22d7c91eeb8
+    region: us-west-1
 
   aws_brazil_1:
     user: ubuntu
     addr: 54.233.106.170
     ntp: gps.ntp.br
     desc: AWS Brazil 1
+    id: i-06601ba56f76edbb2
+    region: sa-east-1
 
   aws_brazil_2:
     user: ubuntu
     addr: 54.233.99.159
     ntp: gps.ntp.br
     desc: AWS Brazil 2
+    id: i-0ac4cecaef4b0cb13
+    region: sa-east-1
 
   aws_india_1:
     user: ubuntu
     addr: 35.154.240.73
     ntp: nets.org.sg
     desc: AWS India 1
+    id: i-004c61b78d601e18f
+    region: ap-south-1
 
   aws_korea:
     user: ubuntu
     addr: 13.124.31.209
     ntp: ntp.nict.jp
     desc: AWS Korea
+    id: i-02ca84088df33bb2f
+    region: ap-northeast-2
 
 gce_servers:
   gce_iowa:
     user: ubuntu
     addr: 35.184.255.184
     desc: GCE Iowa
+    name: observatory-iowa
+    zone: us-central1-c
 
   gce_london:
     user: ubuntu
     addr: 35.197.205.116
     desc: GCE London
+    name: observatory-london
+    zone: europe-west2-c
 
   gce_sydney:
     user: ubuntu
     addr: 35.189.42.59
     desc: GCE Sydney
+    name: observatory-sydney
+    zone: australia-southeast1-c
 
   gce_tokyo:
     user: ubuntu
     addr: 35.190.238.161
     desc: GCE Tokyo
+    name: observatory-tokyo
+    zone: asia-northeast1-c
 
 emu_servers:
   emu_1:
