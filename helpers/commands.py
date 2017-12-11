@@ -104,5 +104,12 @@ def remove_key(hosts):
 def test_ssh(hosts):
     for host in hosts:
         cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
-                '-o', 'ConnectTimeout=5', host, 'echo $HOSTNAME']
+               '-o', 'ConnectTimeout=5', host, 'echo $HOSTNAME']
+        call(cmd)
+
+
+def test_ppp0(hosts):
+    for host in hosts:
+        cmd = ['ssh', host, '-o', 'ConnectTimeout=5',
+               'ping -I ppp0 -c 2 8.8.8.8']
         call(cmd)

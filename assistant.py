@@ -7,7 +7,7 @@ from helpers.helpers import (check_call, call, Popen, parse_config,
 from helpers.commands import (
     install_deps, clone_pantheon, git_pull, cleanup, setup, setup_ppp0,
     add_pub_key, ssh_each_other, copy_ssh_config, mount_readwrite, remove_key,
-    test_ssh, setup_indigos)
+    test_ssh, setup_indigos, test_ppp0)
 
 
 def get_hosts(args):
