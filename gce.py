@@ -3,7 +3,7 @@
 import sys
 import yaml
 import argparse
-from helpers.helpers import call, check_output, parse_config
+from helpers.helpers import Popen, check_output, parse_config
 
 
 def main():
