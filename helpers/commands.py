@@ -33,7 +33,8 @@ def cleanup(hosts):
 
 def setup(hosts):
     cmd = ('sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
-           'cd ~/pantheon && git pull && ./test/setup.py --all --setup')
+           'cd ~/pantheon && git checkout master && git pull && '
+           './test/setup.py --all')
     run_cmd_on_hosts(cmd, hosts)
 
 
@@ -112,4 +113,12 @@ def test_ppp0(hosts):
     for host in hosts:
         cmd = ['ssh', host, '-o', 'ConnectTimeout=5',
                'ping -I ppp0 -c 2 8.8.8.8']
+        call(cmd)
+
+
+def copy_traces(hosts):
+    traces = path.join(project_root.DIR, 'traces')
+
+    for host in hosts:
+        cmd = ['scp', '-r', traces, '%s:~' % host]
         call(cmd)
