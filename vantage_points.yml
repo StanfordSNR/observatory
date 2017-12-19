@@ -111,23 +111,35 @@ emu_servers:
   emu_1:
     user: ubuntu
     addr: 35.184.22.165
+    name: observatory-emu-1
+    zone: us-central1-c
 
   emu_2:
     user: ubuntu
     addr: 35.184.28.249
+    name: observatory-emu-2
+    zone: us-central1-c
 
   emu_3:
     user: ubuntu
     addr: 35.184.59.193
+    name: observatory-emu-3
+    zone: us-central1-c
 
   emu_4:
     user: ubuntu
     addr: 35.184.43.3
+    name: observatory-emu-4
+    zone: us-central1-c
 
   emu_5:
     user: ubuntu
     addr: 35.184.16.36
+    name: observatory-emu-5
+    zone: us-central1-c
 
   emu_6:
     user: ubuntu
     addr: 35.184.20.4
+    name: observatory-emu-6
+    zone: us-central1-c
