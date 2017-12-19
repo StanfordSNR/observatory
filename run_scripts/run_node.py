@@ -20,7 +20,7 @@ def run(args):
     }
 
     if args.ppp0:
-        nodes = ['stanford', 'mexico', 'brazil', 'colombia', 'india', 'china']
+        nodes = ['stanford', 'colombia', 'india', 'china']
     else:
         nodes = ['stanford', 'mexico', 'brazil', 'colombia', 'india', 'china']
 
@@ -31,7 +31,7 @@ def run(args):
     hosts = ','.join(hosts)
 
     check_call([assistant, '--hosts', hosts, '-c', 'cleanup'])
-    check_call([assistant, '--hosts', hosts, '-c', 'setup_indigos'])
+    check_call([assistant, '--hosts', hosts, '-c', 'setup'])
 
     if args.ppp0:
         check_call([assistant, '--hosts', ','.join(nodes), '-c', 'setup_ppp0'])
@@ -48,7 +48,7 @@ def run(args):
     procs = []
 
     for node in nodes:
-        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration', mappings[node], node]))
+        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration', mappings[node], node]))
 
     wait_procs(procs)
 

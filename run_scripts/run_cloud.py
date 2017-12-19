@@ -11,9 +11,9 @@ def run(args):
     console = path.join(project_root.DIR, 'console.py')
 
     check_call([assistant, '--gce-servers', '-c', 'cleanup'])
-    check_call([assistant, '--gce-servers', '-c', 'setup_indigos'])
+    check_call([assistant, '--gce-servers', '-c', 'setup'])
 
-    base_cmd = [console, 'cloud', '--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration', '--run-times', '10']
+    base_cmd = [console, 'cloud', '--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration', '--run-times', '10']
 
     if args.flows > 1:
         base_cmd += ['-f', str(args.flows)]
