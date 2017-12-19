@@ -197,7 +197,7 @@ class Console(object):
             d[sender]['tar'] = d[sender]['data_dir'] + '.tar.gz'
 
     def analyze(self, d):
-        analyze_cmd = '~/pantheon/analysis/analyze.py --schemes "bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa indigo indigo_no_calibration" --data-dir %s >> %s 2>&1'
+        analyze_cmd = '~/pantheon/analysis/analyze.py --schemes "bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo" --data-dir %s >> %s 2>&1'
 
         for sender in d:
             cmd = analyze_cmd % (
