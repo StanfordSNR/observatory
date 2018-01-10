@@ -28,6 +28,7 @@ class Console(object):
         if args.expt_type == 'emu':
             self.desc = args.desc
             self.id = args.id
+            self.scenario = args.scenario
 
             self.uplink_trace = args.uplink_trace
             self.downlink_trace = args.downlink_trace
@@ -284,6 +285,7 @@ class Console(object):
                 }
             elif self.expt_type == 'emu':
                 payload  = {
+                    'scenario': self.scenario,
                     'emu_cmd': self.mm_cmd,
                     'desc': self.desc,
                 }
@@ -383,6 +385,7 @@ def main():
     emu_parser.add_argument('server', help='server to run emulation on')
     emu_parser.add_argument('--desc', help='description of emulation')
     emu_parser.add_argument('--id', help='a distinguished ID used in filename')
+    emu_parser.add_argument('--scenario', type=int, help='scenario ID')
     emu_parser.add_argument('--uplink-trace')
     emu_parser.add_argument('--downlink-trace')
     emu_parser.add_argument('--prepend-mm-cmds')
