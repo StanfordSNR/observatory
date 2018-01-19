@@ -48,7 +48,7 @@ def run(args):
     procs = []
 
     for node in nodes:
-        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration', mappings[node], node]))
+        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration vivace_latency vivace_loss vivace_lte', mappings[node], node]))
 
     wait_procs(procs)
 
