@@ -3,6 +3,7 @@ from os import path
 import subprocess
 from datetime import datetime
 import yaml
+import socket
 import project_root
 
 
@@ -73,3 +74,13 @@ def run_cmd_on_hosts(cmd, hosts, sync=False):
     else:
         procs = [Popen(['ssh', host, cmd]) for host in hosts]
         wait_procs(procs)
+
+
+def get_open_port():
+    sock = socket.socket(socket.AF_INET)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return str(port)

@@ -3,31 +3,37 @@ nodes:
     user: pi
     addr: 171.66.3.65
     desc: Stanford
+    interface: em1
 
   mexico:
     user: pi
     addr: 143.255.56.146
     desc: Mexico
+    interface: em1
 
   brazil:
     user: pi
     addr: 177.234.144.122
     desc: Brazil
+    interface: p4p1
 
   colombia:
     user: pi
     addr: 138.121.201.58
     desc: Colombia
+    interface: p4p1
 
   india:
     user: pi
     addr: 109.73.164.122
     desc: India
+    interface: em1
 
   china:
     user: yanyu
-    addr: 166.111.17.85
+    addr: 166.111.17.84
     desc: China
+    interface: eno1
 
 aws_servers:
   aws_california_1:
@@ -37,6 +43,7 @@ aws_servers:
     desc: AWS California 1
     id: i-033ea18dabe60f843
     region: us-west-1
+    interface: ens3
 
   aws_california_2:
     user: ubuntu
@@ -45,6 +52,7 @@ aws_servers:
     desc: AWS California 2
     id: i-0a5f1e22d7c91eeb8
     region: us-west-1
+    interface: ens3
 
   aws_brazil_1:
     user: ubuntu
@@ -53,6 +61,7 @@ aws_servers:
     desc: AWS Brazil 1
     id: i-06601ba56f76edbb2
     region: sa-east-1
+    interface: ens3
 
   aws_brazil_2:
     user: ubuntu
@@ -61,6 +70,7 @@ aws_servers:
     desc: AWS Brazil 2
     id: i-0ac4cecaef4b0cb13
     region: sa-east-1
+    interface: ens3
 
   aws_india_1:
     user: ubuntu
@@ -69,6 +79,7 @@ aws_servers:
     desc: AWS India 1
     id: i-004c61b78d601e18f
     region: ap-south-1
+    interface: ens3
 
   aws_korea:
     user: ubuntu
@@ -77,6 +88,7 @@ aws_servers:
     desc: AWS Korea
     id: i-02ca84088df33bb2f
     region: ap-northeast-2
+    interface: ens3
 
 gce_servers:
   gce_iowa:
