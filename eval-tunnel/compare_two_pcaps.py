@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--data-dir', help='data dir')
     args = parser.parse_args()
 
-    for run_id in range(1, 10):
+    for run_id in range(1, 11):
         send_pkts = {}
         send_pcap_name = '{scheme}-send-{run_id}.pcap'.format(
                 scheme=args.scheme, run_id=run_id)

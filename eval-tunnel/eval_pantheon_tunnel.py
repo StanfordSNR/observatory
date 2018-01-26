@@ -123,7 +123,7 @@ def main():
     print('Please run: sudo sysctl -w net.core.rmem_max="33554432"; '
           'sudo sysctl -w net.core.rmem_default="16777216"')
 
-    for run_id in xrange(1, 10):
+    for run_id in xrange(1, 11):
         run_tunnel(run_id, args)
         run_no_tunnel(run_id, args)
 
