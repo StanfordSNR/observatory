@@ -27,7 +27,7 @@ def run_no_tunnel(run_id, args):
     port = get_open_port()
 
     # run tcpdump
-    cmd = ('sudo tcpdump -n -i {local_if} dst {remote_addr} '
+    cmd = ('sudo tcpdump -n -s 1515 -i {local_if} dst {remote_addr} '
            'and dst port {remote_port} '
            '-w {data_dir}/{scheme}-send-{run_id}.pcap').format(
            local_if=args['local_if'],
@@ -38,7 +38,7 @@ def run_no_tunnel(run_id, args):
            run_id=run_id)
     procs.append(Popen(cmd, shell=True))
 
-    cmd = ('ssh {remote_host} "sudo tcpdump -n -i {remote_if} '
+    cmd = ('ssh {remote_host} "sudo tcpdump -n -s 1515 -i {remote_if} '
            'src {local_addr} and not src port 22 '
            '-w /tmp/{scheme}-recv-{run_id}.pcap"').format(
            remote_host=args['remote_host'],
@@ -108,12 +108,12 @@ def main():
     args['remote_addr'] = args['remote_host'].split('@')[1]
 
     # disable TSO/GSO/GRO on both ends
-    print('sudo ethtool -K ens4 tso off; '
-          'sudo ethtool -K ens4 gso off; '
-          'sudo ethtool -K ens4 gro off')
+    print('Please run: sudo ethtool -K <interface> tso off; '
+          'sudo ethtool -K <interface> gso off; '
+          'sudo ethtool -K <interface> gro off')
 
     # set recv buffer
-    print('sudo sysctl -w net.core.rmem_max="33554432"; '
+    print('Please run: sudo sysctl -w net.core.rmem_max="33554432"; '
           'sudo sysctl -w net.core.rmem_default="16777216"')
 
     for run_id in xrange(1, 10):
