@@ -27,7 +27,7 @@ def run_no_tunnel(run_id, args):
     port = get_open_port()
 
     # run tcpdump
-    cmd = ('sudo tcpdump -n -s 1515 -i {local_if} dst {remote_addr} '
+    cmd = ('sudo tcpdump -n -s 96 -i {local_if} dst {remote_addr} '
            'and dst port {remote_port} '
            '-w {data_dir}/{scheme}-send-{run_id}.pcap').format(
            local_if=args['local_if'],
@@ -38,7 +38,7 @@ def run_no_tunnel(run_id, args):
            run_id=run_id)
     procs.append(Popen(cmd, shell=True))
 
-    cmd = ('ssh {remote_host} "sudo tcpdump -n -s 1515 -i {remote_if} '
+    cmd = ('ssh {remote_host} "sudo tcpdump -n -s 96 -i {remote_if} '
            'src {local_addr} and not src port 22 '
            '-w /tmp/{scheme}-recv-{run_id}.pcap"').format(
            remote_host=args['remote_host'],
@@ -85,6 +85,13 @@ def run_no_tunnel(run_id, args):
           run_id=run_id,
           data_dir=args['data_dir'])
     check_call(cmd, shell=True)
+
+    # remote pcap file on remote
+    cmd = 'ssh {remote_host} "sudo rm -f /tmp/{scheme}-recv-{run_id}.pcap"'.format(
+          remote_host=args['remote_host'],
+          scheme=args['scheme'],
+          run_id=run_id)
+    call(cmd, shell=True)
 
 
 def main():
