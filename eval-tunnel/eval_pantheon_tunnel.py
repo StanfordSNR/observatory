@@ -3,7 +3,7 @@
 import time
 import argparse
 import project_root
-from helpers.helpers import get_open_port, check_call, Popen
+from helpers.helpers import get_open_port, check_call, call, Popen
 
 
 def run_tunnel(run_id, args):
@@ -24,18 +24,23 @@ def run_tunnel(run_id, args):
 def run_no_tunnel(run_id, args):
     procs = []
 
+    port = get_open_port()
+
     # run tcpdump
-    cmd = ('sudo tcpdump -n -s 1515 -i {local_if} dst {remote_addr} '
+    cmd = ('sudo tcpdump -n -i {local_if} dst {remote_addr} '
+           'and dst port {remote_port} '
            '-w {data_dir}/{scheme}-send-{run_id}.pcap').format(
            local_if=args['local_if'],
            remote_addr=args['remote_addr'],
+           remote_port=port,
            data_dir=args['data_dir'],
            scheme=args['scheme'],
            run_id=run_id)
     procs.append(Popen(cmd, shell=True))
 
-    cmd = ('ssh {remote_host} "sudo tcpdump -n -s 1515 -i {remote_if} '
-           'src {local_addr} -w /tmp/{scheme}-recv-{run_id}.pcap"').format(
+    cmd = ('ssh {remote_host} "sudo tcpdump -n -i {remote_if} '
+           'src {local_addr} and not src port 22 '
+           '-w /tmp/{scheme}-recv-{run_id}.pcap"').format(
            remote_host=args['remote_host'],
            remote_if=args['remote_if'],
            local_addr=args['local_addr'],
@@ -47,7 +52,6 @@ def run_no_tunnel(run_id, args):
     # run receiver
     src = '~/pantheon/src/{}.py'.format(args['scheme'])
 
-    port = get_open_port()
     cmd = 'ssh {remote_host} "{src} receiver {port}"'.format(
           src=src, remote_host=args['remote_host'], port=port)
     procs.append(Popen(cmd, shell=True))
@@ -68,11 +72,11 @@ def run_no_tunnel(run_id, args):
         if proc:
             proc.kill()
 
-    pkill_cmd = "sudo pkill -f tcpdump; pkill -f {}".format(src)
+    pkill_cmd = "sudo pkill -f tcpdump; pkill -f iperf"
     cmd = 'ssh {remote_host} "{pkill_cmd}"'.format(
             remote_host=args['remote_host'], pkill_cmd=pkill_cmd)
-    check_call(cmd, shell=True)
-    check_call(pkill_cmd, shell=True)
+    call(cmd, shell=True)
+    call(pkill_cmd, shell=True)
 
     # copy back pcap file
     cmd = 'scp {remote_host}:/tmp/{scheme}-recv-{run_id}.pcap {data_dir}'.format(
@@ -103,7 +107,16 @@ def main():
     args['local_addr'] = args['local_host'].split('@')[1]
     args['remote_addr'] = args['remote_host'].split('@')[1]
 
-    for run_id in xrange(1, 2):
+    # disable TSO/GSO/GRO on both ends
+    print('sudo ethtool -K ens4 tso off; '
+          'sudo ethtool -K ens4 gso off; '
+          'sudo ethtool -K ens4 gro off')
+
+    # set recv buffer
+    print('sudo sysctl -w net.core.rmem_max="33554432"; '
+          'sudo sysctl -w net.core.rmem_default="16777216"')
+
+    for run_id in xrange(1, 10):
         run_tunnel(run_id, args)
         run_no_tunnel(run_id, args)
 
