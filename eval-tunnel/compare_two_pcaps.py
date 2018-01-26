@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--data-dir', help='data dir')
     args = parser.parse_args()
 
-    for run_id in range(1, 2):
+    for run_id in range(1, 10):
         send_pkts = {}
         send_pcap_name = '{scheme}-send-{run_id}.pcap'.format(
                 scheme=args.scheme, run_id=run_id)
@@ -58,16 +58,11 @@ def main():
             size = int(pkt.ip.len)
             total_size += size
 
-            if uid not in send_pkts:
-                print '%s not in send_pkts' % uid
-            else:
-                if size != send_pkts[uid][1]:
-                    print 'wrong size (unlikely)'
-                else:
-                    delays.append(ts - send_pkts[uid][0])
+            if uid in send_pkts:
+                delays.append(ts - send_pkts[uid][0])
 
-    print total_size, last_ts - first_ts
-    print np.percentile(delays, 95, interpolation='nearest')
+    print '%.2f Mbps' % (total_size / (1024 * 1024 * (last_ts - first_ts)))
+    print '%.2f ms' % (1000 * np.percentile(delays, 95, interpolation='nearest'))
 
 
 if __name__ == '__main__':
