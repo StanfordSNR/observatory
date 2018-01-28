@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import argparse
 import hashlib
 import pyshark
@@ -14,6 +15,14 @@ def main():
     parser.add_argument('--scheme', help='scheme to test')
     parser.add_argument('--data-dir', help='data dir')
     args = parser.parse_args()
+
+    data = {}
+    data[args.scheme] = {}
+
+    data[args.scheme]['mean'] = {}
+    data[args.scheme]['mean']['all'] = {}
+    data[args.scheme]['mean']['all']['tput'] = []
+    data[args.scheme]['mean']['all']['delay'] = []
 
     for run_id in range(1, 11):
         send_pkts = {}
@@ -61,8 +70,23 @@ def main():
             if uid in send_pkts:
                 delays.append(ts - send_pkts[uid][0])
 
-    print '%.2f Mbps' % (total_size / (1024 * 1024 * (last_ts - first_ts)))
-    print '%.2f ms' % (1000 * np.percentile(delays, 95, interpolation='nearest'))
+        tput = total_size / (1024 * 1024 * (last_ts - first_ts))
+        delay = 1000 * np.percentile(delays, 95, interpolation='nearest')
+
+        data[args.scheme][run_id] = {}
+        data[args.scheme][run_id]['all'] = {}
+        data[args.scheme][run_id]['all']['tput'] = tput
+        data[args.scheme][run_id]['all']['delay'] = delay
+
+        data[args.scheme]['mean']['all']['tput'].append(tput)
+        data[args.scheme]['mean']['all']['delay'].append(delay)
+
+    data[args.scheme]['mean']['all']['tput'] = np.mean(data[args.scheme]['mean']['all']['tput'])
+    data[args.scheme]['mean']['all']['delay'] = np.mean(data[args.scheme]['mean']['all']['delay'])
+
+    perf_data_path = path.join(args.data_dir, 'pcap_data.json')
+    with open(perf_data_path, 'w') as fh:
+        json.dump(data, fh)
 
 
 if __name__ == '__main__':
