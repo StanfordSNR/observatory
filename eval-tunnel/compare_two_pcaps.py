@@ -25,18 +25,27 @@ def main():
     data[args.scheme]['mean']['all']['delay'] = []
 
     for run_id in range(1, 11):
+        print '%d/10' % run_id
+
         send_pkts = {}
         send_pcap_name = '{scheme}-send-{run_id}.pcap'.format(
                 scheme=args.scheme, run_id=run_id)
         send_pcap = pyshark.FileCapture(path.join(args.data_dir, send_pcap_name))
+
+        cnt = 0
         for pkt in send_pcap:
             if pkt.ip.dst != args.receiver:
                 continue
 
+            cnt += 1
+            if cnt % 10000 == 0:
+                print cnt
+
             # uid = hashlib.sha256(str(pkt.tcp) + str(pkt.ip)).hexdigest()
             uid = pkt.tcp.seq
             ts = float(pkt.sniff_timestamp)
-            size = int(pkt.ip.len)
+            size = int(pkt.length)
+
             send_pkts[uid] = (ts, size)
 
         # calculate avg. tput
@@ -50,9 +59,15 @@ def main():
         recv_pcap_name = '{scheme}-recv-{run_id}.pcap'.format(
                 scheme=args.scheme, run_id=run_id)
         recv_pcap = pyshark.FileCapture(path.join(args.data_dir, recv_pcap_name))
+
+        cnt = 0
         for pkt in recv_pcap:
             if pkt.ip.src != args.sender:
                 continue
+
+            cnt += 1
+            if cnt % 1000 == 0:
+                print cnt
 
             #uid = hashlib.sha256(str(pkt.tcp) + str(pkt.ip)).hexdigest()
             uid = pkt.tcp.seq
@@ -64,13 +79,13 @@ def main():
             if last_ts is None or ts > last_ts:
                 last_ts = ts
 
-            size = int(pkt.ip.len)
+            size = int(pkt.length)
             total_size += size
 
             if uid in send_pkts:
                 delays.append(ts - send_pkts[uid][0])
 
-        tput = total_size / (1024 * 1024 * (last_ts - first_ts))
+        tput = 8.0 * total_size / (1024 * 1024 * (last_ts - first_ts))
         delay = 1000 * np.percentile(delays, 95, interpolation='nearest')
 
         data[args.scheme][run_id] = {}
