@@ -39,12 +39,12 @@ def run_no_tunnel(run_id, args):
     procs.append(Popen(cmd, shell=True))
 
     cmd = ('ssh {remote_host} "sudo tcpdump -n -s 96 -i {remote_if} '
-           'src {local_addr} and not src port 22 '
+           'src {local_addr} and dst port {remote_port} '
            '-w /tmp/{scheme}-recv-{run_id}.pcap"').format(
            remote_host=args['remote_host'],
            remote_if=args['remote_if'],
            local_addr=args['local_addr'],
-           data_dir=args['data_dir'],
+           remote_port=port,
            scheme=args['scheme'],
            run_id=run_id)
     procs.append(Popen(cmd, shell=True))
@@ -57,7 +57,7 @@ def run_no_tunnel(run_id, args):
     procs.append(Popen(cmd, shell=True))
 
     # wait for the receiver to be ready
-    time.sleep(3)
+    time.sleep(2)
 
     # run sender
     cmd = '{src} sender {remote_addr} {port}'.format(
@@ -123,7 +123,7 @@ def main():
     print('Please run: sudo sysctl -w net.core.rmem_max="33554432"; '
           'sudo sysctl -w net.core.rmem_default="16777216"')
 
-    for run_id in xrange(1, 11):
+    for run_id in xrange(1, 101):
         run_tunnel(run_id, args)
         run_no_tunnel(run_id, args)
 
