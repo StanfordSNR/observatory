@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import json
 import multiprocessing
 import argparse
@@ -9,7 +10,7 @@ import numpy as np
 
 
 def worker(args, run_id, data):
-    print run_id, 'is running'
+    sys.stderr.write('{} is running\n'.format(run_id))
 
     send_pkts = {}
     send_pcap_name = '{scheme}-send-{run_id}.pcap'.format(
@@ -102,13 +103,6 @@ def main():
 
     for p in jobs:
         p.join()
-
-    data[args.scheme]['mean']['all']['tput'] = np.mean(data[args.scheme]['mean']['all']['tput'])
-    data[args.scheme]['mean']['all']['delay'] = np.mean(data[args.scheme]['mean']['all']['delay'])
-
-    perf_data_path = path.join(args.data_dir, 'pcap_data.json')
-    with open(perf_data_path, 'w') as fh:
-        json.dump(data, fh)
 
 
 if __name__ == '__main__':
