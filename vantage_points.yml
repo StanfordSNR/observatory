@@ -1,7 +1,7 @@
 nodes:
   stanford:
     user: pi
-    addr: 171.66.3.65
+    addr: 171.66.3.231
     desc: Stanford
 
   mexico:
@@ -26,7 +26,7 @@ nodes:
 
   china:
     user: yanyu
-    addr: 166.111.17.85
+    addr: 166.111.17.81
     desc: China
 
 aws_servers:
@@ -35,7 +35,7 @@ aws_servers:
     addr: 13.56.50.180
     ntp: time.stanford.edu
     desc: AWS California 1
-    id: i-033ea18dabe60f843
+    id: i-0b097401b820ec3e6
     region: us-west-1
 
   aws_california_2:

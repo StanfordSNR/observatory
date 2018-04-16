@@ -116,7 +116,7 @@ def run(args):
     check_call([assistant, '--emu-servers', '-c', 'cleanup'])
     check_call([assistant, '--emu-servers', '-c', 'setup'])
 
-    base_cmd = '%s emu --schemes "bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration vivace_latency vivace_loss vivace_lte" --run-times 10' % console
+    base_cmd = '%s emu --schemes "bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo_1_32 indigo_1_32_no_calib vivace pcc_experimental" --run-times 10' % console
     if args.flows > 1:
         base_cmd += ' -f %s' % args.flows
 

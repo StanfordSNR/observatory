@@ -20,7 +20,7 @@ def run(args):
     }
 
     if args.ppp0:
-        nodes = ['stanford', 'colombia', 'india', 'china']
+        nodes = ['stanford', 'colombia', 'india']
     else:
         nodes = ['stanford', 'mexico', 'brazil', 'colombia', 'india', 'china']
 
@@ -48,7 +48,7 @@ def run(args):
     procs = []
 
     for node in nodes:
-        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo indigo_no_calibration vivace_latency vivace_loss vivace_lte', mappings[node], node]))
+        procs.append(Popen(base_cmd + ['--schemes', 'bbr default_tcp ledbat pcc quic scream webrtc sprout taova vegas verus copa fillp indigo_1_32 indigo_1_32_no_calib vivace pcc_experimental', mappings[node], node]))
 
     wait_procs(procs)
 
