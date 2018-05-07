@@ -1,5 +1,0 @@
-# /etc/ppp/peers/brazil
-file /etc/ppp/options_observatory
-user "tim"
-password "tim"
-connect "/usr/sbin/chat -v -f /etc/chatscripts/brazil.chat"

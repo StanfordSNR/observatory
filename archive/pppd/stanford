@@ -1,3 +1,0 @@
-# /etc/ppp/peers/stanford
-file /etc/ppp/options_observatory
-connect "/usr/sbin/chat -v -f /etc/chatscripts/stanford.chat"

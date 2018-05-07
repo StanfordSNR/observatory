@@ -1,8 +1,0 @@
-# 6pm PST (2am UTC) daily
-0 2 * * * export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin; git -C /home/ubuntu/observatory_box_scripts pull --ff-only; stdbuf -oL python /home/ubuntu/observatory_box_scripts/run_experiment_from_aws.py OPTIONS > /home/ubuntu/observatory_box_scripts/"$(date).log" 2>&1
-
-# 1pm PST (9pm UTC) daily
-0 21 * * * export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin; git -C /home/ubuntu/observatory_box_scripts pull --ff-only; stdbuf -oL python /home/ubuntu/observatory_box_scripts/run_experiment_from_aws.py OPTIONS > /home/ubuntu/observatory_box_scripts/"$(date).log" 2>&1
-
-# 1pm PST (9pm UTC) MWF
-0 21 * * 1,3,5 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin; git -C /home/ubuntu/observatory_box_scripts pull --ff-only; stdbuf -oL python /home/ubuntu/observatory_box_scripts/run_experiment_from_aws.py OPTIONS > /home/ubuntu/observatory_box_scripts/"$(date).log" 2>&1
