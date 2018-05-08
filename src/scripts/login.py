@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
-from helpers.helpers import call, parse_config
+
+import context
+from helpers import utils
+from helpers.subprocess_wrappers import call
 
 
 def main():
-    config = parse_config()
+    config = utils.parse_vantage_points()
 
     servers = []
     for server_type in config:
@@ -15,13 +18,7 @@ def main():
     parser.add_argument('server', choices=servers)
     args = parser.parse_args()
 
-    server = args.server
-
-    for server_type in config:
-        if server in config[server_type]:
-            server_cfg = config[server_type][server]
-            host = server_cfg['user'] + '@' + server_cfg['addr']
-            call(['ssh', host])
+    call(['ssh', utils.get_host_addr(args.server)])
 
 
 if __name__ == '__main__':

@@ -1,79 +1,91 @@
 nodes:
   stanford:
     user: pi
-    addr: 171.66.3.231
+    ip: 171.66.3.231
     desc: Stanford
+    peer_cloud: aws_california_1
+    ntp: time.stanford.edu
+    cellular: on
 
   mexico:
     user: pi
-    addr: 143.255.56.146
+    ip: 143.255.56.146
     desc: Mexico
+    peer_cloud: aws_california_2
+    ntp: time.stanford.edu
+    cellular: off
 
   brazil:
     user: pi
-    addr: 177.234.144.122
+    ip: 177.234.144.122
     desc: Brazil
+    peer_cloud: aws_brazil_1
+    ntp: gps.ntp.br
+    cellular: off
 
   colombia:
     user: pi
-    addr: 138.121.201.58
+    ip: 138.121.201.58
     desc: Colombia
+    peer_cloud: aws_brazil_2
+    ntp: gps.ntp.br
+    cellular: on
 
   india:
     user: pi
-    addr: 109.73.164.122
+    ip: 109.73.164.122
     desc: India
+    peer_cloud: aws_india_1
+    ntp: nets.org.sg
+    cellular: on
 
   china:
-    user: yanyu
-    addr: 166.111.17.81
+    user: ubuntu
+    ip: 166.111.17.81
     desc: China
+    peer_cloud: aws_korea
+    ntp: ntp.nict.jp
+    cellular: on
 
 aws_servers:
   aws_california_1:
     user: ubuntu
-    addr: 13.56.50.180
-    ntp: time.stanford.edu
+    ip: 13.56.50.180
     desc: AWS California 1
     id: i-0b097401b820ec3e6
     region: us-west-1
 
   aws_california_2:
     user: ubuntu
-    addr: 13.56.84.214
-    ntp: time.stanford.edu
+    ip: 13.56.84.214
     desc: AWS California 2
     id: i-0a5f1e22d7c91eeb8
     region: us-west-1
 
   aws_brazil_1:
     user: ubuntu
-    addr: 54.233.106.170
-    ntp: gps.ntp.br
+    ip: 54.233.106.170
     desc: AWS Brazil 1
     id: i-06601ba56f76edbb2
     region: sa-east-1
 
   aws_brazil_2:
     user: ubuntu
-    addr: 54.233.99.159
-    ntp: gps.ntp.br
+    ip: 54.233.99.159
     desc: AWS Brazil 2
     id: i-0ac4cecaef4b0cb13
     region: sa-east-1
 
   aws_india_1:
     user: ubuntu
-    addr: 35.154.240.73
-    ntp: nets.org.sg
+    ip: 35.154.240.73
     desc: AWS India 1
     id: i-004c61b78d601e18f
     region: ap-south-1
 
   aws_korea:
     user: ubuntu
-    addr: 13.124.31.209
-    ntp: ntp.nict.jp
+    ip: 13.124.31.209
     desc: AWS Korea
     id: i-02ca84088df33bb2f
     region: ap-northeast-2
@@ -81,28 +93,28 @@ aws_servers:
 gce_servers:
   gce_iowa:
     user: ubuntu
-    addr: 35.184.255.184
+    ip: 35.184.255.184
     desc: GCE Iowa
     name: observatory-iowa
     zone: us-central1-c
 
   gce_london:
     user: ubuntu
-    addr: 35.197.205.116
+    ip: 35.197.205.116
     desc: GCE London
     name: observatory-london
     zone: europe-west2-c
 
   gce_sydney:
     user: ubuntu
-    addr: 35.189.42.59
+    ip: 35.189.42.59
     desc: GCE Sydney
     name: observatory-sydney
     zone: australia-southeast1-c
 
   gce_tokyo:
     user: ubuntu
-    addr: 35.190.238.161
+    ip: 35.190.238.161
     desc: GCE Tokyo
     name: observatory-tokyo
     zone: asia-northeast1-c
@@ -110,36 +122,36 @@ gce_servers:
 emu_servers:
   emu_1:
     user: ubuntu
-    addr: 35.184.22.165
+    ip: 35.184.22.165
     name: observatory-emu-1
     zone: us-central1-c
 
   emu_2:
     user: ubuntu
-    addr: 35.184.28.249
+    ip: 35.184.28.249
     name: observatory-emu-2
     zone: us-central1-c
 
   emu_3:
     user: ubuntu
-    addr: 35.184.59.193
+    ip: 35.184.59.193
     name: observatory-emu-3
     zone: us-central1-c
 
   emu_4:
     user: ubuntu
-    addr: 35.184.43.3
+    ip: 35.184.43.3
     name: observatory-emu-4
     zone: us-central1-c
 
   emu_5:
     user: ubuntu
-    addr: 35.184.16.36
+    ip: 35.184.16.36
     name: observatory-emu-5
     zone: us-central1-c
 
   emu_6:
     user: ubuntu
-    addr: 35.184.20.4
+    ip: 35.184.20.4
     name: observatory-emu-6
     zone: us-central1-c
