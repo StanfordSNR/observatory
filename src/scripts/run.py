@@ -128,14 +128,7 @@ def post_to_website():
     sys.stderr.write('----- Posting results to Pantheon website -----\n')
 
 
-def get_dict_to_format(master, slave, cmd_tmpl):
-    # expand macros
-    macros = utils.expt_cfg['macros']
-    for macro in macros:
-        macro_to_replace = '{%s}' % macro
-        if macro_to_replace in cmd_tmpl:
-            cmd_tmpl = cmd_tmpl.replace(macro_to_replace, macros[macro])
-
+def master_slave_expand(master, slave, cmd_tmpl):
     # split cmd_tmpl
     cmd_splitted = cmd_tmpl.split()
 
@@ -186,8 +179,6 @@ def get_dict_to_format(master, slave, cmd_tmpl):
 
     # generate a dictionary of keys for formatting cmd_tmpl
     cmd_dict = {
-        'base_dir': utils.meta['base_dir'],
-        'test_path': utils.meta['test_path'],
         'slave_addr': utils.get_host_addr(slave),
         'master_ip': master_cfg['ip'],
         'master_desc': master_cfg['desc'],
@@ -207,22 +198,44 @@ def get_dict_to_format(master, slave, cmd_tmpl):
 
 # smallest unit of real-world experiment that will be run in parallel
 def run_real_world_experiment(master, slave, cmd_tmpl):
-    # format cmd_tmpl
-    # cmd_dict contains extra useful keys that are not required by cmd_tmpl
-    cmd_dict = get_dict_to_format(master, slave, cmd_tmpl)
-    formatted_cmd = cmd_tmpl.format(**cmd_dict)
+    # 4. fill in the remaining varialbes
+    cmd_dict = master_slave_expand(master, slave, cmd_tmpl)
+    final_cmd = utils.safe_format(cmd_tmpl, cmd_dict)
+    print(final_cmd)
 
 
-def run_node_to_cloud(nodes):
+def run_node_to_cloud(cellular_nodes, ethernet_nodes):
     sys.stderr.write('----- Running node-to-cloud experiments -----\n')
 
-    # run each cellular/ethernet experiment on all node-cloud pairs in parallel
-    for link_type in ['cellular', 'ethernet']:
-        for cmd_tmpl in utils.expt_cfg['real_world'][link_type]:
-            procs = []
+    # convert lists to sets for faster lookup
+    cellular_nodes = set(cellular_nodes)
+    ethernet_nodes = set(ethernet_nodes)
 
-            for node in nodes[link_type]:
-                peer_cloud = utils.host_cfg['nodes'][node]['peer_cloud']
+    cfg = utils.expt_cfg['real_world']
+    matrix = utils.expand_matrix(cfg['matrix'])
+
+    # run each cellular/ethernet experiment on all node-cloud pairs in parallel
+    for mat_dict in matrix:
+        for cmd_tmpl in cfg['script']:
+            # 1. expand macros
+            cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
+            # 2. expand variables in mat_dict
+            cmd_tmpl = utils.safe_format(cmd_tmpl, mat_dict)
+            # 3. expand meta
+            cmd_tmpl = utils.safe_format(cmd_tmpl, utils.meta)
+
+            # create a process
+            procs = []
+            for node, node_cfg in utils.host_cfg['nodes'].iteritems():
+                if '--remote-if ppp0' in cmd_tmpl:
+                    if node not in cellular_nodes:
+                        continue
+                else:
+                    if node not in ethernet_nodes:
+                        continue
+
+                peer_cloud = node_cfg['peer_cloud']
+
                 p = Process(target=run_real_world_experiment,
                             args=(peer_cloud, node, cmd_tmpl))
                 p.start()
@@ -238,19 +251,34 @@ def run_cloud_to_cloud(hosts):
     # create a schedule for a "round-robin tournament" among live cloud servers
     schedule = round_robin_tournament.schedule(hosts)
 
+    cfg = utils.expt_cfg['real_world']
+    matrix = utils.expand_matrix(cfg['matrix'])
+
     # run each ethernet experiment on every pair of cloud servers in parallel
     for schedule_round in schedule:
-        for cmd_tmpl in utils.expt_cfg['real_world']['ethernet']:
-            procs = []
+        for mat_dict in matrix:
+            for cmd_tmpl in cfg['script']:
+                # 1. expand macros
+                cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
+                # 2. expand variables in mat_dict
+                cmd_tmpl = utils.safe_format(cmd_tmpl, mat_dict)
+                # 3. expand meta
+                cmd_tmpl = utils.safe_format(cmd_tmpl, utils.meta)
 
-            for pair in schedule_round:
-                p = Process(target=run_real_world_experiment,
-                            args=(pair[0], pair[1], cmd_tmpl))
-                p.start()
-                procs.append(p)
+                # create a process
+                procs = []
+                for pair in schedule_round:
+                    p = Process(target=run_real_world_experiment,
+                                args=(pair[0], pair[1], cmd_tmpl))
+                    p.start()
+                    procs.append(p)
 
-            for p in procs:
-                p.join()
+                for p in procs:
+                    p.join()
+
+
+def run_emulation(hosts):
+    pass
 
 
 def main():
@@ -281,8 +309,7 @@ def main():
 
         live_cellular_nodes = setup_cellular_links(nodes_with_cellular)
 
-        run_node_to_cloud({'cellular': live_cellular_nodes,
-                           'ethernet': live_ethernet_nodes})
+        run_node_to_cloud(live_cellular_nodes, live_ethernet_nodes)
 
     elif expt_type == 'cloud_to_cloud':
         run_cloud_to_cloud(live_hosts)
