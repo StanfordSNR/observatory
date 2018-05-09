@@ -3,48 +3,48 @@ nodes:
     user: pi
     ip: 171.66.3.231
     desc: Stanford
-    peer_cloud: aws_california_1
     ntp: time.stanford.edu
+    peer_cloud: aws_california_1
     cellular: on
 
   mexico:
     user: pi
     ip: 143.255.56.146
     desc: Mexico
-    peer_cloud: aws_california_2
     ntp: time.stanford.edu
+    peer_cloud: aws_california_2
     cellular: off
 
   brazil:
     user: pi
     ip: 177.234.144.122
     desc: Brazil
-    peer_cloud: aws_brazil_1
     ntp: gps.ntp.br
+    peer_cloud: aws_brazil_1
     cellular: off
 
   colombia:
     user: pi
     ip: 138.121.201.58
     desc: Colombia
-    peer_cloud: aws_brazil_2
     ntp: gps.ntp.br
+    peer_cloud: aws_brazil_2
     cellular: on
 
   india:
     user: pi
     ip: 109.73.164.122
     desc: India
-    peer_cloud: aws_india_1
     ntp: nets.org.sg
+    peer_cloud: aws_india_1
     cellular: on
 
   china:
     user: ubuntu
     ip: 166.111.17.81
     desc: China
-    peer_cloud: aws_korea
     ntp: ntp.nict.jp
+    peer_cloud: aws_korea
     cellular: on
 
 aws_servers:
@@ -95,6 +95,7 @@ gce_servers:
     user: ubuntu
     ip: 35.184.255.184
     desc: GCE Iowa
+    ntp: time.google.com
     name: observatory-iowa
     zone: us-central1-c
 
@@ -102,6 +103,7 @@ gce_servers:
     user: ubuntu
     ip: 35.197.205.116
     desc: GCE London
+    ntp: time.google.com
     name: observatory-london
     zone: europe-west2-c
 
@@ -109,6 +111,7 @@ gce_servers:
     user: ubuntu
     ip: 35.189.42.59
     desc: GCE Sydney
+    ntp: time.google.com
     name: observatory-sydney
     zone: australia-southeast1-c
 
@@ -116,6 +119,7 @@ gce_servers:
     user: ubuntu
     ip: 35.190.238.161
     desc: GCE Tokyo
+    ntp: time.google.com
     name: observatory-tokyo
     zone: asia-northeast1-c
 

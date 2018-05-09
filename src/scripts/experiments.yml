@@ -1,0 +1,52 @@
+metadata:
+  branch: dev
+  base_dir: ~/pantheon
+  data_dir: ~/pantheon/data
+  install_deps_path: ~/pantheon/tools/install_deps.sh
+  pkill_path: ~/pantheon/tools/pkill.py
+  setup_system_path: ~/pantheon/src/experiments/setup_system.py
+  setup_path: ~/pantheon/src/experiments/setup.py
+  test_path: ~/pantheon/src/experiments/test.py
+
+macros:
+  # common parameters used in real world experiments
+  param_set_1: >-
+    remote {slave_addr}:{base_dir} --all --random-order -t 30 --pkill-cleanup
+    --tunnel-server local --local-addr {master_ip} --local-desc "{master_desc}"
+    --remote-desc "{slave_desc}" --ntp-addr {ntp_addr} --data-dir {data_dir}
+
+real_world:
+  ethernet:
+  # master to slave, 1 flow, ethernet
+  - >-
+    {test_path} {param_set_1} --run-times 10 --sender local
+    >> {job_log} 2>&1
+  # slave to master, 1 flow, ethernet
+  - >-
+    {test_path} {param_set_1} --run-times 10 --sender remote
+    >> {job_log} 2>&1
+  # master to slave, 3 flows, ethernet
+  - >-
+    {test_path} {param_set_1} --run-times 10 -f 3 --interval 10 --sender local
+    >> {job_log} 2>&1
+  # slave to master, 3 flows, ethernet
+  - >-
+    {test_path} {param_set_1} --run-times 10 -f 3 --interval 10 --sender remote
+    >> {job_log} 2>&1
+  cellular:
+  # master to slave, 1 flow, cellular
+  - >-
+    {test_path} {param_set_1} --run-times 3 --sender local --remote-if ppp0
+    >> {job_log} 2>&1
+  # slave to master, 1 flow, cellular
+  - >-
+    {test_path} {param_set_1} --run-times 3 --sender remote --remote-if ppp0
+    >> {job_log} 2>&1
+  # master to slave, 3 flows, cellular
+  - >-
+    {test_path} {param_set_1} --run-times 3 -f 3 --interval 10
+    --sender local --remote-if ppp0 >> {job_log} 2>&1
+  # slave to master, 3 flows, cellular
+  - >-
+    {test_path} {param_set_1} --run-times 3 -f 3 --interval 10
+    --sender remote --remote-if ppp0 >> {job_log} 2>&1

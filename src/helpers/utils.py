@@ -2,6 +2,7 @@ import sys
 from os import path
 import yaml
 import time
+from datetime import datetime
 
 import context
 from helpers.subprocess_wrappers import check_call, Popen, call
@@ -106,7 +107,8 @@ def run_pppd(hosts):
 
 
 def setup_ppp0_interface(hosts):
-    cmd = setup_system_path + ' --interface ppp0'
+    cmd = ('{setup_system_path} --interface ppp0'
+           .format(setup_system_path=meta['setup_system_path']))
     return simple_execute(hosts, cmd)
 
 
@@ -127,12 +129,18 @@ def cleanup(hosts):
 
 
 def setup_system(hosts):
-    cmd = ('{setup_system_path} --enable-ip-forwarding && '
+    cmd = ('{setup_system_path} --enable-ip-forward && '
+           '{setup_system_path} --qdisc fq_codel && '
            '{setup_system_path} --set-rmem'
            .format(setup_system_path=meta['setup_system_path']))
     return simple_execute(hosts, cmd)
 
 
 def setup_after_reboot(hosts):
-    cmd = '{setup_path} --all'.format(setup_path=meta['setup_path'])
+    cmd = ('cd {base_dir} && {setup_path} --all'
+           .format(base_dir=meta['base_dir'], setup_path=meta['setup_path']))
     return simple_execute(hosts, cmd)
+
+
+def utc_date():
+    return datetime.utcnow().strftime('%Y-%m-%dT%H-%M')
