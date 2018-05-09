@@ -35,3 +35,222 @@ real_world:
     - command: >-
         {test_path} {common_param_set} --run-times 10
         {sender_side} {flow_scenario} >> {job_log} 2>&1
+
+emulation:
+  matrix:
+    flow_scenario:
+      - -f 1
+      - -f 3 --interval 10
+  macros:
+    common_param_set: >-
+      local --all --random-order --run-times 10 -t 30
+      --data-dir {data_dir} --pkill-cleanup
+  jobs:
+    # 1, 'Calibrated emulator (Nepal to AWS India)'
+    - scenario: 1
+      short_desc: Nepal to AWS India
+      desc: >-
+        Calibrated to the real path from Nepal to AWS India
+        (http://pantheon.stanford.edu/result/188/)"
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/0.57mbps-poisson.trace
+        --downlink-trace {traces_dir}/0.57mbps-poisson.trace
+        --prepend-mm-cmds "mm-delay 28 mm-loss uplink 0.0477"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=14"
+        >> {job_log} 2>&1
+    # 2, 'Calibrated emulator (Mexico cellular to AWS California)'
+    - scenario: 2
+      short_desc: Mexico ppp0 to AWS California
+      desc: >-
+        Calibrated to the real path from Mexico cellular to AWS California
+        (http://pantheon.stanford.edu/result/196/)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/2.64mbps-poisson.trace
+        --downlink-trace {traces_dir}/2.64mbps-poisson.trace
+        --prepend-mm-cmds "mm-delay 88"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=130"
+        >> {job_log} 2>&1
+    # 3, 'Calibrated emulator (AWS Brazil to Colombia cellular)'
+    - scenario: 3
+      short_desc: AWS Brazil to Colombia ppp0
+      desc: >-
+        Calibrated to the real path from AWS Brazil to Colombia cellular
+        (http://pantheon.stanford.edu/result/339/)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/3.04mbps-poisson.trace
+        --downlink-trace {traces_dir}/3.04mbps-poisson.trace
+        --prepend-mm-cmds "mm-delay 130"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=426"
+        >> {job_log} 2>&1
+    # 4, 'Calibrated emulator (India to AWS India)'
+    - scenario: 4
+      short_desc: India to AWS India
+      desc: >-
+        Calibrated to the real path from India to AWS India
+        (http://pantheon.stanford.edu/result/251/)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/100.42mbps.trace
+        --downlink-trace {traces_dir}/100.42mbps.trace
+        --prepend-mm-cmds "mm-delay 27"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=173"
+        >> {job_log} 2>&1
+    # 5, 'Calibrated emulator (AWS Korea to China)'
+    - scenario: 5
+      short_desc: AWS Korea to China
+      desc: >-
+        Calibrated to the real path from AWS Korea to China
+        (http://pantheon.stanford.edu/result/361/)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/77.72mbps.trace
+        --downlink-trace {traces_dir}/77.72mbps.trace
+        --prepend-mm-cmds "mm-delay 51 mm-loss uplink 0.0006"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=94"
+        >> {job_log} 2>&1
+    # 6, 'Calibrated emulator (AWS California to Mexico)'
+    - scenario: 6
+      short_desc: AWS California to Mexico
+      desc: >-
+        Calibrated to the real path from AWS California to Mexico
+        (http://pantheon.stanford.edu/result/353/)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/114.68mbps.trace
+        --downlink-trace {traces_dir}/114.68mbps.trace
+        --prepend-mm-cmds "mm-delay 45"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=450"
+        >> {job_log} 2>&1
+    # 7, 'Token-bucket based policer (bandwidth 12mbps, RTT 20ms)'
+    - scenario: 7
+      short_desc: token-bucket based policer 1
+      desc: Token-bucket based policer (bandwidth 12mbps, RTT 20ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 10"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 8, 'Token-bucket based policer (bandwidth 60mbps, RTT 20ms)'
+    - scenario: 8
+      short_desc: token-bucket based policer 2
+      desc: Token-bucket based policer (bandwidth 60mbps, RTT 20ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/60mbps.trace
+        --downlink-trace {traces_dir}/60mbps.trace
+        --prepend-mm-cmds "mm-delay 10"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 9, 'Token-bucket based policer (bandwidth 108mbps, RTT 20ms)'
+    - scenario: 9
+      short_desc: token-bucket based policer 3
+      desc: Token-bucket based policer (bandwidth 108mbps, RTT 20ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/108mbps.trace
+        --downlink-trace {traces_dir}/108mbps.trace
+        --prepend-mm-cmds "mm-delay 10"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 10, 'Token-bucket based policer (bandwidth 12mbps, RTT 100ms)'
+    - scenario: 10
+      short_desc: token-bucket based policer 4
+      desc: Token-bucket based policer (bandwidth 12mbps, RTT 100ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 50"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 11, 'Token-bucket based policer (bandwidth 60mbps, RTT 100ms)'
+    - scenario: 11
+      short_desc: token-bucket based policer 5
+      desc: Token-bucket based policer (bandwidth 60mbps, RTT 100ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/60mbps.trace
+        --downlink-trace {traces_dir}/60mbps.trace
+        --prepend-mm-cmds "mm-delay 50"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 12, 'Token-bucket based policer (bandwidth 108mbps, RTT 100ms)'
+    - scenario: 12
+      short_desc: token-bucket based policer 6
+      desc: Token-bucket based policer (bandwidth 108mbps, RTT 100ms)
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/108mbps.trace
+        --downlink-trace {traces_dir}/108mbps.trace
+        --prepend-mm-cmds "mm-delay 50"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=packets=1 --downlink-queue=droptail --downlink-queue-args=packets=1"
+        >> {job_log} 2>&1
+    # 13, 'Severe ACK aggregation (1 ACK every 100ms)'
+    - scenario: 13
+      short_desc: 'severe ACK aggregation 1'
+      desc: 'Severe ACK aggregation (1 ACK every 100ms)'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/0.12mbps.trace
+        --prepend-mm-cmds "mm-delay 10"
+        >> {job_log} 2>&1
+    # 14, 'Severe ACK aggregation (10 ACKs every 200ms)'
+    - scenario: 14
+      short_desc: 'severe ACK aggregation 2'
+      desc: 'Severe ACK aggregation (10 ACKs every 200ms)'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/10-every-200.trace
+        --prepend-mm-cmds "mm-delay 10"
+        >> {job_log} 2>&1
+    # 15, 'Bottleneck buffer = BDP/10'
+    - scenario: 15
+      short_desc: 'bottleneck buffer 1'
+      desc: 'Bottleneck buffer = BDP/10'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 30"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=bytes=9000"
+        >> {job_log} 2>&1
+    # 16, 'Bottleneck buffer = BDP/3'
+    - scenario: 16
+      short_desc: 'bottleneck buffer 2'
+      desc: 'Bottleneck buffer = BDP/3'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 30"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=bytes=30000"
+        >> {job_log} 2>&1
+    # 17, 'Bottleneck buffer = BDP/2'
+    - scenario: 17
+      short_desc: 'bottleneck buffer 3'
+      desc: 'Bottleneck buffer = BDP/2'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 30"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=bytes=45000"
+        >> {job_log} 2>&1
+    # 18, 'Bottleneck buffer = BDP'
+    - scenario: 18
+      short_desc: 'bottleneck buffer 4'
+      desc: 'Bottleneck buffer = BDP'
+      command: >-
+        {test_path} {common_param_set}
+        --uplink-trace {traces_dir}/12mbps.trace
+        --downlink-trace {traces_dir}/12mbps.trace
+        --prepend-mm-cmds "mm-delay 30"
+        --extra-mm-link-args "--uplink-queue=droptail --uplink-queue-args=bytes=90000"
+        >> {job_log} 2>&1
