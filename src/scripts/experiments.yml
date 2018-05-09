@@ -1,4 +1,4 @@
-# Principles of formatting each command in 'script':
+# Principles of formatting each 'command' in 'jobs':
 # 1. expand macros; 2. expand variables defined in a single matrix element;
 # 3. expand meta; 4. the remaining variables need to be filled in run.py.
 
@@ -27,12 +27,11 @@ real_world:
       --data-dir {data_dir} --pkill-cleanup --tunnel-server local
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
-  script:
+  jobs:
     # cellular (run only if ppp0 is up)
-    - >-
-      {test_path} {common_param_set} --run-times 3
-      {sender_side} {flow_scenario} --remote-if ppp0 >> {job_log} 2>&1
-    # ethernet
-    - >-
-      {test_path} {common_param_set} --run-times 10
-      {sender_side} {flow_scenario} >> {job_log} 2>&1
+    - command: >-
+        {test_path} {common_param_set} --run-times 3
+        {sender_side} {flow_scenario} --remote-if ppp0 >> {job_log} 2>&1
+    - command: >-
+        {test_path} {common_param_set} --run-times 10
+        {sender_side} {flow_scenario} >> {job_log} 2>&1

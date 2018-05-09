@@ -216,7 +216,8 @@ def run_node_to_cloud(cellular_nodes, ethernet_nodes):
 
     # run each cellular/ethernet experiment on all node-cloud pairs in parallel
     for mat_dict in matrix:
-        for cmd_tmpl in cfg['script']:
+        for job in cfg['jobs']:
+            cmd_tmpl = job['command']
             # 1. expand macros
             cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
             # 2. expand variables in mat_dict
@@ -257,7 +258,8 @@ def run_cloud_to_cloud(hosts):
     # run each ethernet experiment on every pair of cloud servers in parallel
     for schedule_round in schedule:
         for mat_dict in matrix:
-            for cmd_tmpl in cfg['script']:
+            for job in cfg['jobs']:
+                cmd_tmpl = job['command']
                 # 1. expand macros
                 cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
                 # 2. expand variables in mat_dict
