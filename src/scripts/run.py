@@ -4,14 +4,19 @@ import os
 from os import path
 import sys
 import argparse
+import requests
 from multiprocessing import Process
+from collections import deque
 
 import context
 from helpers import utils, round_robin_tournament
-from helpers.subprocess_wrappers import Popen, PIPE
+from helpers.subprocess_wrappers import Popen, PIPE, check_call
 
 
-def start_hosts(expt_type):
+expt_type = None
+
+
+def start_hosts():
     sys.stderr.write('----- Starting hosts -----\n')
 
     # set of live hosts (including nodes and cloud servers)
@@ -20,7 +25,7 @@ def start_hosts(expt_type):
     # list of cloud server to start
     clouds_to_start = []
 
-    if expt_type == 'node_to_cloud':
+    if expt_type == 'node':
         host_status = utils.check_ssh_connection(
                 utils.host_cfg['nodes'].keys())
 
@@ -40,9 +45,9 @@ def start_hosts(expt_type):
                    stdout=DEVNULL, stderr=DEVNULL).wait()
 
     else:
-        if expt_type == 'cloud_to_cloud':
+        if expt_type == 'cloud':
             gce_server_type = 'gce_servers'
-        elif expt_type == 'emulation':
+        elif expt_type == 'emu':
             gce_server_type = 'emu_servers'
 
         for host in utils.host_cfg[gce_server_type]:
@@ -66,9 +71,12 @@ def start_hosts(expt_type):
 
     # print live hosts
     sys.stderr.write('Live hosts:')
-    for host in live_hosts:
-        sys.stderr.write(' ' + host)
-    sys.stderr.write('\n')
+    if not live_hosts:
+        sys.stderr.write(' None\n')
+    else:
+        for host in live_hosts:
+            sys.stderr.write(' ' + host)
+        sys.stderr.write('\n')
 
     return live_hosts
 
@@ -93,14 +101,17 @@ def setup_cellular_links(nodes_with_cellular):
 
     # print live cellular hosts
     sys.stderr.write('Live hosts with working cellular links:')
-    for host in live_cellular_nodes:
-        sys.stderr.write(' ' + host)
-    sys.stderr.write('\n')
+    if not live_cellular_nodes:
+        sys.stderr.write(' None\n')
+    else:
+        for host in live_cellular_nodes:
+            sys.stderr.write(' ' + host)
+        sys.stderr.write('\n')
 
     return live_cellular_nodes
 
 
-def setup(expt_type, hosts):
+def setup(hosts):
     sys.stderr.write('----- Setting up hosts -----\n')
 
     # cleanup
@@ -116,19 +127,112 @@ def setup(expt_type, hosts):
     utils.setup_after_reboot(hosts)
 
 
-def analyze():
+def compress(d):
+    tar_path = path.join(utils.meta['data_base_dir'],
+                         '{}.tar.gz'.format(d['title']))
+
+    cmd = 'tar czvf {tar_path} {data_dir}'.format(
+            tar_path=tar_path, data_dir=d['data_dir'])
+    check_call(['ssh', d['master_addr'], cmd])
+
+    d['tar'] = tar_path
+
+
+def analyze(d):
     sys.stderr.write('----- Performing analysis -----\n')
+    cmd = '{analyze_path} --data-dir {data_dir} >> {job_log} 2>&1'.format(
+            analyze_path=utils.meta['analyze_path'],
+            data_dir=d['data_dir'], job_log=d['job_log'])
+    check_call(['ssh', d['master_addr'], cmd])
 
 
-def upload_to_s3():
+def upload(d):
+    # upload to S3
     sys.stderr.write('----- Uploading logs to Amazon S3 -----\n')
 
+    if expt_type == 'emu':
+        s3_folder = 'stanford-pantheon/emulation/'
+    else:
+        slave_desc = d['slave_desc'].replace(' ', '-')
+        s3_folder = 'stanford-pantheon/real-world/%s/' % slave_desc
+    d['s3_folder'] = s3_folder
 
-def post_to_website():
+    # upload data logs
+    s3_base = 's3://' + s3_folder
+    cmd = 'aws s3 cp %s %s' % (
+        d['tar'], path.join(s3_base, path.basename(d['tar'])))
+    check_call(['ssh', d['master_addr'], cmd])
+
+    # upload reports
+    s3_reports = s3_base + 'reports/'
+    reports_to_upload = ['pantheon_report.pdf',
+                         'pantheon_summary.svg',
+                         'pantheon_summary_mean.svg']
+    for report in reports_to_upload:
+        report_path = path.join(d['data_dir'], report)
+
+        dst_file = '%s-%s' % (d['title'], report.replace('_', '-'))
+        d[report] = dst_file
+        dst_url = path.join(s3_reports, dst_file)
+
+        cmd = 'aws s3 cp %s %s' % (report_path, dst_url)
+        check_call(['ssh', d['master_addr'], cmd])
+
+    # upload job logs
+    s3_job_logs = s3_base + 'job-logs/'
+    cmd = 'aws s3 cp %s %s' % (
+        d['job_log'], path.join(s3_job_logs, path.basename(d['job_log'])))
+    check_call(['ssh', d['master_addr'], cmd])
+
+
+def post_to_website(d):
+    # post to pantheon website
     sys.stderr.write('----- Posting results to Pantheon website -----\n')
 
+    s3_url_base = 'https://s3.amazonaws.com/' + d['s3_folder']
+    s3_url_reports = s3_url_base + 'reports/'
 
-def master_slave_expand(master, slave, cmd_tmpl):
+    update_url = 'https://pantheon.stanford.edu/%s/%s/' % (
+            os.environ['PANTHEON_UPDATE_URL'], expt_type)
+
+    # GET CSRF token
+    client = requests.session()
+    response = client.get(update_url)
+    csrftoken = client.cookies['csrftoken']
+
+    payload = {}
+    payload['csrfmiddlewaretoken'] = csrftoken
+    payload['time_created'] = d['expt_time']
+
+    payload['logs'] = path.join(s3_url_base, path.basename(d['tar']))
+    payload['report'] = path.join(s3_url_reports,
+                                  d['pantheon_report.pdf'])
+    payload['graph1'] = path.join(s3_url_reports,
+                                  d['pantheon_summary.svg'])
+    payload['graph2'] = path.join(s3_url_reports,
+                                  d['pantheon_summary_mean.svg'])
+
+    payload['time'] = d['time']
+    payload['runs'] = d['runs']
+    payload['scenario'] = d['scenario']
+
+    if expt_type == 'node':
+        payload['node'] = d['node']
+        payload['cloud'] = d['cloud']
+        payload['to_node'] = d['to_node']
+        payload['link'] = d['link']
+    elif expt_type == 'cloud':
+        payload['src'] = d['src']
+        payload['dst'] = d['dst']
+    elif expt_type == 'emu':
+        payload['emu_scenario'] = d['emu_scenario']
+        payload['emu_cmd'] = d['emu_cmd']
+        payload['emu_desc'] = d['emu_desc']
+
+    client.post(update_url, data=payload, headers=dict(Referer=update_url))
+
+
+def master_slave_expand(master, slave, cmd_tmpl, expt_time):
     # split cmd_tmpl
     cmd_splitted = cmd_tmpl.split()
 
@@ -136,14 +240,15 @@ def master_slave_expand(master, slave, cmd_tmpl):
     slave_cfg = utils.get_host_cfg(slave)
 
     # start preparing experiment's title
-    expt_time = utils.utc_date()
     title = expt_time
 
     # refine descriptions
     master_desc = master_cfg['desc']
     slave_desc = slave_cfg['desc']
+    link = 'ethernet'
     if 'ppp0' in cmd_splitted: # cellular experiment
         slave_desc += ' ppp0'
+        link = 'cellular'
 
     if '--sender' not in cmd_splitted:
         sys.exit('Specify --sender explicitly')
@@ -159,6 +264,7 @@ def master_slave_expand(master, slave, cmd_tmpl):
         title += ' %s to %s' % (slave_desc, master_desc)
 
     # add runs to the title (if runs > 1)
+    runs = 1
     if '--run-times' in cmd_splitted:
         runs_idx = cmd_splitted.index('--run-times')
         runs = int(cmd_splitted[runs_idx + 1])
@@ -167,12 +273,19 @@ def master_slave_expand(master, slave, cmd_tmpl):
             title += ' %d runs' % runs
 
     # add flows to the title (if not single flow)
+    flows = 1
     if '-f' in cmd_splitted:
         flow_idx = cmd_splitted.index('-f')
         flows = int(cmd_splitted[flow_idx + 1])
 
         if flows > 1:
             title += ' %d flows' % flows
+
+    # record time
+    time = 30
+    if '-t' in cmd_splitted:
+        time_idx = cmd_splitted.index('-t')
+        time = int(cmd_splitted[time_idx + 1])
 
     # finish preparing experiment's title
     title = title.replace(' ', '-')
@@ -186,25 +299,78 @@ def master_slave_expand(master, slave, cmd_tmpl):
         'ntp_addr': slave_cfg['ntp'],
     }
 
-    data_dir = utils.meta['data_dir']
-    cmd_dict['data_dir'] = path.join(data_dir, title)
-    cmd_dict['job_log'] = path.join(data_dir, '%s.log' % title)
+    cmd_dict['data_dir'] = path.join(utils.meta['data_base_dir'], title)
+    cmd_dict['job_log'] = path.join(utils.meta['tmp_dir'], '%s.log' % title)
 
-    # store extra useful information
-    cmd_dict['title'] = title
+    # store extra information to return
+    cmd_dict['time'] = time
+    cmd_dict['runs'] = runs
+
+    if flows == 1:
+        cmd_dict['scenario'] = '1_flow'
+    elif flows == 3:
+        cmd_dict['scenario'] = '3_flows'
+
+    cmd_dict['sender'] = sender
+    cmd_dict['link'] = link
 
     return cmd_dict
+
+
+def analyze_and_upload(d):
+    # compress logs
+    compress(d)
+
+    # analyze results
+    analyze(d)
+
+    # upload logs to S3 and website
+    upload(d)
+    post_to_website(d)
 
 
 # smallest unit of real-world experiment that will be run in parallel
 def run_real_world_experiment(master, slave, cmd_tmpl):
     # 4. fill in the remaining varialbes
-    cmd_dict = master_slave_expand(master, slave, cmd_tmpl)
-    final_cmd = utils.safe_format(cmd_tmpl, cmd_dict)
-    print(final_cmd)
+    expt_time = utils.utc_date()
+    cmd_dict = master_slave_expand(master, slave, cmd_tmpl, expt_time)
+    cmd = utils.safe_format(cmd_tmpl, cmd_dict)
+
+    master_addr = utils.get_host_addr(master)
+    final_cmd = ['ssh', master_addr, cmd]
+    check_call(final_cmd)
+
+    # prepare parameters used in analyze_and_upload
+    d = {
+        'title': path.basename(cmd_dict['data_dir']),
+        'data_dir': cmd_dict['data_dir'],
+        'job_log': cmd_dict['job_log'],
+        'master_addr': master_addr,
+        'slave_desc': cmd_dict['slave_desc'],
+        'expt_time': expt_time,
+        'time': cmd_dict['time'],
+        'runs': cmd_dict['runs'],
+        'scenario': cmd_dict['scenario'],
+    }
+
+    sender = cmd_dict['sender']
+    if expt_type == 'node':
+        d['node'] = slave
+        d['cloud'] = master
+        d['to_node'] = True if sender == 'local' else False
+        d['link'] = cmd_dict['link']
+    elif expt_type == 'cloud':
+        if sender == 'local':
+            d['src'] = master
+            d['dst'] = slave
+        else:
+            d['src'] = slave
+            d['dst'] = master
+
+    analyze_and_upload(d)
 
 
-def run_node_to_cloud(cellular_nodes, ethernet_nodes):
+def run_node(cellular_nodes, ethernet_nodes):
     sys.stderr.write('----- Running node-to-cloud experiments -----\n')
 
     # convert lists to sets for faster lookup
@@ -246,7 +412,7 @@ def run_node_to_cloud(cellular_nodes, ethernet_nodes):
                 p.join()
 
 
-def run_cloud_to_cloud(hosts):
+def run_cloud(hosts):
     sys.stderr.write('----- Running cloud-to-cloud experiments -----\n')
 
     # create a schedule for a "round-robin tournament" among live cloud servers
@@ -279,26 +445,70 @@ def run_cloud_to_cloud(hosts):
                     p.join()
 
 
-def run_emulation(hosts):
-    pass
+# smallest unit of emulation experiment that will be run in parallel
+def run_emu_experiment(emu_server, cmd):
+    emu_addr = utils.get_host_addr(emu_server)
+    final_cmd = ['ssh', emu_addr, cmd]
+    check_call(final_cmd)
+
+
+def run_emu(hosts):
+    sys.stderr.write('----- Running emulation experiments -----\n')
+
+    cfg = utils.expt_cfg['emulation']
+    matrix = utils.expand_matrix(cfg['matrix'])
+
+    # create a queue of jobs
+    job_queue = deque()
+    for mat_dict in matrix:
+        for job in cfg['jobs']:
+            cmd_tmpl = job['command']
+
+            # 1. expand macros
+            cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
+            # 2. expand variables in mat_dict
+            cmd_tmpl = utils.safe_format(cmd_tmpl, mat_dict)
+            # 3. expand meta
+            cmd_tmpl = utils.safe_format(cmd_tmpl, utils.meta)
+
+            job_queue.append(cmd_tmpl)
+
+    while len(job_queue):
+        procs = []
+        for emu_server in utils.host_cfg['emu_servers']:
+            #if len(job_queue) == 0:
+            #    break
+
+            cmd = job_queue.popleft()
+            p = Process(target=run_emu_experiment,
+                        args=(emu_server, cmd))
+            p.start()
+            procs.append(p)
+
+            break
+
+        if procs:
+            for p in procs:
+                p.join()
 
 
 def main():
     # get commands to run from experiments.yml
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'expt_type', choices=['node_to_cloud', 'cloud_to_cloud', 'emulation'])
+    parser.add_argument('expt_type', choices=['node', 'cloud', 'emu'])
     args = parser.parse_args()
 
+    # change global variables
+    global expt_type
     expt_type = args.expt_type
 
     # start servers
-    live_hosts = start_hosts(expt_type)
+    live_hosts = start_hosts()
 
     # run setup
-    setup(expt_type, live_hosts)
+    setup(live_hosts)
 
-    if expt_type == 'node_to_cloud':
+    if expt_type == 'node':
         live_ethernet_nodes = []
         nodes_with_cellular = []
 
@@ -311,13 +521,13 @@ def main():
 
         live_cellular_nodes = setup_cellular_links(nodes_with_cellular)
 
-        run_node_to_cloud(live_cellular_nodes, live_ethernet_nodes)
+        run_node(live_cellular_nodes, live_ethernet_nodes)
 
-    elif expt_type == 'cloud_to_cloud':
-        run_cloud_to_cloud(live_hosts)
+    elif expt_type == 'cloud':
+        run_cloud(live_hosts)
 
-    elif expt_type == 'emulation':
-        run_emulation(live_hosts)
+    elif expt_type == 'emu':
+        run_emu(live_hosts)
 
 
 if __name__ == '__main__':
