@@ -143,8 +143,9 @@ def setup_ppp0_interface(hosts):
 def update_repository(hosts):
     cmd = ('cd {base_dir} && '
            'git fetch --all && '
+           'git checkout {branch} && '
            'git reset --hard origin/{branch} && '
-           'git submodule update --init --recursive'
+           'git submodule update --recursive --init'
            .format(base_dir=meta['base_dir'], branch=meta['branch']))
     return simple_execute(hosts, cmd)
 

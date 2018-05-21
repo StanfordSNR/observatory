@@ -3,7 +3,7 @@
 # 3. expand meta; 4. the remaining variables need to be filled in run.py.
 
 meta:
-  branch: dev
+  branch: master
   base_dir: ~/pantheon
   data_base_dir: ~/pantheon/data
   tmp_dir: ~/pantheon/tmp

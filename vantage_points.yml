@@ -1,7 +1,7 @@
 nodes:
   stanford:
     user: pi
-    ip: 171.66.3.231
+    ip: 171.67.76.32
     desc: Stanford
     ntp: time.stanford.edu
     peer_cloud: aws_california_1
@@ -37,6 +37,14 @@ nodes:
     desc: India
     ntp: nets.org.sg
     peer_cloud: aws_india_1
+    cellular: off
+
+  saudi_arabia:
+    user: ubuntu
+    ip: saudi_arabia  # reverse SSH tunnel: require settings in .ssh/config
+    desc: Saudi Arabia
+    ntp: nets.org.sg
+    peer_cloud: aws_india_2
     cellular: off
 
   china:
