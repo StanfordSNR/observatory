@@ -5,7 +5,7 @@ nodes:
     desc: Stanford
     ntp: time.stanford.edu
     peer_cloud: aws_california_1
-    cellular: on
+    cellular: off
 
   mexico:
     user: pi
@@ -29,7 +29,7 @@ nodes:
     desc: Colombia
     ntp: gps.ntp.br
     peer_cloud: aws_brazil_2
-    cellular: on
+    cellular: off
 
   india:
     user: pi
@@ -37,57 +37,64 @@ nodes:
     desc: India
     ntp: nets.org.sg
     peer_cloud: aws_india_1
-    cellular: on
+    cellular: off
 
   china:
     user: ubuntu
-    ip: 166.111.17.81
+    ip: 166.111.17.94
     desc: China
     ntp: ntp.nict.jp
     peer_cloud: aws_korea
-    cellular: on
+    cellular: off
 
 aws_servers:
   aws_california_1:
     user: ubuntu
     ip: 13.56.50.180
     desc: AWS California 1
-    id: i-0b097401b820ec3e6
+    id: i-0d817cfa8f9b66438
     region: us-west-1
 
   aws_california_2:
     user: ubuntu
     ip: 13.56.84.214
     desc: AWS California 2
-    id: i-0a5f1e22d7c91eeb8
+    id: i-034a8cab622791483
     region: us-west-1
 
   aws_brazil_1:
     user: ubuntu
     ip: 54.233.106.170
     desc: AWS Brazil 1
-    id: i-06601ba56f76edbb2
+    id: i-0958c295d4a5e6d1e
     region: sa-east-1
 
   aws_brazil_2:
     user: ubuntu
     ip: 54.233.99.159
     desc: AWS Brazil 2
-    id: i-0ac4cecaef4b0cb13
+    id: i-0c9a3b88d7e88b7b6
     region: sa-east-1
 
   aws_india_1:
     user: ubuntu
     ip: 35.154.240.73
     desc: AWS India 1
-    id: i-004c61b78d601e18f
+    id: i-014d310343efc8b64
+    region: ap-south-1
+
+  aws_india_2:
+    user: ubuntu
+    ip: 13.126.30.111
+    desc: AWS India 2
+    id: i-030a50cb2b431db35
     region: ap-south-1
 
   aws_korea:
     user: ubuntu
     ip: 13.124.31.209
     desc: AWS Korea
-    id: i-02ca84088df33bb2f
+    id: i-07b7d463fc6c69a2e
     region: ap-northeast-2
 
 gce_servers:
