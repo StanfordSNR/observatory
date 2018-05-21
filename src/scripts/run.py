@@ -88,7 +88,7 @@ def setup_cellular_links(nodes_with_cellular):
 
     live_cellular_nodes = set()
 
-    # run pppd commands
+    # run pppd commands if ppp0 is not up
     utils.run_pppd(nodes_with_cellular)
 
     # set up ppp0 interface

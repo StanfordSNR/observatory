@@ -130,7 +130,14 @@ def check_ppp0_connection(hosts, retry_times=0, retry_timeout=0):
 
 
 def run_pppd(hosts):
-    host_cmd = {host:'sudo pon %s' % host for host in hosts}
+    ppp0_up = simple_execute(hosts, 'ifconfig ppp0')
+
+    host_cmd = {}
+    for host in ppp0_up:
+        if not ppp0_up[host]:
+            # run pppd only if ppp0 is not up
+            host_cmd[host] = 'sudo pon %s' % host
+
     return execute(host_cmd)
 
 
