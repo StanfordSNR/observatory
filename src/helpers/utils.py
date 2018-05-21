@@ -150,7 +150,7 @@ def update_repository(hosts):
 
 
 def cleanup(hosts):
-    cmd = ('rm -rf {base_dir}/tmp && '
+    cmd = ('rm -rf {base_dir}/tmp {base_dir}/data && '
            '{pkill_path} --kill-dir {base_dir}'
            .format(base_dir=meta['base_dir'], pkill_path=meta['pkill_path']))
     return simple_execute(hosts, cmd)

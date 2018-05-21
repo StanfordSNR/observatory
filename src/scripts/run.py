@@ -5,6 +5,7 @@ from os import path
 import sys
 import argparse
 import requests
+import shlex
 from multiprocessing import Process
 from collections import deque
 
@@ -127,6 +128,17 @@ def setup(hosts):
     utils.setup_after_reboot(hosts)
 
 
+def get_param_from_cmd(cmd_splitted, key):
+    if key in cmd_splitted:
+        idx = cmd_splitted.index(key)
+        if idx + 1 < len(cmd_splitted):
+            return cmd_splitted[idx + 1]
+        else:
+            return None
+    else:
+        return None
+
+
 def compress(d):
     tar_path = path.join(utils.meta['data_base_dir'],
                          '{}.tar.gz'.format(d['title']))
@@ -233,8 +245,8 @@ def post_to_website(d):
 
 
 def master_slave_expand(master, slave, cmd_tmpl, expt_time):
-    # split cmd_tmpl
-    cmd_splitted = cmd_tmpl.split()
+    # split cmd_tmpl by spaces but preserve quoted substrings
+    cmd_splitted = shlex.split(cmd_tmpl)
 
     master_cfg = utils.get_host_cfg(master)
     slave_cfg = utils.get_host_cfg(slave)
@@ -250,11 +262,9 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
         slave_desc += ' ppp0'
         link = 'cellular'
 
-    if '--sender' not in cmd_splitted:
+    sender = get_param_from_cmd(cmd_splitted, '--sender')
+    if sender is None:
         sys.exit('Specify --sender explicitly')
-
-    sender_idx = cmd_splitted.index('--sender')
-    sender = cmd_splitted[sender_idx + 1]
 
     # master to slave
     if sender == 'local':
@@ -264,28 +274,20 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
         title += ' %s to %s' % (slave_desc, master_desc)
 
     # add runs to the title (if runs > 1)
-    runs = 1
-    if '--run-times' in cmd_splitted:
-        runs_idx = cmd_splitted.index('--run-times')
-        runs = int(cmd_splitted[runs_idx + 1])
-
-        if runs > 1:
-            title += ' %d runs' % runs
+    runs = get_param_from_cmd(cmd_splitted, '--run-times')
+    runs = int(runs) if runs is not None else 1
+    if runs > 1:
+        title += ' %d runs' % runs
 
     # add flows to the title (if not single flow)
-    flows = 1
-    if '-f' in cmd_splitted:
-        flow_idx = cmd_splitted.index('-f')
-        flows = int(cmd_splitted[flow_idx + 1])
-
-        if flows > 1:
-            title += ' %d flows' % flows
+    flows = get_param_from_cmd(cmd_splitted, '-f')
+    flows = int(flows) if flows is not None else 1
+    if flows > 1:
+        title += ' %d flows' % flows
 
     # record time
-    time = 30
-    if '-t' in cmd_splitted:
-        time_idx = cmd_splitted.index('-t')
-        time = int(cmd_splitted[time_idx + 1])
+    time = get_param_from_cmd(cmd_splitted, '-t')
+    time = int(time) if time is not None else 30
 
     # finish preparing experiment's title
     title = title.replace(' ', '-')
@@ -313,6 +315,81 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
 
     cmd_dict['sender'] = sender
     cmd_dict['link'] = link
+
+    return cmd_dict
+
+
+def create_mm_cmd(cmd_splitted):
+    mm_cmd = ''
+
+    prepend_cmd = get_param_from_cmd(cmd_splitted, '--prepend-mm-cmds')
+    if prepend_cmd is not None:
+        mm_cmd += prepend_cmd + ' '
+
+    uptrace = get_param_from_cmd(cmd_splitted, '--uplink-trace')
+    if uptrace is not None:
+        uptrace = path.basename(uptrace)
+    else:
+        uptrace = '12mbps.trace'
+
+    downtrace = get_param_from_cmd(cmd_splitted, '--downlink-trace')
+    if downtrace is not None:
+        downtrace = path.basename(downtrace)
+    else:
+        downtrace = '12mbps.trace'
+
+    mm_cmd += 'mm-link %s %s ' % (uptrace, downtrace)
+
+    mm_link_args = get_param_from_cmd(cmd_splitted, '--extra-mm-link-args')
+    if mm_link_args is not None:
+        mm_cmd += mm_link_args + ' '
+
+    append_cmd = get_param_from_cmd(cmd_splitted, '--append-mm-cmds')
+    if append_cmd is not None:
+        mm_cmd += append_cmd + ' '
+
+    mm_cmd = mm_cmd.strip()
+
+    return mm_cmd
+
+
+def emu_server_expand(emu_server, cmd_tmpl, job_cfg, expt_time):
+    # split cmd_tmpl by spaces but preserve quoted substrings
+    cmd_splitted = shlex.split(cmd_tmpl)
+
+    # record runs
+    runs = get_param_from_cmd(cmd_splitted, '--run-times')
+    runs = int(runs) if runs is not None else 1
+
+    # record flows
+    flows = get_param_from_cmd(cmd_splitted, '-f')
+    flows = int(flows) if flows is not None else 1
+
+    # record time
+    time = get_param_from_cmd(cmd_splitted, '-t')
+    time = int(time) if time is not None else 30
+
+    # prepare title
+    title = expt_time + ' emu ' + str(job_cfg['scenario']);
+    title = title.replace(' ', '-')
+
+    # generate a dictionary of keys for formatting cmd_tmpl
+    cmd_dict = {}
+
+    cmd_dict['data_dir'] = path.join(utils.meta['data_base_dir'], title)
+    cmd_dict['job_log'] = path.join(utils.meta['tmp_dir'], '%s.log' % title)
+
+    # store extra information to return
+    cmd_dict['time'] = time
+    cmd_dict['runs'] = runs
+
+    if flows == 1:
+        cmd_dict['scenario'] = '1_flow'
+    elif flows == 3:
+        cmd_dict['scenario'] = '3_flows'
+
+    # create a user-friendly mahimahi command to present
+    cmd_dict['mm_cmd'] = create_mm_cmd(cmd_splitted)
 
     return cmd_dict
 
@@ -377,7 +454,7 @@ def run_node(cellular_nodes, ethernet_nodes):
     cellular_nodes = set(cellular_nodes)
     ethernet_nodes = set(ethernet_nodes)
 
-    cfg = utils.expt_cfg['real_world']
+    cfg = utils.expt_cfg['node']
     matrix = utils.expand_matrix(cfg['matrix'])
 
     # run each cellular/ethernet experiment on all node-cloud pairs in parallel
@@ -418,7 +495,7 @@ def run_cloud(hosts):
     # create a schedule for a "round-robin tournament" among live cloud servers
     schedule = round_robin_tournament.schedule(hosts)
 
-    cfg = utils.expt_cfg['real_world']
+    cfg = utils.expt_cfg['cloud']
     matrix = utils.expand_matrix(cfg['matrix'])
 
     # run each ethernet experiment on every pair of cloud servers in parallel
@@ -446,23 +523,44 @@ def run_cloud(hosts):
 
 
 # smallest unit of emulation experiment that will be run in parallel
-def run_emu_experiment(emu_server, cmd):
+def run_emu_experiment(emu_server, cmd_tmpl, job_cfg):
+    # 4. fill in the remaining varialbes
+    expt_time = utils.utc_date()
+    cmd_dict = emu_server_expand(emu_server, cmd_tmpl, job_cfg, expt_time)
+    cmd = utils.safe_format(cmd_tmpl, cmd_dict)
+
     emu_addr = utils.get_host_addr(emu_server)
     final_cmd = ['ssh', emu_addr, cmd]
     check_call(final_cmd)
 
+    # prepare parameters used in analyze_and_upload
+    d = {
+        'title': path.basename(cmd_dict['data_dir']),
+        'data_dir': cmd_dict['data_dir'],
+        'job_log': cmd_dict['job_log'],
+        'master_addr': emu_addr,
+        'expt_time': expt_time,
+        'time': cmd_dict['time'],
+        'runs': cmd_dict['runs'],
+        'scenario': cmd_dict['scenario'],
+        'emu_scenario': job_cfg['scenario'],
+        'emu_cmd': cmd_dict['mm_cmd'],
+        'emu_desc': job_cfg['desc'],
+    }
+
+    analyze_and_upload(d)
 
 def run_emu(hosts):
     sys.stderr.write('----- Running emulation experiments -----\n')
 
-    cfg = utils.expt_cfg['emulation']
+    cfg = utils.expt_cfg['emu']
     matrix = utils.expand_matrix(cfg['matrix'])
 
     # create a queue of jobs
     job_queue = deque()
     for mat_dict in matrix:
-        for job in cfg['jobs']:
-            cmd_tmpl = job['command']
+        for job_cfg in cfg['jobs']:
+            cmd_tmpl = job_cfg['command']
 
             # 1. expand macros
             cmd_tmpl = utils.safe_format(cmd_tmpl, cfg['macros'])
@@ -471,21 +569,19 @@ def run_emu(hosts):
             # 3. expand meta
             cmd_tmpl = utils.safe_format(cmd_tmpl, utils.meta)
 
-            job_queue.append(cmd_tmpl)
+            job_queue.append((job_cfg, cmd_tmpl))
 
     while len(job_queue):
         procs = []
         for emu_server in utils.host_cfg['emu_servers']:
-            #if len(job_queue) == 0:
-            #    break
+            if len(job_queue) == 0:
+                break
 
-            cmd = job_queue.popleft()
+            job_cfg, cmd_tmpl = job_queue.popleft()
             p = Process(target=run_emu_experiment,
-                        args=(emu_server, cmd))
+                        args=(emu_server, cmd_tmpl, job_cfg))
             p.start()
             procs.append(p)
-
-            break
 
         if procs:
             for p in procs:
