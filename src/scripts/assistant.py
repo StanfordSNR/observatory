@@ -1,45 +1,34 @@
 #!/usr/bin/env python
 
-import os
 import argparse
-from helpers.helpers import (check_call, call, Popen, parse_config,
-                             run_cmd_on_hosts)
-from helpers.commands import (
-    install_deps, clone_pantheon, git_pull, cleanup, setup, setup_ppp0,
-    add_pub_key, ssh_each_other, copy_ssh_config, mount_readwrite, remove_key,
-    test_ssh, setup_indigos, test_ppp0, copy_traces)
+
+import context
+from helpers import utils
 
 
 def get_hosts(args):
-    config = parse_config()
+    config = utils.parse_vantage_points()
 
-    host_names = []
+    hosts = []
 
     if args.hosts is not None:
-        host_names = args.hosts.split(',')
+        hosts = args.hosts.split()
     else:
         if args.all or args.nodes:
             for server in config['nodes']:
-                host_names.append(server)
+                hosts.append(server)
 
         if args.all or args.aws_servers:
             for server in config['aws_servers']:
-                host_names.append(server)
+                hosts.append(server)
 
         if args.all or args.gce_servers:
             for server in config['gce_servers']:
-                host_names.append(server)
+                hosts.append(server)
 
         if args.all or args.emu_servers:
             for server in config['emu_servers']:
-                host_names.append(server)
-
-    hosts = []
-    for server_type in config:
-        for server in config[server_type]:
-            if server in host_names:
-                server_cfg = config[server_type][server]
-                hosts.append(server_cfg['user'] + '@' + server_cfg['addr'])
+                hosts.append(server)
 
     return hosts
 
@@ -50,26 +39,26 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         '--all', action='store_true',
-        help='all hosts listed in config.yml')
+        help='all hosts listed in vantange_points.yml')
     group.add_argument(
         '--nodes', action='store_true',
-        help='all measurement nodes listed in config.yml')
+        help='all measurement nodes listed in vantange_points.yml')
     group.add_argument(
         '--aws-servers', action='store_true',
-        help='all AWS servers listed in config.yml')
+        help='all AWS servers listed in vantange_points.yml')
     group.add_argument(
         '--gce-servers', action='store_true',
-        help='all GCE servers listed in config.yml')
+        help='all GCE servers listed in vantange_points.yml')
     group.add_argument(
         '--emu-servers', action='store_true',
-        help='all servers reserved for emulation listed in config.yml')
+        help='all servers reserved for emulation listed in vantange_points.yml')
     group.add_argument(
-        '--hosts', metavar='"HOST1,HOST2..."',
-        help='comma-separated list of hosts listed in config.yml')
+        '--hosts', metavar='"HOST1 HOST2..."',
+        help='space-separated list of hosts listed in vantange_points.yml')
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--ssh', metavar='CMD', help='commands to run over SSH')
-    group.add_argument('-c', metavar='CMD', help='predefined commands')
+    group.add_argument('--cmd', metavar='CMD', help='predefined commands')
 
     args = parser.parse_args()
 
@@ -78,10 +67,10 @@ def main():
 
     if args.ssh is not None:
         # run commands over SSH
-        run_cmd_on_hosts(args.ssh, hosts)
+        utils.simple_execute(hosts, args.ssh)
     else:
-        # call the function with the name args.c
-        globals()[args.c](hosts)
+        # call the function with the name args.cmd
+        getattr(utils, args.cmd)(hosts)
 
 
 if __name__ == '__main__':
