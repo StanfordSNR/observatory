@@ -5,13 +5,14 @@ from os import path
 import sys
 import argparse
 import requests
+import json
 import shlex
 from multiprocessing import Process
 from collections import deque
 
 import context
 from helpers import utils, round_robin_tournament
-from helpers.subprocess_wrappers import Popen, PIPE, check_call
+from helpers.subprocess_wrappers import Popen, PIPE, check_call, check_output
 
 
 expt_type = None
@@ -240,6 +241,12 @@ def post_to_website(d):
         payload['emu_scenario'] = d['emu_scenario']
         payload['emu_cmd'] = d['emu_cmd']
         payload['emu_desc'] = d['emu_desc']
+
+    # add perf data to payload
+    perf_data_path = path.join(d['data_dir'], 'pantheon_perf.json')
+    cat_cmd = 'cat ' + perf_data_path
+    perf_data = check_output(['ssh', d['master_addr'], cat_cmd])
+    payload['pantheon_perf.json'] = perf_data
 
     client.post(update_url, data=payload, headers=dict(Referer=update_url))
 
