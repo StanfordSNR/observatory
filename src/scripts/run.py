@@ -146,7 +146,7 @@ def compress(d):
     d['tar'] = path.join(utils.meta['data_base_dir'], '%s.tar.gz' % d['title'])
 
     # compress raw ingress/egress logs
-    title_uid = d['title'] + '-uid'
+    title_uid = d['title'] + '-UID'
     cmd = ('cd {tmp_dir} && mkdir {title_uid} && '
            'mv *.log.ingress *.log.egress {title_uid} && '
            'tar czvf {title_uid}.tar.gz {title_uid}'.format(
@@ -182,7 +182,7 @@ def upload(d):
     check_call(['ssh', d['master_addr'], cmd])
 
     # upload ingress egress logs
-    s3_uid_logs = path.join(s3_base, 'raw-logs')
+    s3_uid_logs = path.join(s3_base, 'uid-logs')
     cmd = 'aws s3 cp %s %s' % (
         d['tar_uid'], path.join(s3_uid_logs, path.basename(d['tar_uid'])))
     check_call(['ssh', d['master_addr'], cmd])
@@ -215,7 +215,7 @@ def post_to_website(d):
     sys.stderr.write('----- Posting results to Pantheon website -----\n')
 
     s3_url_base = 'https://s3.amazonaws.com/' + d['s3_folder']
-    s3_url_reports = s3_url_base + 'reports/'
+    s3_url_reports = path.join(s3_url_base, 'reports')
 
     update_url = 'https://pantheon.stanford.edu/%s/%s/' % (
             os.environ['PANTHEON_UPDATE_URL'], expt_type)
@@ -230,6 +230,8 @@ def post_to_website(d):
     payload['time_created'] = d['expt_time']
 
     payload['logs'] = path.join(s3_url_base, path.basename(d['tar']))
+    payload['uid_logs'] = path.join(s3_url_base, 'uid-logs',
+                                    path.basename(d['tar_uid']))
     payload['report'] = path.join(s3_url_reports,
                                   d['pantheon_report.pdf'])
     payload['graph1'] = path.join(s3_url_reports,
