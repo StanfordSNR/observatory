@@ -141,14 +141,11 @@ def get_param_from_cmd(cmd_splitted, key):
 
 
 def compress(d):
-    tar_path = path.join(utils.meta['data_base_dir'],
-                         '{}.tar.gz'.format(d['title']))
-
-    cmd = 'tar czvf {tar_path} {data_dir}'.format(
-            tar_path=tar_path, data_dir=d['data_dir'])
+    cmd = 'cd {data_base_dir} && tar czvf {title}.tar.gz {title}'.format(
+            data_base_dir=utils.meta['data_base_dir'], title=d['title'])
     check_call(['ssh', d['master_addr'], cmd])
 
-    d['tar'] = tar_path
+    d['tar'] = d['data_dir'] + '.tar.gz'
 
 
 def analyze(d):
