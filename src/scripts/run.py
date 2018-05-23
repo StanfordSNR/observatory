@@ -447,6 +447,9 @@ def run_real_world_experiment(master, slave, cmd_tmpl):
 
     analyze_and_upload(d)
 
+    # cleanup
+    utils.cleanup([master, slave])
+
 
 def run_node(cellular_nodes, ethernet_nodes):
     sys.stderr.write('----- Running node-to-cloud experiments -----\n')
@@ -550,6 +553,10 @@ def run_emu_experiment(emu_server, cmd_tmpl, job_cfg):
     }
 
     analyze_and_upload(d)
+
+    # cleanup
+    utils.cleanup([emu_server])
+
 
 def run_emu(hosts):
     sys.stderr.write('----- Running emulation experiments -----\n')
