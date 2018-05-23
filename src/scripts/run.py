@@ -116,9 +116,6 @@ def setup_cellular_links(nodes_with_cellular):
 def setup(hosts):
     sys.stderr.write('----- Setting up hosts -----\n')
 
-    # cleanup
-    utils.cleanup(hosts)
-
     # update repository
     utils.update_repository(hosts)
 
@@ -141,11 +138,22 @@ def get_param_from_cmd(cmd_splitted, key):
 
 
 def compress(d):
+    # compress raw packet logs
     cmd = 'cd {data_base_dir} && tar czvf {title}.tar.gz {title}'.format(
             data_base_dir=utils.meta['data_base_dir'], title=d['title'])
     check_call(['ssh', d['master_addr'], cmd])
 
-    d['tar'] = d['data_dir'] + '.tar.gz'
+    d['tar'] = path.join(utils.meta['data_base_dir'], '%s.tar.gz' % d['title'])
+
+    # compress raw ingress/egress logs
+    title_uid = d['title'] + '-uid'
+    cmd = ('cd {tmp_dir} && mkdir {title_uid} && '
+           'mv *.log.ingress *.log.egress {title_uid} && '
+           'tar czvf {title_uid}.tar.gz {title_uid}'.format(
+            tmp_dir=utils.meta['tmp_dir'], title_uid=title_uid))
+    check_call(['ssh', d['master_addr'], cmd])
+
+    d['tar_uid'] = path.join(utils.meta['tmp_dir'], '%s.tar.gz' % title_uid)
 
 
 def analyze(d):
@@ -173,8 +181,14 @@ def upload(d):
         d['tar'], path.join(s3_base, path.basename(d['tar'])))
     check_call(['ssh', d['master_addr'], cmd])
 
+    # upload ingress egress logs
+    s3_uid_logs = path.join(s3_base, 'raw-logs')
+    cmd = 'aws s3 cp %s %s' % (
+        d['tar_uid'], path.join(s3_uid_logs, path.basename(d['tar_uid'])))
+    check_call(['ssh', d['master_addr'], cmd])
+
     # upload reports
-    s3_reports = s3_base + 'reports/'
+    s3_reports = path.join(s3_base, 'reports')
     reports_to_upload = ['pantheon_report.pdf',
                          'pantheon_summary.svg',
                          'pantheon_summary_mean.svg',
@@ -190,7 +204,7 @@ def upload(d):
         check_call(['ssh', d['master_addr'], cmd])
 
     # upload job logs
-    s3_job_logs = s3_base + 'job-logs/'
+    s3_job_logs = path.join(s3_base, 'job-logs')
     cmd = 'aws s3 cp %s %s' % (
         d['job_log'], path.join(s3_job_logs, path.basename(d['job_log'])))
     check_call(['ssh', d['master_addr'], cmd])
@@ -396,7 +410,7 @@ def emu_server_expand(emu_server, cmd_tmpl, job_cfg, expt_time):
 
 
 def analyze_and_upload(d):
-    # compress logs
+    # compress results
     compress(d)
 
     # analyze results
@@ -409,6 +423,9 @@ def analyze_and_upload(d):
 
 # smallest unit of real-world experiment that will be run in parallel
 def run_real_world_experiment(master, slave, cmd_tmpl):
+    # cleanup
+    utils.cleanup([master, slave])
+
     # 4. fill in the remaining varialbes
     expt_time = utils.utc_date()
     cmd_dict = master_slave_expand(master, slave, cmd_tmpl, expt_time)
@@ -528,6 +545,9 @@ def run_cloud(hosts):
 
 # smallest unit of emulation experiment that will be run in parallel
 def run_emu_experiment(emu_server, cmd_tmpl, job_cfg):
+    # cleanup
+    utils.cleanup([emu_server])
+
     # 4. fill in the remaining varialbes
     expt_time = utils.utc_date()
     cmd_dict = emu_server_expand(emu_server, cmd_tmpl, job_cfg, expt_time)
