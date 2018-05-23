@@ -5,7 +5,7 @@ nodes:
     desc: Stanford
     ntp: time.stanford.edu
     peer_cloud: aws_california_1
-    cellular: off
+    cellular: on
 
   mexico:
     user: pi
@@ -29,7 +29,7 @@ nodes:
     desc: Colombia
     ntp: gps.ntp.br
     peer_cloud: aws_brazil_2
-    cellular: off
+    cellular: on
 
   india:
     user: pi
@@ -37,7 +37,7 @@ nodes:
     desc: India
     ntp: nets.org.sg
     peer_cloud: aws_india_1
-    cellular: off
+    cellular: on
 
   saudi_arabia:
     user: ubuntu
@@ -53,7 +53,7 @@ nodes:
     desc: China
     ntp: ntp.nict.jp
     peer_cloud: aws_korea
-    cellular: off
+    cellular: on
 
 aws_servers:
   aws_california_1:

@@ -83,6 +83,26 @@ def start_hosts():
     return live_hosts
 
 
+def stop_hosts():
+    if expt_type == 'node':
+        # run aws.py
+        aws_py = path.join(context.scripts_dir, 'aws.py')
+        with open(os.devnull, 'w') as DEVNULL:
+            Popen([aws_py, 'stop'], stdout=DEVNULL, stderr=DEVNULL).wait()
+
+    else:
+        if expt_type == 'cloud':
+            gce_server_type = 'gce_servers'
+        elif expt_type == 'emu':
+            gce_server_type = 'emu_servers'
+
+        # run gce.py
+        gce_py = path.join(context.scripts_dir, 'gce.py')
+        with open(os.devnull, 'w') as DEVNULL:
+            Popen([gce_py, 'stop', gce_server_type],
+                   stdout=DEVNULL, stderr=DEVNULL).wait()
+
+
 def setup_cellular_links(nodes_with_cellular):
     sys.stderr.write('Setting up cellular links...\n')
 
@@ -654,6 +674,9 @@ def main():
 
     elif expt_type == 'emu':
         run_emu(live_hosts)
+
+    # stop servers
+    stop_hosts()
 
 
 if __name__ == '__main__':
