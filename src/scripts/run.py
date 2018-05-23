@@ -177,7 +177,8 @@ def upload(d):
     s3_reports = s3_base + 'reports/'
     reports_to_upload = ['pantheon_report.pdf',
                          'pantheon_summary.svg',
-                         'pantheon_summary_mean.svg']
+                         'pantheon_summary_mean.svg',
+                         'pantheon_perf.json']
     for report in reports_to_upload:
         report_path = path.join(d['data_dir'], report)
 
@@ -221,6 +222,8 @@ def post_to_website(d):
                                   d['pantheon_summary.svg'])
     payload['graph2'] = path.join(s3_url_reports,
                                   d['pantheon_summary_mean.svg'])
+    payload['perf_file'] = path.join(s3_url_reports,
+                                  d['pantheon_perf.json'])
 
     payload['time'] = d['time']
     payload['runs'] = d['runs']
@@ -238,12 +241,6 @@ def post_to_website(d):
         payload['emu_scenario'] = d['emu_scenario']
         payload['emu_cmd'] = d['emu_cmd']
         payload['emu_desc'] = d['emu_desc']
-
-    # add perf data to payload
-    perf_data_path = path.join(d['data_dir'], 'pantheon_perf.json')
-    cat_cmd = 'cat ' + perf_data_path
-    perf_data = check_output(['ssh', d['master_addr'], cat_cmd])
-    payload['pantheon_perf.json'] = perf_data
 
     client.post(update_url, data=payload, headers=dict(Referer=update_url))
 
