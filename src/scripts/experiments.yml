@@ -32,7 +32,7 @@ node:
   jobs:
     # cellular (run only if ppp0 is up)
     - command: >-
-        {test_path} {common_param_set} --run-times 10
+        {test_path} {common_param_set} --run-times 3
         {sender_side} {flow_scenario} --remote-if ppp0 > {job_log} 2>&1
     - command: >-
         {test_path} {common_param_set} --run-times 10
