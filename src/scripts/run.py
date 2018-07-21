@@ -195,24 +195,14 @@ def upload(d):
         s3_folder = 'stanford-pantheon/real-world/%s/' % slave_desc
     d['s3_folder'] = s3_folder
 
-    # upload data logs
     s3_base = 's3://' + s3_folder
-    cmd = 'aws s3 cp %s %s' % (
-        d['tar'], path.join(s3_base, path.basename(d['tar'])))
-    check_call(['ssh', d['master_addr'], cmd])
-
-    # upload ingress egress logs
-    s3_uid_logs = path.join(s3_base, 'uid-logs')
-    cmd = 'aws s3 cp %s %s' % (
-        d['tar_uid'], path.join(s3_uid_logs, path.basename(d['tar_uid'])))
-    check_call(['ssh', d['master_addr'], cmd])
 
     # upload reports
     s3_reports = path.join(s3_base, 'reports')
-    reports_to_upload = ['pantheon_report.pdf',
+    reports_to_upload = ['pantheon_perf.json',
+                         'pantheon_report.pdf',
                          'pantheon_summary.svg',
-                         'pantheon_summary_mean.svg',
-                         'pantheon_perf.json']
+                         'pantheon_summary_mean.svg']
     for report in reports_to_upload:
         report_path = path.join(d['data_dir'], report)
 
@@ -227,6 +217,17 @@ def upload(d):
     s3_job_logs = path.join(s3_base, 'job-logs')
     cmd = 'aws s3 cp %s %s' % (
         d['job_log'], path.join(s3_job_logs, path.basename(d['job_log'])))
+    check_call(['ssh', d['master_addr'], cmd])
+
+    # upload data logs
+    cmd = 'aws s3 cp %s %s' % (
+        d['tar'], path.join(s3_base, path.basename(d['tar'])))
+    check_call(['ssh', d['master_addr'], cmd])
+
+    # upload ingress egress logs
+    s3_uid_logs = path.join(s3_base, 'uid-logs')
+    cmd = 'aws s3 cp %s %s' % (
+        d['tar_uid'], path.join(s3_uid_logs, path.basename(d['tar_uid'])))
     check_call(['ssh', d['master_addr'], cmd])
 
 
