@@ -158,11 +158,15 @@ def cleanup(hosts):
     return simple_execute(hosts, cmd)
 
 
-def setup_system(hosts):
+def setup_system(hosts, extra_args=None):
     cmd = ('{setup_system_path} --enable-ip-forward && '
-           '{setup_system_path} --qdisc fq_codel && '
-           '{setup_system_path} --set-rmem'
+           '{setup_system_path} --qdisc fq_codel'
            .format(setup_system_path=meta['setup_system_path']))
+
+    if extra_args:
+        cmd += ' && {setup_system_path} {extra_args}'.format(
+           setup_system_path=meta['setup_system_path'], extra_args=extra_args)
+
     return simple_execute(hosts, cmd)
 
 

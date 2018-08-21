@@ -3,6 +3,7 @@
 import os
 from os import path
 import sys
+import time
 import argparse
 import requests
 import json
@@ -110,6 +111,7 @@ def setup_cellular_links(nodes_with_cellular):
 
     # run pppd commands if ppp0 is not up
     utils.run_pppd(nodes_with_cellular)
+    time.sleep(5)
 
     # set up ppp0 interface
     utils.setup_ppp0_interface(nodes_with_cellular)
@@ -140,7 +142,10 @@ def setup(hosts):
     utils.update_repository(hosts)
 
     # setup system
-    utils.setup_system(hosts)
+    if expt_type == 'cloud':
+        utils.setup_system(hosts, '--set-all-mem')
+    else:
+        utils.setup_system(hosts, '--set-rmem')
 
     # setup after reboot
     utils.setup_after_reboot(hosts)
