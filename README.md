@@ -1,3 +1,3 @@
-# observatory
+observatory: management scripts for Pantheon's global testbed
 
-Management scripts for Pantheon observatory
+Find [more details](https://pantheon.stanford.edu/faq/#testbed) on the Pantheon website <https://pantheon.stanfored.edu>.
