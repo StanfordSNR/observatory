@@ -124,8 +124,14 @@ def check_ssh_connection(hosts, retry_times=0, retry_timeout=0):
     return execute_retry(host_cmd, retry_times, retry_timeout)
 
 
-def check_ppp0_connection(hosts, retry_times=0, retry_timeout=0):
-    host_cmd = {host:'ping -I ppp0 -c 3 8.8.8.8' for host in hosts}
+def check_cellular_connection(hosts, retry_times=0, retry_timeout=0):
+    host_cmd = {}
+    for host in hosts:
+        host_cfg = get_host_cfg(host)
+        if 'cell_if' in host_cfg:
+            host_cmd[host] = 'ping -I {cell_if} -c 3 8.8.8.8'.format(
+                             cell_if=host_cfg['cell_if'])
+
     return execute_retry(host_cmd, retry_times, retry_timeout)
 
 
@@ -134,10 +140,17 @@ def run_pppd(hosts):
     return execute(host_cmd)
 
 
-def setup_ppp0_interface(hosts):
-    cmd = ('{setup_system_path} --interface ppp0'
-           .format(setup_system_path=meta['setup_system_path']))
-    return simple_execute(hosts, cmd)
+def setup_cellular_interface(hosts):
+    host_cmd = {}
+    for host in hosts:
+        host_cfg = get_host_cfg(host)
+        if 'cell_if' in host_cfg:
+            host_cmd[host] = (
+                '{setup_system_path} --interface {cell_if}'.format(
+                setup_system_path=meta['setup_system_path'],
+                cell_if=host_cfg['cell_if']))
+
+    return execute(host_cmd)
 
 
 def update_repository(hosts):
@@ -158,25 +171,22 @@ def cleanup(hosts):
     return simple_execute(hosts, cmd)
 
 
-def setup_system(hosts, extra_args=None):
+def setup_system(hosts):
     cmd = ('{setup_system_path} --enable-ip-forward && '
-           '{setup_system_path} --qdisc fq'
+           '{setup_system_path} --qdisc fq && '
+           '{setup_system_path} --set-all-mem'
            .format(setup_system_path=meta['setup_system_path']))
-
-    if extra_args:
-        cmd += ' && {setup_system_path} {extra_args}'.format(
-           setup_system_path=meta['setup_system_path'], extra_args=extra_args)
 
     host_cmd = {}
     for host in hosts:
         host_cmd[host] = cmd
 
         host_cfg = get_host_cfg(host)
-        if 'netif' in host_cfg:
+        if 'eth_if' in host_cfg:
             host_cmd[host] += (
-                ' && {setup_system_path} --interface {netif}'.format(
+                ' && {setup_system_path} --interface {eth_if}'.format(
                 setup_system_path=meta['setup_system_path'],
-                netif=host_cfg['netif']))
+                eth_if=host_cfg['eth_if']))
 
     return execute(host_cmd)
 

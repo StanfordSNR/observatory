@@ -109,15 +109,15 @@ def setup_cellular_links(nodes_with_cellular):
 
     live_cellular_nodes = set()
 
-    # run pppd commands if ppp0 is not up
+    # run pppd commands
     utils.run_pppd(nodes_with_cellular)
     time.sleep(5)
 
-    # set up ppp0 interface
-    utils.setup_ppp0_interface(nodes_with_cellular)
+    # set up cellular interfaces
+    utils.setup_cellular_interface(nodes_with_cellular)
 
-    # check ppp0 connections
-    host_status = utils.check_ppp0_connection(
+    # check if cellular connections are up
+    host_status = utils.check_cellular_connection(
             nodes_with_cellular, retry_times=2, retry_timeout=10)
     for host, status in host_status.iteritems():
         if status:
@@ -142,10 +142,7 @@ def setup(hosts):
     utils.update_repository(hosts)
 
     # setup system
-    if expt_type == 'cloud':
-        utils.setup_system(hosts, '--set-all-mem')
-    else:
-        utils.setup_system(hosts, '--set-rmem')
+    utils.setup_system(hosts)
 
     # setup after reboot
     utils.setup_after_reboot(hosts)
@@ -301,8 +298,9 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
     master_desc = master_cfg['desc']
     slave_desc = slave_cfg['desc']
     link = 'ethernet'
-    if 'ppp0' in cmd_splitted: # cellular experiment
-        slave_desc += ' ppp0'
+
+    if '{slave_cell_if}' in cmd_splitted and 'cell_if' in slave_cfg:
+        slave_desc += ' cellular'
         link = 'cellular'
 
     sender = get_param_from_cmd(cmd_splitted, '--sender')
@@ -342,9 +340,16 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
         'master_desc': master_cfg['desc'],
         'slave_desc': slave_desc,
         'ntp_addr': slave_cfg['ntp'],
-        'master_if': master_cfg['netif'],
-        'slave_if': slave_cfg['netif']
     }
+
+    if 'eth_if' in master_cfg:
+        cmd_dict['master_eth_if'] = master_cfg['eth_if']
+    if 'eth_if' in slave_cfg:
+        cmd_dict['slave_eth_if'] = slave_cfg['eth_if']
+    if 'cell_if' in master_cfg:
+        cmd_dict['master_cell_if'] = master_cfg['cell_if']
+    if 'cell_if' in slave_cfg:
+        cmd_dict['slave_cell_if'] = slave_cfg['cell_if']
 
     cmd_dict['data_dir'] = path.join(utils.meta['data_base_dir'], title)
     cmd_dict['job_log'] = path.join(utils.meta['tmp_dir'], '%s.log' % title)
@@ -522,7 +527,7 @@ def run_node(cellular_nodes, ethernet_nodes):
             # create a process
             procs = []
             for node, node_cfg in utils.host_cfg['nodes'].iteritems():
-                if '--remote-if ppp0' in cmd_tmpl:
+                if '{slave_cell_if}' in cmd_tmpl:
                     if node not in cellular_nodes:
                         continue
                 else:
@@ -670,7 +675,7 @@ def main():
             if node in live_hosts:
                 live_ethernet_nodes.append(node)
 
-                if node_cfg['cellular']:
+                if 'cell_if' in node_cfg:
                     nodes_with_cellular.append(node)
 
         live_cellular_nodes = setup_cellular_links(nodes_with_cellular)

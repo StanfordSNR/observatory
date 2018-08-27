@@ -30,13 +30,16 @@ node:
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
   jobs:
-    # cellular (run only if ppp0 is up)
+    # cellular (run only if a cellular interface is up)
     - command: >-
         {test_path} {common_param_set} --run-times 3
-        {sender_side} {flow_scenario} --remote-if ppp0 > {job_log} 2>&1
+        {sender_side} {flow_scenario}
+        --local-if {master_eth_if} --remote-if {slave_cell_if} > {job_log} 2>&1
+    # wired (specify network interfaces to detect MTU)
     - command: >-
         {test_path} {common_param_set} --run-times 10
-        {sender_side} {flow_scenario} > {job_log} 2>&1
+        {sender_side} {flow_scenario}
+        --local-if {master_eth_if} --remote-if {slave_eth_if} > {job_log} 2>&1
 
 cloud:
   matrix:
@@ -52,8 +55,9 @@ cloud:
       --data-dir {data_dir} --pkill-cleanup --tunnel-server local
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
-      --local-if {master_if} --remote-if {slave_if}
+      --local-if {master_eth_if} --remote-if {slave_eth_if}
   jobs:
+    # wired (specify network interfaces above to detect MTU)
     - command: >-
         {test_path} {common_param_set} --run-times 10
         {sender_side} {flow_scenario} > {job_log} 2>&1

@@ -5,7 +5,8 @@ nodes:
     desc: Stanford
     ntp: time.stanford.edu
     peer_cloud: aws_california_1
-    cellular: on
+    eth_if: eno1
+    cell_if: ppp0
 
   mexico:
     user: pi
@@ -13,7 +14,7 @@ nodes:
     desc: Mexico
     ntp: time.stanford.edu
     peer_cloud: aws_california_2
-    cellular: off
+    eth_if: em1
 
   brazil:
     user: pi
@@ -21,7 +22,7 @@ nodes:
     desc: Brazil
     ntp: gps.ntp.br
     peer_cloud: aws_brazil_1
-    cellular: off
+    eth_if: p4p1
 
   colombia:
     user: pi
@@ -29,7 +30,8 @@ nodes:
     desc: Colombia
     ntp: gps.ntp.br
     peer_cloud: aws_brazil_2
-    cellular: on
+    eth_if: p4p1
+    cell_if: ppp0
 
   india:
     user: pi
@@ -37,7 +39,8 @@ nodes:
     desc: India
     ntp: nets.org.sg
     peer_cloud: aws_india_1
-    cellular: on
+    eth_if: em1
+    cell_if: ppp0
 
   saudi_arabia:
     user: ubuntu
@@ -45,7 +48,7 @@ nodes:
     desc: Saudi Arabia
     ntp: nets.org.sg
     peer_cloud: aws_india_2
-    cellular: off
+    eth_if: enp2s0
 
   china:
     user: ubuntu
@@ -53,7 +56,6 @@ nodes:
     desc: China
     ntp: ntp.nict.jp
     peer_cloud: aws_korea
-    cellular: on
 
 aws_servers:
   aws_california_1:
@@ -62,6 +64,7 @@ aws_servers:
     desc: AWS California 1
     id: i-0d817cfa8f9b66438
     region: us-west-1
+    eth_if: ens5
 
   aws_california_2:
     user: ubuntu
@@ -69,6 +72,7 @@ aws_servers:
     desc: AWS California 2
     id: i-034a8cab622791483
     region: us-west-1
+    eth_if: ens5
 
   aws_brazil_1:
     user: ubuntu
@@ -76,6 +80,7 @@ aws_servers:
     desc: AWS Brazil 1
     id: i-0958c295d4a5e6d1e
     region: sa-east-1
+    eth_if: ens5
 
   aws_brazil_2:
     user: ubuntu
@@ -83,6 +88,7 @@ aws_servers:
     desc: AWS Brazil 2
     id: i-0c9a3b88d7e88b7b6
     region: sa-east-1
+    eth_if: ens5
 
   aws_india_1:
     user: ubuntu
@@ -90,6 +96,7 @@ aws_servers:
     desc: AWS India 1
     id: i-014d310343efc8b64
     region: ap-south-1
+    eth_if: ens5
 
   aws_india_2:
     user: ubuntu
@@ -97,6 +104,7 @@ aws_servers:
     desc: AWS India 2
     id: i-030a50cb2b431db35
     region: ap-south-1
+    eth_if: ens5
 
   aws_korea:
     user: ubuntu
@@ -104,6 +112,7 @@ aws_servers:
     desc: AWS Korea
     id: i-07b7d463fc6c69a2e
     region: ap-northeast-2
+    eth_if: ens5
 
 gce_servers:
   gce_iowa:
@@ -113,7 +122,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-iowa
     zone: us-central1-c
-    netif: ens4
+    eth_if: ens4
 
   gce_london:
     user: ubuntu
@@ -122,7 +131,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-london
     zone: europe-west2-c
-    netif: ens4
+    eth_if: ens4
 
   gce_sydney:
     user: ubuntu
@@ -131,7 +140,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-sydney
     zone: australia-southeast1-c
-    netif: ens4
+    eth_if: ens4
 
   gce_tokyo:
     user: ubuntu
@@ -140,7 +149,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-tokyo
     zone: asia-northeast1-c
-    netif: ens4
+    eth_if: ens4
 
 emu_servers:
   emu_1:
