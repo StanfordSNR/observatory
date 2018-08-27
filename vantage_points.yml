@@ -113,6 +113,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-iowa
     zone: us-central1-c
+    netif: ens4
 
   gce_london:
     user: ubuntu
@@ -121,6 +122,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-london
     zone: europe-west2-c
+    netif: ens4
 
   gce_sydney:
     user: ubuntu
@@ -129,6 +131,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-sydney
     zone: australia-southeast1-c
+    netif: ens4
 
   gce_tokyo:
     user: ubuntu
@@ -137,6 +140,7 @@ gce_servers:
     ntp: time.google.com
     name: observatory-tokyo
     zone: asia-northeast1-c
+    netif: ens4
 
 emu_servers:
   emu_1:

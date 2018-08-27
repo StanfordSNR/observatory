@@ -52,6 +52,7 @@ cloud:
       --data-dir {data_dir} --pkill-cleanup --tunnel-server local
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
+      --local-if {master_if} --remote-if {slave_if}
   jobs:
     - command: >-
         {test_path} {common_param_set} --run-times 10

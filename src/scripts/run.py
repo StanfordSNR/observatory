@@ -342,6 +342,8 @@ def master_slave_expand(master, slave, cmd_tmpl, expt_time):
         'master_desc': master_cfg['desc'],
         'slave_desc': slave_desc,
         'ntp_addr': slave_cfg['ntp'],
+        'master_if': master_cfg['netif'],
+        'slave_if': slave_cfg['netif']
     }
 
     cmd_dict['data_dir'] = path.join(utils.meta['data_base_dir'], title)

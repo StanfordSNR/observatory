@@ -160,14 +160,25 @@ def cleanup(hosts):
 
 def setup_system(hosts, extra_args=None):
     cmd = ('{setup_system_path} --enable-ip-forward && '
-           '{setup_system_path} --qdisc fq_codel'
+           '{setup_system_path} --qdisc fq'
            .format(setup_system_path=meta['setup_system_path']))
 
     if extra_args:
         cmd += ' && {setup_system_path} {extra_args}'.format(
            setup_system_path=meta['setup_system_path'], extra_args=extra_args)
 
-    return simple_execute(hosts, cmd)
+    host_cmd = {}
+    for host in hosts:
+        host_cmd[host] = cmd
+
+        host_cfg = get_host_cfg(host)
+        if 'netif' in host_cfg:
+            host_cmd[host] += (
+                ' && {setup_system_path} --interface {netif}'.format(
+                setup_system_path=meta['setup_system_path'],
+                netif=host_cfg['netif']))
+
+    return execute(host_cmd)
 
 
 def setup_after_reboot(hosts):
