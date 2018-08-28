@@ -49,13 +49,13 @@ nodes:
     ntp: nets.org.sg
     peer_cloud: aws_india_2
     eth_if: enp2s0
-
-  china:
-    user: ubuntu
-    ip: 166.111.17.94
-    desc: China
-    ntp: ntp.nict.jp
-    peer_cloud: aws_korea
+    #
+    #  china:
+    #    user: ubuntu
+    #    ip: 166.111.17.94
+    #    desc: China
+    #    ntp: ntp.nict.jp
+    #    peer_cloud: aws_korea
 
 aws_servers:
   aws_california_1:

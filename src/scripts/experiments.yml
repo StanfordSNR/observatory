@@ -3,7 +3,7 @@
 # 3. expand meta; 4. the remaining variables need to be filled in run.py.
 
 meta:
-  branch: master
+  branch: muses
   base_dir: ~/pantheon
   data_base_dir: ~/pantheon/data
   tmp_dir: ~/pantheon/tmp
@@ -25,19 +25,20 @@ node:
       - -f 3 --interval 10
   macros:
     common_param_set: >-
-      remote {slave_addr}:{base_dir} --all --random-order -t 30
+      remote {slave_addr}:{base_dir} --schemes "cubic bbr indigo muses"
+      --random-order -t 30
       --data-dir {data_dir} --pkill-cleanup --tunnel-server local
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
   jobs:
     # cellular (run only if a cellular interface is up)
-    - command: >-
-        {test_path} {common_param_set} --run-times 3
-        {sender_side} {flow_scenario}
-        --local-if {master_eth_if} --remote-if {slave_cell_if} > {job_log} 2>&1
+    # - command: >-
+    #     {test_path} {common_param_set} --run-times 3
+    #     {sender_side} {flow_scenario}
+    #     --local-if {master_eth_if} --remote-if {slave_cell_if} > {job_log} 2>&1
     # wired (specify network interfaces to detect MTU)
     - command: >-
-        {test_path} {common_param_set} --run-times 10
+        {test_path} {common_param_set} --run-times 3
         {sender_side} {flow_scenario}
         --local-if {master_eth_if} --remote-if {slave_eth_if} > {job_log} 2>&1
 
@@ -51,7 +52,8 @@ cloud:
       - -f 3 --interval 10
   macros:
     common_param_set: >-
-      remote {slave_addr}:{base_dir} --all --random-order -t 30
+      remote {slave_addr}:{base_dir} --schemes "cubic bbr indigo muses"
+      --random-order -t 30
       --data-dir {data_dir} --pkill-cleanup --tunnel-server local
       --local-addr {master_ip} --local-desc "{master_desc}"
       --remote-desc "{slave_desc}" --ntp-addr {ntp_addr}
@@ -59,7 +61,7 @@ cloud:
   jobs:
     # wired (specify network interfaces above to detect MTU)
     - command: >-
-        {test_path} {common_param_set} --run-times 10
+        {test_path} {common_param_set} --run-times 3
         {sender_side} {flow_scenario} > {job_log} 2>&1
 
 emu:
