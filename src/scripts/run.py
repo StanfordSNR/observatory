@@ -17,6 +17,7 @@ from helpers.subprocess_wrappers import Popen, PIPE, check_call, check_output
 
 
 expt_type = None
+no_post_log = None
 
 
 def start_hosts():
@@ -234,9 +235,6 @@ def upload(d):
 
 
 def post_to_website(d):
-    # post to pantheon website
-    sys.stderr.write('----- Posting results to Pantheon website -----\n')
-
     s3_url_base = 'https://s3.amazonaws.com/' + d['s3_folder']
     s3_url_reports = path.join(s3_url_base, 'reports')
 
@@ -281,7 +279,14 @@ def post_to_website(d):
         payload['emu_cmd'] = d['emu_cmd']
         payload['emu_desc'] = d['emu_desc']
 
-    client.post(update_url, data=payload, headers=dict(Referer=update_url))
+    if not no_post_log:
+        # post to pantheon website
+        client.post(update_url, data=payload, headers=dict(Referer=update_url))
+        sys.stderr.write('----- Posted results to Pantheon website -----\n')
+    else:
+        with open(no_post_log, 'a') as fh:
+            json.dump(payload, fh)
+            fh.write(os.linesep)
 
 
 def master_slave_expand(master, slave, cmd_tmpl, expt_time):
@@ -655,11 +660,14 @@ def main():
     # get commands to run from experiments.yml
     parser = argparse.ArgumentParser()
     parser.add_argument('expt_type', choices=['node', 'cloud', 'emu'])
+    parser.add_argument('--no-post', metavar='LOG',
+        help='save POST payloads to LOG rather than post to the website')
     args = parser.parse_args()
 
     # change global variables
-    global expt_type
+    global expt_type, no_post_log
     expt_type = args.expt_type
+    no_post_log = args.no_post
 
     # start servers
     live_hosts = start_hosts()
