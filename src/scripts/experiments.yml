@@ -37,7 +37,7 @@ node:
         --local-if {master_eth_if} --remote-if {slave_cell_if} > {job_log} 2>&1
     # wired (specify network interfaces to detect MTU)
     - command: >-
-        {test_path} {common_param_set} --run-times 10
+        {test_path} {common_param_set} --run-times 5
         {sender_side} {flow_scenario}
         --local-if {master_eth_if} --remote-if {slave_eth_if} > {job_log} 2>&1
 
@@ -45,7 +45,7 @@ cloud:
   matrix:
     sender_side:
       - --sender local
-      - --sender remote
+      # - --sender remote
     flow_scenario:
       - -f 1
       - -f 3 --interval 10
@@ -59,7 +59,7 @@ cloud:
   jobs:
     # wired (specify network interfaces above to detect MTU)
     - command: >-
-        {test_path} {common_param_set} --run-times 10
+        {test_path} {common_param_set} --run-times 5
         {sender_side} {flow_scenario} > {job_log} 2>&1
 
 emu:
@@ -69,7 +69,7 @@ emu:
       - -f 3 --interval 10
   macros:
     common_param_set: >-
-      local --all --random-order --run-times 10 -t 30
+      local --all --random-order --run-times 5 -t 30
       --data-dir {data_dir} --pkill-cleanup
   jobs:
     # 1, 'Calibrated emulator (Nepal to AWS India)'
