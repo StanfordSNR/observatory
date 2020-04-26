@@ -60,7 +60,7 @@ nodes:
 aws_servers:
   aws_california_1:
     user: ubuntu
-    ip: 13.56.50.180
+    ip: 13.56.136.50
     desc: AWS California 1
     id: i-0d817cfa8f9b66438
     region: us-west-1
@@ -68,7 +68,7 @@ aws_servers:
 
   aws_california_2:
     user: ubuntu
-    ip: 13.56.84.214
+    ip: 13.52.8.65
     desc: AWS California 2
     id: i-034a8cab622791483
     region: us-west-1
